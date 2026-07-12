@@ -1,0 +1,1019 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PAI Department — Еженедельный отчёт</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@300;400;500&family=IBM+Plex+Sans:ital,wght@0,300;0,400;0,500;0,600;1,300&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg:    #060606;
+  --bg2:   #0c0c0c;
+  --bg3:   #121212;
+  --bg4:   #1a1a1a;
+  --bg5:   #222222;
+  --line:  rgba(255,255,255,0.055);
+  --line2: rgba(255,255,255,0.10);
+  --t1:    #efefef;
+  --t2:    #7a7a7a;
+  --t3:    #404040;
+  --accent:      #ffffff;
+  --accent-dim:  rgba(255,255,255,0.12);
+  --green:      #c8f0dc;
+  --green-bg:   rgba(200,240,220,0.05);
+  --green-line: rgba(200,240,220,0.15);
+  --red:        #f0c8c8;
+  --amber:      #f0e0b0;
+  --amber-bg:   rgba(240,224,176,0.05);
+  --amber-line: rgba(240,224,176,0.15);
+  --font: 'IBM Plex Sans', system-ui, sans-serif;
+  --mono: 'IBM Plex Mono', monospace;
+  --rad:  9px;
+  --rad-s: 6px;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  font-family: var(--font);
+  background: var(--bg);
+  color: var(--t1);
+  font-size: 13.5px;
+  line-height: 1.6;
+  min-height: 100vh;
+}
+
+/* ── HERO ── */
+.hero {
+  position: relative;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 60px 24px;
+  overflow: hidden;
+  text-align: center;
+}
+
+.hero::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: 
+    radial-gradient(ellipse 60% 40% at 50% 30%, rgba(255,255,255,0.025) 0%, transparent 70%),
+    radial-gradient(ellipse 40% 60% at 20% 80%, rgba(255,255,255,0.012) 0%, transparent 60%);
+  pointer-events: none;
+}
+
+.hero-grid-lines {
+  position: absolute;
+  inset: 0;
+  background-image: 
+    linear-gradient(var(--line) 1px, transparent 1px),
+    linear-gradient(90deg, var(--line) 1px, transparent 1px);
+  background-size: 48px 48px;
+  mask-image: radial-gradient(ellipse 80% 70% at 50% 50%, black 30%, transparent 80%);
+  pointer-events: none;
+}
+
+.hero-tag {
+  font-family: var(--mono);
+  font-size: 9px;
+  letter-spacing: .22em;
+  text-transform: uppercase;
+  color: var(--t3);
+  margin-bottom: 20px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.hero-tag::before, .hero-tag::after {
+  content: '';
+  display: block;
+  width: 32px;
+  height: 1px;
+  background: var(--line2);
+}
+
+.hero-title {
+  font-size: clamp(28px, 5vw, 52px);
+  font-weight: 600;
+  letter-spacing: -.03em;
+  color: var(--t1);
+  line-height: 1.1;
+  margin-bottom: 14px;
+}
+.hero-title span {
+  color: var(--t2);
+  font-weight: 300;
+}
+
+.hero-sub {
+  font-size: 14px;
+  color: var(--t2);
+  max-width: 400px;
+  margin-bottom: 40px;
+  line-height: 1.7;
+}
+
+.btn-hero {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 14px 32px;
+  background: var(--t1);
+  color: #000;
+  font-family: var(--font);
+  font-size: 13.5px;
+  font-weight: 600;
+  letter-spacing: -.01em;
+  border: none;
+  border-radius: var(--rad);
+  cursor: pointer;
+  transition: opacity .15s, transform .15s;
+}
+.btn-hero:hover { opacity: .88; transform: translateY(-1px); }
+.btn-hero:active { transform: translateY(0); }
+
+.hero-footer-note {
+  position: absolute;
+  bottom: 28px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-family: var(--mono);
+  font-size: 10px;
+  color: var(--t3);
+  letter-spacing: .08em;
+  text-align: center;
+  white-space: nowrap;
+}
+
+/* ── CONFIG SETUP ── */
+.config-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,.7);
+  backdrop-filter: blur(4px);
+  z-index: 200;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+}
+.config-overlay.open { display: flex; }
+.config-box {
+  background: var(--bg2);
+  border: 1px solid var(--line2);
+  border-radius: var(--rad);
+  padding: 28px;
+  width: 100%;
+  max-width: 440px;
+}
+.config-title {
+  font-size: 15px;
+  font-weight: 600;
+  margin-bottom: 6px;
+}
+.config-sub {
+  font-size: 12px;
+  color: var(--t2);
+  margin-bottom: 22px;
+  line-height: 1.6;
+}
+.field-group { margin-bottom: 14px; }
+.field-label {
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  color: var(--t2);
+  margin-bottom: 6px;
+}
+.field-input {
+  width: 100%;
+  background: var(--bg3);
+  border: 1px solid var(--line2);
+  border-radius: var(--rad-s);
+  color: var(--t1);
+  font-family: var(--mono);
+  font-size: 12px;
+  padding: 9px 12px;
+  outline: none;
+  transition: border-color .15s;
+}
+.field-input:focus { border-color: rgba(255,255,255,.25); }
+.config-footer {
+  display: flex;
+  gap: 8px;
+  justify-content: flex-end;
+  margin-top: 20px;
+}
+.btn { display: inline-flex; align-items: center; gap: 6px; padding: 8px 16px; border-radius: var(--rad-s); font-family: var(--font); font-size: 12.5px; font-weight: 500; border: none; cursor: pointer; transition: opacity .15s; }
+.btn:hover { opacity: .78; }
+.btn-primary { background: var(--t1); color: #000; }
+.btn-ghost { background: var(--bg4); color: var(--t2); border: 1px solid var(--line2); }
+
+/* ── FORM SECTION ── */
+.form-section {
+  display: none;
+  min-height: 100vh;
+  padding: 40px 0 80px;
+}
+.form-section.visible { display: block; }
+
+.form-wrap {
+  max-width: 720px;
+  margin: 0 auto;
+  padding: 0 24px;
+}
+
+.form-header {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 36px;
+  padding-bottom: 20px;
+  border-bottom: 1px solid var(--line);
+}
+.form-header-back {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: .1em;
+  color: var(--t3);
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: color .15s;
+  flex-shrink: 0;
+}
+.form-header-back:hover { color: var(--t2); }
+.form-header-info { flex: 1; }
+.form-header-title {
+  font-size: 18px;
+  font-weight: 600;
+  letter-spacing: -.025em;
+}
+.form-header-sub {
+  font-family: var(--mono);
+  font-size: 10px;
+  color: var(--t3);
+  letter-spacing: .06em;
+  margin-top: 2px;
+}
+
+.form-block {
+  background: var(--bg2);
+  border: 1px solid var(--line);
+  border-radius: var(--rad);
+  margin-bottom: 16px;
+  overflow: hidden;
+}
+.form-block-hd {
+  padding: 16px 20px;
+  border-bottom: 1px solid var(--line);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.form-block-num {
+  font-family: var(--mono);
+  font-size: 10px;
+  color: var(--t3);
+  background: var(--bg3);
+  border: 1px solid var(--line);
+  border-radius: 4px;
+  padding: 2px 6px;
+  flex-shrink: 0;
+}
+.form-block-title {
+  font-size: 13px;
+  font-weight: 500;
+  flex: 1;
+}
+.form-block-pts {
+  font-family: var(--mono);
+  font-size: 10px;
+  color: var(--t2);
+  background: var(--bg3);
+  border: 1px solid var(--line);
+  border-radius: 4px;
+  padding: 2px 8px;
+}
+.form-block-body { padding: 16px 20px; }
+
+.identity-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.links-area {
+  position: relative;
+}
+.links-textarea {
+  width: 100%;
+  min-height: 96px;
+  background: var(--bg3);
+  border: 1px solid var(--line);
+  border-radius: var(--rad-s);
+  color: var(--t1);
+  font-family: var(--mono);
+  font-size: 11.5px;
+  padding: 10px 12px;
+  resize: vertical;
+  outline: none;
+  line-height: 1.7;
+  transition: border-color .15s;
+  placeholder-color: var(--t3);
+}
+.links-textarea:focus { border-color: var(--line2); }
+.links-textarea::placeholder { color: var(--t3); }
+.links-count {
+  margin-top: 6px;
+  font-family: var(--mono);
+  font-size: 10px;
+  color: var(--t3);
+}
+.links-count span { color: var(--t2); }
+
+.form-hint {
+  font-size: 11px;
+  color: var(--t3);
+  line-height: 1.6;
+  margin-bottom: 10px;
+}
+
+.form-submit-row {
+  margin-top: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+.form-submit-info {
+  font-size: 11.5px;
+  color: var(--t3);
+  line-height: 1.6;
+  max-width: 380px;
+}
+.btn-submit {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 28px;
+  background: var(--t1);
+  color: #000;
+  font-family: var(--font);
+  font-size: 13px;
+  font-weight: 600;
+  border: none;
+  border-radius: var(--rad);
+  cursor: pointer;
+  transition: opacity .15s, transform .12s;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+.btn-submit:hover { opacity: .88; transform: translateY(-1px); }
+.btn-submit:disabled { opacity: .4; cursor: not-allowed; transform: none; }
+
+/* ── STATUS ── */
+.status-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: var(--bg);
+  z-index: 300;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  text-align: center;
+  padding: 40px;
+}
+.status-overlay.open { display: flex; }
+.status-icon {
+  font-size: 48px;
+  margin-bottom: 20px;
+}
+.status-title {
+  font-size: 24px;
+  font-weight: 600;
+  letter-spacing: -.03em;
+  margin-bottom: 10px;
+}
+.status-sub {
+  font-size: 13px;
+  color: var(--t2);
+  max-width: 360px;
+  line-height: 1.7;
+  margin-bottom: 32px;
+}
+.status-detail {
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--t3);
+  background: var(--bg2);
+  border: 1px solid var(--line);
+  border-radius: var(--rad-s);
+  padding: 12px 20px;
+  margin-bottom: 24px;
+  max-width: 400px;
+  width: 100%;
+  text-align: left;
+  line-height: 1.8;
+}
+
+/* ── SYNC STATUS ── */
+.sync-bar {
+  position: fixed;
+  bottom: 16px;
+  right: 16px;
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  background: var(--bg2);
+  border: 1px solid var(--line);
+  border-radius: 20px;
+  padding: 6px 12px;
+  font-family: var(--mono);
+  font-size: 10px;
+  color: var(--t3);
+  z-index: 50;
+}
+.sync-dot {
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  background: var(--t3);
+  flex-shrink: 0;
+}
+.sync-dot.ok  { background: var(--green); box-shadow: 0 0 6px rgba(200,240,220,.4); }
+.sync-dot.err { background: var(--red);   box-shadow: 0 0 6px rgba(240,200,200,.4); }
+.sync-dot.loading { background: var(--amber); animation: blink 1.4s infinite; }
+@keyframes blink { 0%,100%{opacity:1} 50%{opacity:.25} }
+
+/* ── WEEK INFO BANNER ── */
+.week-banner {
+  background: var(--bg3);
+  border: 1px solid var(--line);
+  border-radius: var(--rad-s);
+  padding: 10px 16px;
+  margin-bottom: 20px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--t2);
+}
+.week-banner-dot {
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  background: var(--t1);
+  box-shadow: 0 0 8px rgba(255,255,255,.4);
+  animation: blink 2.8s infinite;
+  flex-shrink: 0;
+}
+
+/* ── ALREADY SUBMITTED WARN ── */
+.warn-banner {
+  background: rgba(240,224,176,0.06);
+  border: 1px solid rgba(240,224,176,0.2);
+  border-radius: var(--rad-s);
+  padding: 12px 16px;
+  margin-bottom: 20px;
+  font-size: 12px;
+  color: var(--amber);
+  line-height: 1.6;
+}
+
+/* ── TOAST ── */
+.toast-wrap {
+  position: fixed;
+  bottom: 56px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 400;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  pointer-events: none;
+}
+.toast-item {
+  background: var(--bg3);
+  border: 1px solid var(--line2);
+  border-radius: 20px;
+  padding: 8px 18px;
+  font-size: 12px;
+  color: var(--t2);
+  white-space: nowrap;
+  animation: toast-in .2s ease;
+}
+@keyframes toast-in { from { opacity:0; transform:translateY(6px); } to { opacity:1; transform:translateY(0); } }
+
+@media(max-width:520px) {
+  .identity-grid { grid-template-columns: 1fr; }
+  .form-submit-row { flex-direction: column; align-items: stretch; }
+  .btn-submit { justify-content: center; }
+}
+</style>
+</head>
+<body>
+
+<!-- ── HERO SCREEN ── -->
+<section class="hero" id="heroSection">
+  <div class="hero-grid-lines"></div>
+  <div class="hero-tag">PAI Department</div>
+  <h1 class="hero-title">Еженедельный<br><span>отчёт</span></h1>
+  <p class="hero-sub">Заполни форму и отправь на модерацию.<br>Каждая ссылка — одно выполнение аспекта.</p>
+  <button class="btn-hero" onclick="startForm()">
+    <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M8 2v12M2 8h12" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+    Оставить отчёт
+  </button>
+  <div class="hero-footer-note" id="heroWeekNote">Загрузка...</div>
+</section>
+
+<!-- ── SYNC CONFIG ── -->
+<div class="config-overlay" id="configOverlay">
+  <div class="config-box">
+    <div class="config-title">Подключение к GitHub</div>
+    <div class="config-sub">Укажи параметры синхронизации. Используется тот же репозиторий, что и в основной панели.</div>
+    <div class="field-group">
+      <div class="field-label">GitHub Owner</div>
+      <input class="field-input" id="cfgOwner" placeholder="username или org" autocomplete="off">
+    </div>
+    <div class="field-group">
+      <div class="field-label">Repository</div>
+      <input class="field-input" id="cfgRepo" placeholder="repo-name" autocomplete="off">
+    </div>
+    <div class="field-group">
+      <div class="field-label">Branch</div>
+      <input class="field-input" id="cfgBranch" placeholder="main" autocomplete="off">
+    </div>
+    <div class="field-group">
+      <div class="field-label">Personal Access Token</div>
+      <input class="field-input" id="cfgToken" type="password" placeholder="ghp_..." autocomplete="off">
+    </div>
+    <div class="config-footer">
+      <button class="btn btn-ghost" onclick="closeConfig()">Отмена</button>
+      <button class="btn btn-primary" onclick="saveConfig()">Подключить</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── FORM SECTION ── -->
+<section class="form-section" id="formSection">
+  <div class="form-wrap">
+    <div class="form-header">
+      <div class="form-header-back" onclick="backToHero()">
+        <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M9 2L4 7l5 5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        Назад
+      </div>
+      <div class="form-header-info">
+        <div class="form-header-title">Отчёт за неделю</div>
+        <div class="form-header-sub" id="formWeekSub">PAI Department · Текущая неделя</div>
+      </div>
+    </div>
+
+    <div class="week-banner">
+      <div class="week-banner-dot"></div>
+      <span id="weekBannerText">Загрузка данных...</span>
+    </div>
+
+    <div id="alreadySubmittedWarn" class="warn-banner" style="display:none">
+      ⚠ Ты уже подавал отчёт на этой неделе. Новая заявка заменит предыдущую, если она ещё не одобрена.
+    </div>
+
+    <!-- IDENTITY -->
+    <div class="form-block">
+      <div class="form-block-hd">
+        <div class="form-block-num">01</div>
+        <div class="form-block-title">Идентификация</div>
+      </div>
+      <div class="form-block-body">
+        <div class="identity-grid">
+          <div class="field-group">
+            <div class="field-label">Имя Фамилия</div>
+            <input class="field-input" id="fName" placeholder="Okuname Londo" autocomplete="off">
+          </div>
+          <div class="field-group">
+            <div class="field-label">Статик (Game ID)</div>
+            <input class="field-input" id="fGameId" placeholder="155604" autocomplete="off">
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ACTIVITY BLOCKS GENERATED HERE -->
+    <div id="activityBlocks"></div>
+
+    <div class="form-submit-row">
+      <div class="form-submit-info">
+        После отправки заявка уйдёт на модерацию.<br>
+        Баллы появятся только после одобрения.
+      </div>
+      <button class="btn-submit" id="submitBtn" onclick="submitReport()">
+        <svg width="15" height="15" viewBox="0 0 15 15" fill="none"><path d="M2 7.5h11M8.5 3l4.5 4.5-4.5 4.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        Отправить на модерацию
+      </button>
+    </div>
+  </div>
+</section>
+
+<!-- ── SUCCESS / ERROR OVERLAY ── -->
+<div class="status-overlay" id="statusOverlay">
+  <div class="status-icon" id="statusIcon">✓</div>
+  <div class="status-title" id="statusTitle">Отчёт отправлен</div>
+  <div class="status-sub" id="statusSub">Заявка принята и ожидает проверки модератором.</div>
+  <div class="status-detail" id="statusDetail"></div>
+  <button class="btn btn-ghost" onclick="closeStatus()">Закрыть</button>
+</div>
+
+<div class="sync-bar">
+  <div class="sync-dot" id="syncDot"></div>
+  <span id="syncText">Инициализация...</span>
+</div>
+
+<div class="toast-wrap" id="toasts"></div>
+
+<script>
+'use strict';
+
+// ── CONFIG ────────────────────────────────────────────────────────────────────
+const CFG_KEY = 'pai_sync_v2';
+const REPORTS_PATH = 'data/weekly_reports.json';
+const STATE_PATH   = 'data/state.json';
+
+let cfg = {};
+let S = null;        // main state (activities)
+let REPORTS = null;  // reports array
+let remoteShaState   = '';
+let remoteShaReports = '';
+
+// ── UTILS ─────────────────────────────────────────────────────────────────────
+function uid() { return 'r' + Date.now() + Math.random().toString(36).slice(2,6); }
+function ea(s) { return (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/"/g,'&quot;'); }
+
+function toast(msg) {
+  const el = document.createElement('div');
+  el.className = 'toast-item';
+  el.textContent = msg;
+  document.getElementById('toasts').appendChild(el);
+  setTimeout(() => el.remove(), 3000);
+}
+
+function setSyncUI(cls, text) {
+  document.getElementById('syncDot').className = 'sync-dot ' + (cls||'');
+  document.getElementById('syncText').textContent = text;
+}
+
+function b64toStr(b64) {
+  const bin = atob(String(b64).replace(/\s/g,''));
+  const bytes = Uint8Array.from(bin, c => c.charCodeAt(0));
+  return new TextDecoder('utf-8').decode(bytes);
+}
+function strToB64(str) {
+  const bytes = new TextEncoder().encode(str);
+  let bin = ''; bytes.forEach(b => bin += String.fromCharCode(b));
+  return btoa(bin);
+}
+
+function getWeekRange() {
+  const now = new Date();
+  const mon = new Date(now);
+  mon.setDate(now.getDate() - ((now.getDay() + 6) % 7));
+  mon.setHours(0,0,0,0);
+  const sun = new Date(mon);
+  sun.setDate(mon.getDate() + 6);
+  const fmt = d => d.toLocaleDateString('ru', { day:'2-digit', month:'2-digit', year:'numeric' });
+  return { mon, sun, label: `${fmt(mon)} — ${fmt(sun)}` };
+}
+
+function getWeekKey() {
+  const { mon } = getWeekRange();
+  return mon.toISOString().slice(0,10);
+}
+
+function parseName(raw) {
+  const parts = raw.trim().split(/\s+/);
+  return { firstName: parts[0]||'', lastName: parts.slice(1).join(' ')||'' };
+}
+
+// ── CONFIG MANAGEMENT ─────────────────────────────────────────────────────────
+function loadCfg() {
+  try { cfg = JSON.parse(localStorage.getItem(CFG_KEY)||'{}'); } catch { cfg = {}; }
+  return cfg;
+}
+
+function closeConfig() {
+  document.getElementById('configOverlay').classList.remove('open');
+}
+
+function saveConfig() {
+  cfg = {
+    owner:  document.getElementById('cfgOwner').value.trim(),
+    repo:   document.getElementById('cfgRepo').value.trim(),
+    branch: document.getElementById('cfgBranch').value.trim() || 'main',
+    token:  document.getElementById('cfgToken').value.trim(),
+  };
+  if (!cfg.owner || !cfg.repo || !cfg.token) { toast('Заполни все поля'); return; }
+  localStorage.setItem(CFG_KEY, JSON.stringify(cfg));
+  closeConfig();
+  init();
+}
+
+// ── GITHUB API ────────────────────────────────────────────────────────────────
+function ghHeaders() {
+  return { Accept: 'application/vnd.github+json', Authorization: `Bearer ${cfg.token}` };
+}
+
+async function ghGet(path) {
+  const url = `https://api.github.com/repos/${cfg.owner}/${cfg.repo}/contents/${path}?ref=${encodeURIComponent(cfg.branch||'main')}&t=${Date.now()}`;
+  const r = await fetch(url, { cache: 'no-store', headers: ghHeaders() });
+  if (!r.ok) throw new Error('GitHub ' + r.status + ' GET ' + path);
+  const d = await r.json();
+  return { data: JSON.parse(b64toStr(d.content)), sha: d.sha };
+}
+
+async function ghPut(path, data, sha, message) {
+  // Always re-fetch latest SHA before write to avoid conflicts
+  try {
+    const cur = await fetch(`https://api.github.com/repos/${cfg.owner}/${cfg.repo}/contents/${path}?ref=${encodeURIComponent(cfg.branch||'main')}&t=${Date.now()}`, { cache:'no-store', headers: ghHeaders() });
+    if (cur.ok) sha = (await cur.json()).sha;
+  } catch {}
+
+  const url = `https://api.github.com/repos/${cfg.owner}/${cfg.repo}/contents/${path}`;
+  const body = { message: message || 'PAI report update', content: strToB64(JSON.stringify(data, null, 2)), branch: cfg.branch||'main' };
+  if (sha) body.sha = sha;
+  const r = await fetch(url, { method:'PUT', headers: { ...ghHeaders(), 'Content-Type':'application/json' }, body: JSON.stringify(body) });
+  if (!r.ok) { const e = await r.json().catch(()=>({})); throw new Error(e.message || 'GitHub PUT ' + r.status); }
+  const resp = await r.json();
+  return resp.content?.sha || sha;
+}
+
+async function ensureReportsFile() {
+  try {
+    const res = await ghGet(REPORTS_PATH);
+    REPORTS = Array.isArray(res.data) ? res.data : [];
+    remoteShaReports = res.sha;
+  } catch (e) {
+    if (e.message.includes('404')) {
+      // File doesn't exist, create empty
+      REPORTS = [];
+      remoteShaReports = await ghPut(REPORTS_PATH, [], '', 'PAI: init weekly_reports');
+    } else {
+      throw e;
+    }
+  }
+}
+
+// ── INIT ─────────────────────────────────────────────────────────────────────
+async function init() {
+  setSyncUI('loading', 'Загрузка...');
+  loadCfg();
+
+  if (!cfg.owner || !cfg.repo || !cfg.token) {
+    // Show config if no saved settings
+    const overlay = document.getElementById('configOverlay');
+    overlay.classList.add('open');
+    ['cfgOwner','cfgRepo','cfgBranch','cfgToken'].forEach(id => {
+      const key = id.replace('cfg','').toLowerCase();
+      if (cfg[key]) document.getElementById(id).value = cfg[key];
+    });
+    setSyncUI('err', 'Нет настроек');
+    updateWeekLabels();
+    return;
+  }
+
+  try {
+    // Load main state for activities list
+    const stateRes = await ghGet(STATE_PATH);
+    S = stateRes.data;
+    remoteShaState = stateRes.sha;
+
+    // Load reports file
+    await ensureReportsFile();
+
+    setSyncUI('ok', 'Готово');
+    updateWeekLabels();
+    buildActivityBlocks();
+    checkAlreadySubmitted();
+  } catch(e) {
+    setSyncUI('err', 'Ошибка: ' + e.message);
+    toast('Не удалось загрузить данные');
+    updateWeekLabels();
+    // Fallback: render with empty activities
+    if (!S) S = { activities: [], members: [] };
+    buildActivityBlocks();
+  }
+}
+
+function updateWeekLabels() {
+  const { label } = getWeekRange();
+  document.getElementById('heroWeekNote').textContent = `Текущая неделя: ${label}`;
+  document.getElementById('formWeekSub').textContent = `PAI Department · ${label}`;
+  document.getElementById('weekBannerText').textContent = `Отчёт за период ${label}`;
+}
+
+function checkAlreadySubmitted() {
+  if (!REPORTS) return;
+  const weekKey = getWeekKey();
+  const savedName = localStorage.getItem('pai_report_name') || '';
+  const savedId   = localStorage.getItem('pai_report_id')   || '';
+  if (savedName || savedId) {
+    const existing = REPORTS.find(r =>
+      r.weekKey === weekKey &&
+      r.status === 'pending' &&
+      ((savedName && r.name?.toLowerCase() === savedName.toLowerCase()) ||
+       (savedId && r.gameId === savedId))
+    );
+    if (existing) {
+      document.getElementById('alreadySubmittedWarn').style.display = '';
+    }
+  }
+}
+
+// ── BUILD FORM ────────────────────────────────────────────────────────────────
+function buildActivityBlocks() {
+  const activities = (S?.activities || []);
+  const container = document.getElementById('activityBlocks');
+
+  if (!activities.length) {
+    container.innerHTML = `
+      <div style="padding:20px;text-align:center;color:var(--t3);font-size:12px;font-family:var(--mono)">
+        Аспекты не загружены. Проверь подключение.
+      </div>`;
+    return;
+  }
+
+  container.innerHTML = activities.map((a, i) => `
+    <div class="form-block">
+      <div class="form-block-hd">
+        <div class="form-block-num">${String(i+2).padStart(2,'0')}</div>
+        <div class="form-block-title">
+          <span style="font-family:var(--mono);font-size:10px;color:var(--t3);margin-right:8px">${ea(a.code)}</span>
+          ${ea(a.name)}
+          ${a.highStaff ? '<span style="font-family:var(--mono);font-size:9px;color:var(--red);margin-left:6px">★ HS</span>' : ''}
+        </div>
+        <div class="form-block-pts">${a.points} б/ед.</div>
+      </div>
+      <div class="form-block-body">
+        ${a.note ? `<div class="form-hint">${ea(a.note)}</div>` : ''}
+        <div class="links-area">
+          <textarea
+            class="links-textarea"
+            id="links_${a.id}"
+            placeholder="Вставь Discord-ссылки, по одной на строку&#10;https://discord.com/channels/...&#10;https://discord.com/channels/..."
+            oninput="updateLinkCount('${a.id}')"
+          ></textarea>
+          <div class="links-count" id="count_${a.id}">Ссылок: <span>0</span> · Баллов: <span>0</span></div>
+        </div>
+      </div>
+    </div>
+  `).join('');
+}
+
+function updateLinkCount(actId) {
+  const ta = document.getElementById('links_' + actId);
+  if (!ta) return;
+  const links = parseLinks(ta.value);
+  const a = (S?.activities||[]).find(x => x.id === actId);
+  const pts = a ? links.length * a.points : 0;
+  const el = document.getElementById('count_' + actId);
+  if (el) {
+    el.innerHTML = `Ссылок: <span>${links.length}</span> · Баллов: <span>${pts}</span>`;
+  }
+}
+
+function parseLinks(raw) {
+  return raw.split('\n')
+    .map(l => l.trim())
+    .filter(l => l.length > 0);
+}
+
+// ── NAVIGATION ────────────────────────────────────────────────────────────────
+function startForm() {
+  document.getElementById('heroSection').style.display = 'none';
+  document.getElementById('formSection').classList.add('visible');
+}
+
+function backToHero() {
+  document.getElementById('heroSection').style.display = '';
+  document.getElementById('formSection').classList.remove('visible');
+}
+
+// ── SUBMIT ────────────────────────────────────────────────────────────────────
+async function submitReport() {
+  const name   = document.getElementById('fName').value.trim();
+  const gameId = document.getElementById('fGameId').value.trim();
+
+  if (!name)   { toast('Укажи имя и фамилию'); document.getElementById('fName').focus(); return; }
+  if (!gameId) { toast('Укажи статик'); document.getElementById('fGameId').focus(); return; }
+
+  if (!REPORTS) { toast('Данные ещё не загружены. Подожди.'); return; }
+
+  const activities = S?.activities || [];
+  const aspects = [];
+  let totalPts = 0;
+
+  activities.forEach(a => {
+    const ta = document.getElementById('links_' + a.id);
+    const links = ta ? parseLinks(ta.value) : [];
+    const pts = links.length * a.points;
+    totalPts += pts;
+    aspects.push({
+      actId:  a.id,
+      code:   a.code,
+      name:   a.name,
+      points: a.points,
+      count:  links.length,
+      totalPts: pts,
+      links:  links
+    });
+  });
+
+  const weekKey = getWeekKey();
+  const { label: weekLabel } = getWeekRange();
+  const { firstName, lastName } = parseName(name);
+
+  // Remove previous pending report for same person this week
+  const filtered = REPORTS.filter(r => !(
+    r.weekKey === weekKey &&
+    r.status  === 'pending' &&
+    r.gameId  === gameId
+  ));
+
+  const report = {
+    id:        uid(),
+    weekKey,
+    weekLabel,
+    submittedAt: new Date().toISOString(),
+    name,
+    firstName,
+    lastName,
+    gameId,
+    status:    'pending',
+    aspects,
+    totalPts,
+    modNote:   '',
+    reviewedAt: null
+  };
+
+  filtered.push(report);
+
+  const btn = document.getElementById('submitBtn');
+  btn.disabled = true;
+  btn.innerHTML = '<svg width="15" height="15" viewBox="0 0 15 15" fill="none"><circle cx="7.5" cy="7.5" r="5" stroke="currentColor" stroke-width="1.6" stroke-dasharray="20" stroke-dashoffset="20" style="animation:spin 1s linear infinite"><animateTransform attributeName="transform" type="rotate" values="0 7.5 7.5;360 7.5 7.5" dur="1s" repeatCount="indefinite"/></circle></svg> Отправка...';
+
+  try {
+    setSyncUI('loading', 'Сохранение...');
+    remoteShaReports = await ghPut(REPORTS_PATH, filtered, remoteShaReports, `PAI report: ${name} #${gameId} ${weekKey}`);
+    REPORTS = filtered;
+    setSyncUI('ok', 'Сохранено');
+
+    // Save locally to detect next visit
+    localStorage.setItem('pai_report_name', name);
+    localStorage.setItem('pai_report_id', gameId);
+
+    showSuccess(report);
+  } catch(e) {
+    setSyncUI('err', 'Ошибка');
+    toast('Ошибка отправки: ' + e.message);
+    btn.disabled = false;
+    btn.innerHTML = '<svg width="15" height="15" viewBox="0 0 15 15" fill="none"><path d="M2 7.5h11M8.5 3l4.5 4.5-4.5 4.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg> Отправить на модерацию';
+  }
+}
+
+function showSuccess(report) {
+  const filled = report.aspects.filter(a => a.count > 0);
+  document.getElementById('statusIcon').textContent = '✓';
+  document.getElementById('statusTitle').textContent = 'Отчёт отправлен';
+  document.getElementById('statusSub').textContent = 'Заявка принята и ожидает проверки модератором.';
+  document.getElementById('statusDetail').innerHTML =
+    `<div style="margin-bottom:4px;color:var(--t2)">${ea(report.name)} · #${ea(report.gameId)}</div>` +
+    `<div style="margin-bottom:8px;color:var(--t3)">${report.weekLabel}</div>` +
+    filled.map(a => `<div style="display:flex;justify-content:space-between;gap:12px"><span style="color:var(--t3)">${ea(a.code)} ${ea(a.name)}</span><span style="color:var(--t1)">${a.count} × ${a.points} = ${a.totalPts} б.</span></div>`).join('') +
+    `<div style="margin-top:8px;padding-top:8px;border-top:1px solid var(--line);display:flex;justify-content:space-between"><span style="color:var(--t2)">Итого</span><span style="color:var(--t1);font-weight:500">${report.totalPts} б.</span></div>`;
+  document.getElementById('statusOverlay').classList.add('open');
+}
+
+function closeStatus() {
+  document.getElementById('statusOverlay').classList.remove('open');
+  backToHero();
+  // Reset form
+  document.getElementById('fName').value = '';
+  document.getElementById('fGameId').value = '';
+  (S?.activities||[]).forEach(a => {
+    const ta = document.getElementById('links_' + a.id);
+    if (ta) { ta.value = ''; updateLinkCount(a.id); }
+  });
+  document.getElementById('submitBtn').disabled = false;
+  document.getElementById('submitBtn').innerHTML = '<svg width="15" height="15" viewBox="0 0 15 15" fill="none"><path d="M2 7.5h11M8.5 3l4.5 4.5-4.5 4.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg> Отправить на модерацию';
+}
+
+init();
+</script>
+</body>
+</html>

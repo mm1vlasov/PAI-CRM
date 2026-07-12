@@ -1,0 +1,8 @@
+{
+  "owner": "mm1vlasov",
+  "repo": "paicrm",
+  "branch": "main",
+  "path": "data/state.json",
+  "token": "",
+  "pollSec": 30
+}

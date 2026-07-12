@@ -1,0 +1,6 @@
+.DS_Store
+Thumbs.db
+*.log
+sync.local.json
+.env
+.env.*
