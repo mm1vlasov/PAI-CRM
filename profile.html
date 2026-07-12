@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PAI Department — Профиль</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #060606; --bg2: #0c0c0c; --bg3: #121212;
+  --line: rgba(255,255,255,0.06); --t1: #efefef; --t2: #7a7a7a; --t3: #404040;
+  --amber: #f0e0b0; --amber-bg: rgba(240,224,176,0.06);
+  --font: 'IBM Plex Sans', system-ui, sans-serif; --mono: 'IBM Plex Mono', monospace;
+  --rad: 9px;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: var(--font); background: var(--bg); color: var(--t1); min-height: 100vh; }
+.topbar {
+  height: 50px; background: var(--bg2); border-bottom: 1px solid var(--line);
+  display: flex; align-items: center; justify-content: space-between; padding: 0 24px;
+}
+.topbar a { color: var(--t2); text-decoration: none; font-size: 13px; }
+.topbar a:hover { color: var(--t1); }
+.page { max-width: 560px; margin: 0 auto; padding: 32px 24px; }
+.title { font-size: 20px; font-weight: 600; margin-bottom: 4px; }
+.sub { font-family: var(--mono); font-size: 10px; color: var(--t3); margin-bottom: 24px; }
+.banner {
+  padding: 14px 16px; background: var(--amber-bg); border: 1px solid rgba(240,224,176,.15);
+  border-radius: var(--rad); margin-bottom: 24px; font-size: 13px; color: var(--amber);
+}
+.card { background: var(--bg2); border: 1px solid var(--line); border-radius: var(--rad); padding: 24px; margin-bottom: 16px; }
+.card-title { font-size: 13px; font-weight: 500; margin-bottom: 16px; }
+.form-group { margin-bottom: 14px; }
+label { display: block; font-family: var(--mono); font-size: 9.5px; letter-spacing: .1em; text-transform: uppercase; color: var(--t3); margin-bottom: 6px; }
+input {
+  width: 100%; padding: 10px 12px; background: var(--bg3); border: 1px solid var(--line);
+  border-radius: 6px; color: var(--t1); font-family: var(--font); font-size: 13px;
+}
+input:disabled { opacity: .5; }
+.row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.btn {
+  padding: 10px 16px; border: 1px solid var(--line); border-radius: 6px; cursor: pointer;
+  font-family: var(--font); font-size: 13px; background: none; color: var(--t2);
+}
+.btn:hover { color: var(--t1); border-color: rgba(255,255,255,.15); }
+.btn-primary { background: var(--t1); color: var(--bg); border-color: var(--t1); }
+.btn-primary:hover { opacity: .9; }
+.actions { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 16px; }
+.role-badge {
+  display: inline-block; font-family: var(--mono); font-size: 10px; padding: 4px 10px;
+  border-radius: 100px; border: 1px solid var(--line); color: var(--t2); margin-bottom: 16px;
+}
+.msg { font-size: 12px; margin-top: 12px; min-height: 18px; }
+.msg.ok { color: #c8f0dc; }
+.msg.err { color: #f0c8c8; }
+</style>
+</head>
+<body>
+<div class="topbar">
+  <a href="/">← PAI CRM</a>
+  <div style="display:flex;gap:12px">
+    <a href="/report" id="linkReport" style="display:none">Еженеделька</a>
+    <a href="#" onclick="doLogout();return false">Выйти</a>
+  </div>
+</div>
+
+<div class="page">
+  <div class="title">Профиль</div>
+  <div class="sub" id="userSub">—</div>
+
+  <div class="banner" id="verifyBanner" style="display:none">
+    Ваш аккаунт ожидает верификации. Старший состав PAI назначит роль после проверки.
+  </div>
+
+  <div class="card">
+    <div class="role-badge" id="roleBadge">—</div>
+    <div class="card-title">Данные аккаунта</div>
+    <div class="form-group"><label>Логин</label><input type="text" id="fUsername" disabled></div>
+    <div class="row">
+      <div class="form-group"><label>Имя</label><input type="text" id="fFirst"></div>
+      <div class="form-group"><label>Фамилия</label><input type="text" id="fLast"></div>
+    </div>
+    <div class="form-group"><label>Статик</label><input type="text" id="fGameId"></div>
+    <div class="form-group"><label>Новый пароль</label><input type="password" id="fPass" placeholder="Оставьте пустым, чтобы не менять"></div>
+    <button class="btn btn-primary" onclick="saveProfile()">Сохранить</button>
+    <div class="msg" id="profileMsg"></div>
+  </div>
+
+  <div class="actions" id="navActions"></div>
+</div>
+
+<script src="api-client.js"></script>
+<script>
+let currentUser = null;
+
+async function doLogout() {
+  await PAI_API.apiFetch('/api/auth/logout', { method: 'POST' });
+  location.href = '/login';
+}
+
+function renderUser(user) {
+  currentUser = user;
+  document.getElementById('userSub').textContent = PAI_API.formatUserName(user) + ' · @' + user.username;
+  document.getElementById('roleBadge').textContent = PAI_API.ROLE_LABELS[user.role] || user.role;
+  document.getElementById('fUsername').value = user.username;
+  document.getElementById('fFirst').value = user.firstName || '';
+  document.getElementById('fLast').value = user.lastName || '';
+  document.getElementById('fGameId').value = user.gameId || '';
+  document.getElementById('verifyBanner').style.display = user.role === 'verification' ? '' : 'none';
+  document.getElementById('linkReport').style.display = PAI_API.isEmployee(user.role) ? '' : 'none';
+
+  const nav = document.getElementById('navActions');
+  nav.innerHTML = '';
+  if (PAI_API.isEmployee(user.role)) {
+    nav.innerHTML += '<a class="btn" href="/report">Подать еженедельку</a>';
+  }
+  if (PAI_API.isSenior(user.role)) {
+    nav.innerHTML += '<a class="btn" href="/">Админ-панель</a>';
+  }
+}
+
+async function saveProfile() {
+  const msg = document.getElementById('profileMsg');
+  msg.className = 'msg';
+  try {
+    const body = {
+      firstName: document.getElementById('fFirst').value,
+      lastName: document.getElementById('fLast').value,
+      gameId: document.getElementById('fGameId').value,
+    };
+    const pass = document.getElementById('fPass').value;
+    if (pass) body.password = pass;
+    const data = await PAI_API.apiFetch('/api/auth/profile', { method: 'PUT', body: JSON.stringify(body) });
+    renderUser(data.user);
+    document.getElementById('fPass').value = '';
+    msg.className = 'msg ok';
+    msg.textContent = 'Профиль сохранён';
+  } catch (err) {
+    msg.className = 'msg err';
+    msg.textContent = err.message;
+  }
+}
+
+(async () => {
+  const user = await PAI_API.requireAuth();
+  if (!user) return;
+  renderUser(user);
+})();
+</script>
+</body>
+</html>

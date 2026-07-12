@@ -583,8 +583,9 @@ canvas.monthly-chart { width: 100%; height: 100%; display: block; }
     <button class="sb-item"        data-tab="statistics"  onclick="showTab('statistics',this)"> <span class="sb-icon">◬</span> Статистика</button>
     <span class="sb-section">Система</span>
     <button class="sb-item"        data-tab="admin"       onclick="showTab('admin',this)">      <span class="sb-icon">◆</span> Настройки</button>
+    <button class="sb-item"        data-tab="users"       onclick="showTab('users',this)" id="navUsers" style="display:none"> <span class="sb-icon">◇</span> Пользователи</button>
   </nav>
-  <div class="sb-footer">PAI Department<br>MAJESTIC RP · 2026</div>
+  <div class="sb-footer" id="sbUserInfo">PAI Department<br>MAJESTIC RP · 2026</div>
 </aside>
 
 <!-- MAIN -->
@@ -597,9 +598,12 @@ canvas.monthly-chart { width: 100%; height: 100%; display: block; }
         <span id="syncText">—</span>
       </div>
       <button class="btn btn-ghost btn-sm" onclick="pullRemote()">↻</button>
-      <button class="btn btn-ghost btn-sm" onclick="exportData()">↑ Экспорт</button>
-      <button class="btn btn-ghost btn-sm" onclick="document.getElementById('importFile').click()">↓ Импорт</button>
+      <a class="btn btn-ghost btn-sm" href="/report" id="topReportLink" style="display:none">Еженеделька</a>
+      <a class="btn btn-ghost btn-sm" href="/profile" id="topProfileLink">Профиль</a>
+      <button class="btn btn-ghost btn-sm" id="exportBtn" onclick="exportData()">↑ Экспорт</button>
+      <button class="btn btn-ghost btn-sm" id="importBtn" onclick="document.getElementById('importFile').click()">↓ Импорт</button>
       <input type="file" id="importFile" accept=".json" style="display:none" onchange="importData(this)">
+      <button class="btn btn-ghost btn-sm" onclick="doLogout()">Выйти</button>
     </div>
   </div>
 
@@ -1078,18 +1082,35 @@ canvas.monthly-chart { width: 100%; height: 100%; display: block; }
           </div>
         </div>
 
-        <div class="card">
-          <div class="card-hd"><span class="card-title">Данные и синхронизация</span></div>
+        <div class="card" id="adminDataCard">
+          <div class="card-hd"><span class="card-title">Данные</span></div>
           <div class="card-body" style="display:flex;flex-direction:column;gap:9px">
             <button class="btn btn-ghost" onclick="exportData()">↑ Экспорт JSON</button>
             <button class="btn btn-ghost" onclick="document.getElementById('importFile').click()">↓ Импорт JSON</button>
             <div class="divider"></div>
-            <button class="btn btn-ghost" onclick="openSyncSetup(getSyncConfig())">⚙ GitHub токен</button>
-            <div class="divider"></div>
-            <button class="btn btn-danger" onclick="clearAllData()">↺ Сбросить к начальным</button>
+            <button class="btn btn-danger" id="clearDataBtn" onclick="clearAllData()">↺ Сбросить к начальным</button>
           </div>
         </div>
 
+      </div>
+    </div>
+
+    <!-- ══ USERS ══ -->
+    <div id="tab-users" class="tab-content hidden">
+      <div class="section-hd">
+        <div>
+          <div class="page-title">Пользователи</div>
+          <div class="page-sub">Управление ролями и доступом</div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-hd"><span class="card-title">Все пользователи</span></div>
+        <div class="tbl-wrap">
+          <table>
+            <thead><tr><th>Логин</th><th>Имя</th><th>Статик</th><th>Роль</th><th>Последний вход</th><th></th></tr></thead>
+            <tbody id="usersTableBody"></tbody>
+          </table>
+        </div>
       </div>
     </div>
 
@@ -1097,29 +1118,6 @@ canvas.monthly-chart { width: 100%; height: 100%; display: block; }
 </main>
 
 <!-- ── MODALS ── -->
-
-<!-- Sync -->
-<div class="modal-overlay" id="modalSync">
-  <div class="modal">
-    <div class="modal-hd"><span class="modal-title">Синхронизация GitHub</span></div>
-    <div class="modal-body">
-      <p style="color:var(--t2);font-size:12px;margin-bottom:16px;line-height:1.7">Данные хранятся в <code style="color:var(--t1)">data/state.json</code>. Токен нужен с правом <code style="color:var(--t1)">contents:write</code>.</p>
-      <div class="form-row">
-        <div class="form-group"><label>Owner</label><input type="text" id="setupOwner" placeholder="username"></div>
-        <div class="form-group"><label>Repo</label><input type="text" id="setupRepo" placeholder="pai-department"></div>
-      </div>
-      <div class="form-row">
-        <div class="form-group"><label>Ветка</label><input type="text" id="setupBranch" value="main"></div>
-        <div class="form-group"><label>Путь к JSON</label><input type="text" id="setupPath" value="data/state.json"></div>
-      </div>
-      <div class="form-group"><label>GitHub Token (PAT)</label><input type="password" id="setupToken" placeholder="ghp_..." autocomplete="off"></div>
-    </div>
-    <div class="modal-foot">
-      <button class="btn btn-ghost" onclick="closeModal('modalSync')">Пропустить</button>
-      <button class="btn btn-primary" onclick="saveSyncSetup()">Сохранить</button>
-    </div>
-  </div>
-</div>
 
 <!-- Edit Member -->
 <div class="modal-overlay" id="modalMember">
@@ -1258,14 +1256,38 @@ canvas.monthly-chart { width: 100%; height: 100%; display: block; }
     {"id":"q14","q":"Как повышать человека по восстановлению или переводу?","a":"Проверить одобренный запрос и ранг, в кадровом указать ссылку"},
     {"id":"q15","q":"Что делать, если написал кадровый неправильно?","a":"Удалить или поставить реакцию крестика"}
   ],
-  "monthlyLog": [],
-  "sync": {"owner":"","repo":"","branch":"main","path":"data/state.json","token":"","sha":"","pollSec":30}
+  "monthlyLog": []
 }
 </script>
 
 <!-- ═══════════════════════════════ JAVASCRIPT ═══════════════════════════════ -->
+<script src="api-client.js"></script>
 <script>
 'use strict';
+
+// ── AUTH ─────────────────────────────────────────────────────────────────────
+let CURRENT_USER = null;
+const ROLE_LABELS = PAI_API.ROLE_LABELS;
+
+async function doLogout() {
+  await PAI_API.apiFetch('/api/auth/logout', { method: 'POST' });
+  window.location.href = '/login';
+}
+
+function applyPermissions() {
+  const isAdmin = PAI_API.isAdmin(CURRENT_USER.role);
+  const isSenior = PAI_API.isSenior(CURRENT_USER.role);
+  document.getElementById('navUsers').style.display = isSenior ? '' : 'none';
+  document.getElementById('topReportLink').style.display = PAI_API.isEmployee(CURRENT_USER.role) ? '' : 'none';
+  document.getElementById('topProfileLink').textContent = PAI_API.formatUserName(CURRENT_USER);
+  document.getElementById('sbUserInfo').innerHTML = `${ea(PAI_API.formatUserName(CURRENT_USER))}<br>${ROLE_LABELS[CURRENT_USER.role] || CURRENT_USER.role}`;
+  if (!isAdmin) {
+    document.getElementById('tab-admin')?.querySelectorAll('.card').forEach((card, i) => {
+      if (i < 3) card.style.display = 'none';
+    });
+    document.getElementById('clearDataBtn')?.remove();
+  }
+}
 
 // ── RANK HIERARCHY ───────────────────────────────────────────────────────────
 const RANK_ORDER = [
@@ -1303,11 +1325,11 @@ let memberSort  = 'rank-asc';
 let editMemberId = null;
 let editActivityId = null;
 let editQuestionId = null;
-let remoteSha = '';
 let isSaving = false, pendingSave = false;
-let saveTimer = null, pollTimer = null;
-let currentStatMonth = null; // {year, month}
+let saveTimer = null;
+let currentStatMonth = null;
 let currentStatTab = 'meetings';
+let USERS_LIST = [];
 
 // ── UTILS ────────────────────────────────────────────────────────────────────
 function uid() { return 'i' + Date.now() + Math.random().toString(36).slice(2, 6); }
@@ -1376,117 +1398,38 @@ function toast(msg) {
   setTimeout(() => el.remove(), 3000);
 }
 
-// ── SYNC UI ──────────────────────────────────────────────────────────────────
+// ── DB SYNC ──────────────────────────────────────────────────────────────────
 function setSyncUI(cls, text) {
   document.getElementById('syncDot').className = 'sync-dot ' + (cls||'');
   document.getElementById('syncText').textContent = text;
 }
 
-// ── BASE64 UTF-8 ─────────────────────────────────────────────────────────────
-function b64toStr(b64) {
-  const bin = atob(String(b64).replace(/\s/g,''));
-  const bytes = Uint8Array.from(bin, c => c.charCodeAt(0));
-  return new TextDecoder('utf-8').decode(bytes);
-}
-function strToB64(str) {
-  const bytes = new TextEncoder().encode(str);
-  let bin = ''; bytes.forEach(b => bin += String.fromCharCode(b));
-  return btoa(bin);
-}
-
-// ── SYNC ─────────────────────────────────────────────────────────────────────
-function getSyncConfig() {
-  const ls = JSON.parse(localStorage.getItem('pai_sync_v2')||'{}');
-  return { ...((S||{}).sync||{}), ...ls };
-}
-function saveSyncLocal(cfg) {
-  localStorage.setItem('pai_sync_v2', JSON.stringify(cfg));
-  if (S) S.sync = { ...S.sync, ...cfg };
-}
-
-function openSyncSetup(cfg) {
-  if (cfg) {
-    ['Owner','Repo','Branch','Path','Token'].forEach(k => {
-      const el = document.getElementById('setup'+k);
-      if (el && cfg[k.toLowerCase()]) el.value = cfg[k.toLowerCase()];
-    });
-  }
-  document.getElementById('modalSync').classList.add('open');
-}
-function saveSyncSetup() {
-  const cfg = {
-    owner: document.getElementById('setupOwner').value.trim(),
-    repo:  document.getElementById('setupRepo').value.trim(),
-    branch: document.getElementById('setupBranch').value.trim() || 'main',
-    path:  document.getElementById('setupPath').value.trim()  || 'data/state.json',
-    token: document.getElementById('setupToken').value.trim(),
-    pollSec: 30
-  };
-  if (!cfg.owner || !cfg.repo || !cfg.token) { toast('Заполните owner, repo и token'); return; }
-  saveSyncLocal(cfg);
-  closeModal('modalSync');
-  pullRemote().then(() => { startPolling(); toast('Синхронизация настроена'); });
-}
-
-function ghPath(cfg) { return (cfg.path||'data/state.json').replace(/^\//,''); }
-
-async function loadFromGitHub(cfg) {
-  const api = `https://api.github.com/repos/${cfg.owner}/${cfg.repo}/contents/${ghPath(cfg)}?ref=${encodeURIComponent(cfg.branch||'main')}&t=${Date.now()}`;
-  const r = await fetch(api, { cache:'no-store', headers: { Accept:'application/vnd.github+json', Authorization:`Bearer ${cfg.token}` } });
-  if (!r.ok) throw new Error('GitHub ' + r.status);
-  const d = await r.json();
-  remoteSha = d.sha;
-  return migrateState(JSON.parse(b64toStr(d.content)));
-}
-
-async function saveToGitHub(cfg) {
-  const shaApi = `https://api.github.com/repos/${cfg.owner}/${cfg.repo}/contents/${ghPath(cfg)}?ref=${encodeURIComponent(cfg.branch||'main')}&t=${Date.now()}`;
-  const sr = await fetch(shaApi, { cache:'no-store', headers: { Accept:'application/vnd.github+json', Authorization:`Bearer ${cfg.token}` } });
-  if (!sr.ok) throw new Error('SHA ' + sr.status);
-  remoteSha = (await sr.json()).sha;
-  const api = `https://api.github.com/repos/${cfg.owner}/${cfg.repo}/contents/${ghPath(cfg)}`;
-  const r = await fetch(api, {
-    method: 'PUT',
-    headers: { Accept:'application/vnd.github+json', Authorization:`Bearer ${cfg.token}`, 'Content-Type':'application/json' },
-    body: JSON.stringify({ message:'PAI CRM update', content: strToB64(JSON.stringify(S, null, 2)), branch: cfg.branch||'main', sha: remoteSha })
-  });
-  if (!r.ok) { const e = await r.json().catch(()=>({})); throw new Error(e.message||'Save ' + r.status); }
-  remoteSha = (await r.json()).content.sha;
-}
-
 async function pullRemote() {
   setSyncUI('loading', 'Загрузка...');
   try {
-    const cfg = getSyncConfig();
-    if (cfg.owner && cfg.repo && cfg.token) {
-      S = await loadFromGitHub(cfg);
-    } else {
-      // try static file
-      const res = await fetch('data/state.json?t='+Date.now(), { cache:'no-store' });
-      if (!res.ok) throw new Error('no file');
-      S = migrateState(await res.json());
-    }
+    S = await PAI_API.apiFetch('/api/state');
     ensureAll();
     renderTab(currentTab);
-    setSyncUI('ok', 'Обновлено ' + new Date().toLocaleTimeString('ru',{hour:'2-digit',minute:'2-digit'}));
+    setSyncUI('ok', 'БД · ' + new Date().toLocaleTimeString('ru',{hour:'2-digit',minute:'2-digit'}));
   } catch(e) {
     if (!S?.members?.length) S = defaultState();
     ensureAll();
     renderTab(currentTab);
-    setSyncUI('err', 'Локальные данные');
+    setSyncUI('err', e.message || 'Ошибка загрузки');
   }
 }
 
-function scheduleSave() { clearTimeout(saveTimer); saveTimer = setTimeout(pushRemote, 900); }
+function scheduleSave() {
+  clearTimeout(saveTimer);
+  saveTimer = setTimeout(pushRemote, 900);
+}
 
 async function pushRemote() {
   if (isSaving) { pendingSave = true; return; }
-  const cfg = getSyncConfig();
-  if (!cfg.owner || !cfg.repo || !cfg.token) { setSyncUI('', 'Настройте GitHub'); return; }
   isSaving = true;
   setSyncUI('loading', 'Сохранение...');
   try {
-    await saveToGitHub(cfg);
+    await PAI_API.apiFetch('/api/state', { method: 'POST', body: JSON.stringify(S) });
     setSyncUI('ok', 'Сохранено ' + new Date().toLocaleTimeString('ru',{hour:'2-digit',minute:'2-digit'}));
   } catch(e) {
     setSyncUI('err', 'Ошибка'); toast('Сохранение: ' + e.message);
@@ -1494,12 +1437,6 @@ async function pushRemote() {
     isSaving = false;
     if (pendingSave) { pendingSave = false; scheduleSave(); }
   }
-}
-
-function startPolling() {
-  clearInterval(pollTimer);
-  const sec = (getSyncConfig().pollSec || 30);
-  pollTimer = setInterval(pullRemote, sec * 1000);
 }
 
 // ── STATE MIGRATION ──────────────────────────────────────────────────────────
@@ -1515,9 +1452,9 @@ function migrateState(raw) {
     weeklyHistory: raw.weeklyHistory || base.weeklyHistory || [],
     meeting:     raw.meeting     || base.meeting     || { date:'', attendance:{} },
     call:        raw.call        || base.call        || { date:'', candidates:[], scores:{} },
+    meetings:    raw.meetings    || base.meetings    || [],
     reprimands:  raw.reprimands  || base.reprimands  || {},
-    monthlyLog:  raw.monthlyLog  || base.monthlyLog  || [],
-    sync:        { ...(base.sync||{}), ...(raw.sync||{}) }
+    monthlyLog:  raw.monthlyLog  || base.monthlyLog  || []
   };
   if (!s.call.candidates) s.call.candidates = [];
   s.call.candidates = s.call.candidates.filter(c => c && (c.name||c.gameId));
@@ -1554,7 +1491,8 @@ function ensureAll() {
 const TAB_TITLES = {
   dashboard: 'Дашборд', members: 'Состав', scores: 'Еженедельные баллы',
   meetings: 'Собрания', calls: 'Обзвон', reprimands: 'Выговоры',
-  statistics: 'Статистика', admin: 'Настройки', reports: 'Заявки на еженедельку'
+  statistics: 'Статистика', admin: 'Настройки', reports: 'Заявки на еженедельку',
+  users: 'Пользователи'
 };
 
 function showTab(tab, el) {
@@ -1577,6 +1515,7 @@ function renderTab(tab) {
   else if (tab === 'statistics') renderStatistics();
   else if (tab === 'admin')      renderAdmin();
   else if (tab === 'reports')    renderReports();
+  else if (tab === 'users')      renderUsers();
 }
 
 function closeModal(id) { document.getElementById(id)?.classList.remove('open'); }
@@ -1894,7 +1833,7 @@ function meetingWeekRange(offset) {
   mon.setDate(mon.getDate() + offset * 7);
   const sun = addDays(mon, 6); return { mon, sun };
 }
-function isoDate(d) { return d.toISOString().slice(0,10); }
+function isoDate(d) { return PAI_API.isoDateLocal(d); }
 function ensureMeetings() { if (!S.meetings) S.meetings = []; }
 
 const MTG_TYPE_LABEL = { weekly:'Еженедельное', emergency:'Экстренное', briefing:'Брифинг', other:'Другое' };
@@ -2037,9 +1976,10 @@ function createMeeting() {
   S.meetings.push({ id:uid(), title, date, time, type, note, attendance, createdAt:now_iso() });
   closeModal('modalCreateMeeting');
 
-const currentWeek = getWeekNumber(new Date());
-const mtgWeek = getWeekNumber(new Date(date + 'T00:00:00'));
-meetingWeekOffset = mtgWeek - currentWeek;
+  const mtgDate = new Date(date + 'T12:00:00');
+  const currentMon = getMondayOf(new Date());
+  const mtgMon = getMondayOf(mtgDate);
+  meetingWeekOffset = Math.round((mtgMon - currentMon) / (7 * 24 * 60 * 60 * 1000));
 
   scheduleSave(); renderMeetings(); toast('Собрание создано');
 }
@@ -2904,57 +2844,24 @@ function clearAllData() {
 }
 
 // ── REPORTS MODERATION ──────────────────────────────────────────────────────
-const REPORTS_PATH = 'data/weekly_reports.json';
 let REPORTS = null;
-let remoteShaReports = '';
 let activeReportId = null;
 
-function ghReportsPath(cfg) { return REPORTS_PATH; }
-
-async function ghGetFile(cfg, path) {
-  const url = `https://api.github.com/repos/${cfg.owner}/${cfg.repo}/contents/${path}?ref=${encodeURIComponent(cfg.branch||'main')}&t=${Date.now()}`;
-  const r = await fetch(url, { cache:'no-store', headers: { Accept:'application/vnd.github+json', Authorization:`Bearer ${cfg.token}` } });
-  if (!r.ok) throw new Error('GitHub ' + r.status + ' ' + path);
-  const d = await r.json();
-  return { data: JSON.parse(b64toStr(d.content)), sha: d.sha };
-}
-
-async function ghPutFile(cfg, path, data, sha, message) {
-  // re-fetch SHA
-  try {
-    const cur = await fetch(`https://api.github.com/repos/${cfg.owner}/${cfg.repo}/contents/${path}?ref=${encodeURIComponent(cfg.branch||'main')}&t=${Date.now()}`, { cache:'no-store', headers: { Accept:'application/vnd.github+json', Authorization:`Bearer ${cfg.token}` } });
-    if (cur.ok) sha = (await cur.json()).sha;
-  } catch {}
-  const body = { message: message||'PAI reports update', content: strToB64(JSON.stringify(data, null, 2)), branch: cfg.branch||'main' };
-  if (sha) body.sha = sha;
-  const r = await fetch(`https://api.github.com/repos/${cfg.owner}/${cfg.repo}/contents/${path}`, {
-    method: 'PUT',
-    headers: { Accept:'application/vnd.github+json', Authorization:`Bearer ${cfg.token}`, 'Content-Type':'application/json' },
-    body: JSON.stringify(body)
-  });
-  if (!r.ok) { const e = await r.json().catch(()=>({})); throw new Error(e.message||'PUT '+r.status); }
-  return (await r.json()).content?.sha || sha;
-}
-
 async function loadReports() {
-  const cfg = getSyncConfig();
-  if (!cfg.owner || !cfg.repo || !cfg.token) return;
   try {
-    const res = await ghGetFile(cfg, REPORTS_PATH);
-    REPORTS = Array.isArray(res.data) ? res.data : [];
-    remoteShaReports = res.sha;
+    REPORTS = await PAI_API.apiFetch('/api/reports');
+    if (!Array.isArray(REPORTS)) REPORTS = [];
   } catch(e) {
-    if (e.message.includes('404')) { REPORTS = []; remoteShaReports = ''; }
-    else console.warn('loadReports:', e);
+    console.warn('loadReports:', e);
+    REPORTS = REPORTS || [];
   }
   if (currentTab === 'reports') renderReports();
   updatePendingBadge();
 }
 
 async function saveReports() {
-  const cfg = getSyncConfig();
-  if (!cfg.owner || !cfg.repo || !cfg.token || !REPORTS) return;
-  remoteShaReports = await ghPutFile(cfg, REPORTS_PATH, REPORTS, remoteShaReports, 'PAI: reports moderation');
+  if (!REPORTS) return;
+  await PAI_API.apiFetch('/api/reports', { method: 'POST', body: JSON.stringify(REPORTS) });
 }
 
 function updatePendingBadge() {
@@ -2966,11 +2873,7 @@ function updatePendingBadge() {
 }
 
 function getWeekKey() {
-  const now = new Date();
-  const mon = new Date(now);
-  mon.setDate(now.getDate() - ((now.getDay() + 6) % 7));
-  mon.setHours(0,0,0,0);
-  return mon.toISOString().slice(0,10);
+  return PAI_API.getWeekKey();
 }
 
 function renderReports() {
@@ -3202,8 +3105,65 @@ async function reviewReport(newStatus) {
   }
 }
 
+// ── USERS ────────────────────────────────────────────────────────────────────
+async function renderUsers() {
+  try {
+    const data = await PAI_API.apiFetch('/api/users');
+    USERS_LIST = data.users || [];
+    const isAdmin = PAI_API.isAdmin(CURRENT_USER.role);
+    const assignableRoles = isAdmin
+      ? ['verification', 'pai_employee', 'pai_senior', 'admin']
+      : ['verification', 'pai_employee', 'pai_senior'];
+
+    document.getElementById('usersTableBody').innerHTML = USERS_LIST.map(u => {
+      const lastIn = u.lastSignInAt ? new Date(u.lastSignInAt).toLocaleString('ru',{day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit'}) : '—';
+      const name = [u.firstName, u.lastName].filter(Boolean).join(' ') || '—';
+      const canEdit = u.id !== CURRENT_USER.id && (isAdmin || u.role !== 'admin');
+      const opts = assignableRoles.map(r =>
+        `<option value="${r}"${r===u.role?' selected':''}>${ROLE_LABELS[r]||r}</option>`
+      ).join('');
+      return `<tr>
+        <td style="font-family:var(--mono);font-size:11px">${ea(u.username)}</td>
+        <td>${ea(name)}</td>
+        <td style="font-family:var(--mono);font-size:11px">${ea(u.gameId||'—')}</td>
+        <td>${canEdit ? `<select onchange="changeUserRole(${u.id},this.value)" style="font-size:12px;padding:4px 8px;background:var(--bg3);border:1px solid var(--line);border-radius:4px;color:var(--t1)">${opts}</select>` : `<span class="badge bg-gray">${ROLE_LABELS[u.role]||u.role}</span>`}</td>
+        <td style="font-family:var(--mono);font-size:10px;color:var(--t3)">${lastIn}</td>
+        <td>${isAdmin && u.id !== CURRENT_USER.id ? `<button class="btn btn-ghost btn-sm" onclick="toggleUserActive(${u.id},${!u.isActive})">${u.isActive?'Блок':'Актив.'}</button>` : ''}</td>
+      </tr>`;
+    }).join('');
+  } catch(e) {
+    toast('Ошибка загрузки пользователей: ' + e.message);
+  }
+}
+
+async function changeUserRole(userId, role) {
+  try {
+    await PAI_API.apiFetch(`/api/users/${userId}/role`, { method: 'PUT', body: JSON.stringify({ role }) });
+    toast('Роль обновлена');
+    renderUsers();
+  } catch(e) { toast(e.message); renderUsers(); }
+}
+
+async function toggleUserActive(userId, isActive) {
+  try {
+    await PAI_API.apiFetch(`/api/users/${userId}/active`, { method: 'PUT', body: JSON.stringify({ isActive }) });
+    toast(isActive ? 'Пользователь активирован' : 'Пользователь заблокирован');
+    renderUsers();
+  } catch(e) { toast(e.message); }
+}
+
 // ── INIT ─────────────────────────────────────────────────────────────────────
 async function init() {
+  CURRENT_USER = await PAI_API.requireAuth('/login');
+  if (!CURRENT_USER) return;
+
+  if (!PAI_API.isSenior(CURRENT_USER.role)) {
+    if (CURRENT_USER.role === 'pai_employee') window.location.href = '/report';
+    else window.location.href = '/profile';
+    return;
+  }
+
+  applyPermissions();
   setSyncUI('loading', 'Загрузка...');
   S = defaultState();
   ensureAll();
@@ -3212,15 +3172,10 @@ async function init() {
 
   try {
     await pullRemote();
+    await loadReports();
   } catch {
     setSyncUI('ok', 'Встроенные данные · ' + S.members.length + ' чел.');
   }
-
-  startPolling();
-  loadReports();
-
-  const cfg = getSyncConfig();
-  if (!cfg.token) setTimeout(() => openSyncSetup(cfg), 500);
 }
 
 init();

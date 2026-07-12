@@ -1,6 +1,5 @@
 -- PAI CRM Database Schema
 
--- Drop existing tables if they exist to ensure clean deployment
 DROP TABLE IF EXISTS report_aspect_links CASCADE;
 DROP TABLE IF EXISTS report_aspects CASCADE;
 DROP TABLE IF EXISTS reports CASCADE;
@@ -17,6 +16,34 @@ DROP TABLE IF EXISTS weekly_scores CASCADE;
 DROP TABLE IF EXISTS activities CASCADE;
 DROP TABLE IF EXISTS members CASCADE;
 DROP TABLE IF EXISTS ranks CASCADE;
+DROP TABLE IF EXISTS users CASCADE;
+
+DROP TYPE IF EXISTS user_role CASCADE;
+
+CREATE TYPE user_role AS ENUM (
+  'verification',
+  'pai_employee',
+  'pai_senior',
+  'admin'
+);
+
+-- Users (auth & profiles)
+CREATE TABLE users (
+    id SERIAL PRIMARY KEY,
+    username VARCHAR(255) NOT NULL UNIQUE,
+    password_hash VARCHAR(255) NOT NULL,
+    first_name VARCHAR(100) DEFAULT '',
+    last_name VARCHAR(100) DEFAULT '',
+    game_id VARCHAR(50) DEFAULT '',
+    role user_role NOT NULL DEFAULT 'verification',
+    is_active BOOLEAN NOT NULL DEFAULT TRUE,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    last_sign_in_at TIMESTAMPTZ
+);
+
+CREATE INDEX idx_users_username ON users (LOWER(username));
+CREATE INDEX idx_users_role ON users (role);
 
 -- 1. Ranks Table
 CREATE TABLE ranks (
@@ -47,7 +74,7 @@ CREATE TABLE activities (
     note TEXT DEFAULT ''
 );
 
--- 4. Weekly Scores Table (real-time weekly points count)
+-- 4. Weekly Scores Table
 CREATE TABLE weekly_scores (
     member_id TEXT REFERENCES members(id) ON DELETE CASCADE,
     activity_id TEXT REFERENCES activities(id) ON DELETE CASCADE,
@@ -85,12 +112,12 @@ CREATE TABLE meetings (
 CREATE TABLE meeting_attendance (
     meeting_id TEXT REFERENCES meetings(id) ON DELETE CASCADE,
     member_id TEXT REFERENCES members(id) ON DELETE CASCADE,
-    status TEXT NOT NULL, -- 'present', 'warned', 'absent', 'none'
+    status TEXT NOT NULL,
     note TEXT DEFAULT '',
     PRIMARY KEY (meeting_id, member_id)
 );
 
--- 9. Weekly History Table (archived weeks)
+-- 9. Weekly History Table
 CREATE TABLE weekly_history (
     id TEXT PRIMARY KEY,
     date TEXT NOT NULL,
@@ -109,15 +136,15 @@ CREATE TABLE weekly_history_scores (
     PRIMARY KEY (history_id, member_id, activity_id)
 );
 
--- 11. Monthly Log Table (reprimands logs, meeting records, etc.)
+-- 11. Monthly Log Table
 CREATE TABLE monthly_log (
     id TEXT PRIMARY KEY,
-    type TEXT NOT NULL, -- 'reprimand', 'scores-reset', etc.
+    type TEXT NOT NULL,
     date TEXT NOT NULL,
     data JSONB NOT NULL
 );
 
--- 12. Settings Table (for singular meeting state, candidates, general config)
+-- 12. Settings Table
 CREATE TABLE settings (
     key TEXT PRIMARY KEY,
     value JSONB NOT NULL
@@ -139,7 +166,7 @@ CREATE TABLE call_scores (
     PRIMARY KEY (candidate_id, question_id)
 );
 
--- 15. Reports Table (weekly reports submitted by users)
+-- 15. Reports Table
 CREATE TABLE reports (
     id TEXT PRIMARY KEY,
     week_key TEXT NOT NULL,
@@ -149,10 +176,11 @@ CREATE TABLE reports (
     first_name TEXT NOT NULL,
     last_name TEXT NOT NULL,
     game_id TEXT NOT NULL,
-    status TEXT NOT NULL, -- 'pending', 'approved', 'rejected'
+    status TEXT NOT NULL,
     total_pts INTEGER NOT NULL,
     mod_note TEXT DEFAULT '',
-    reviewed_at TEXT
+    reviewed_at TEXT,
+    user_id INTEGER REFERENCES users(id) ON DELETE SET NULL
 );
 
 -- 16. Report Aspects Table
