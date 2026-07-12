@@ -1465,6 +1465,20 @@ function migrateState(raw) {
 function defaultState() { return migrateState(JSON.parse(JSON.stringify(getEmbedded()||{}))); }
 
 function ensureAll() {
+  if (!S) S = defaultState();
+  if (!S.meeting) S.meeting = { date: '', attendance: {} };
+  if (!S.meeting.attendance) S.meeting.attendance = {};
+  if (!S.reprimands) S.reprimands = {};
+  if (!S.monthlyLog) S.monthlyLog = [];
+  if (!S.call) S.call = { date: '', candidates: [], scores: {} };
+  if (!S.call.candidates) S.call.candidates = [];
+  if (!S.call.scores) S.call.scores = {};
+  if (!S.meetings) S.meetings = [];
+  if (!S.members) S.members = [];
+  if (!S.activities) S.activities = [];
+  if (!S.ranks) S.ranks = [];
+  if (!S.questions) S.questions = [];
+
   // meeting attendance for every member
   S.members.forEach(m => {
     if (!S.meeting.attendance[m.id]) S.meeting.attendance[m.id] = { status:'none', note:'' };
@@ -1476,13 +1490,11 @@ function ensureAll() {
     if (!a.status) a.status = 'none';
   });
   // reprimands
-  if (!S.reprimands) S.reprimands = {};
   S.members.forEach(m => {
     if (!S.reprimands[m.id]) S.reprimands[m.id] = { verbal:0, strict:0 };
     S.reprimands[m.id].verbal = Math.min(2, Math.max(0, S.reprimands[m.id].verbal||0));
     S.reprimands[m.id].strict = Math.min(2, Math.max(0, S.reprimands[m.id].strict||0));
   });
-  if (!S.monthlyLog) S.monthlyLog = [];
   // ensure phone/bank fields
   S.members.forEach(m => { if(!('phone' in m)) m.phone=''; if(!('bank' in m)) m.bank=''; });
 }
@@ -1824,7 +1836,7 @@ let repSelected       = {};   // mid → true/false
 /* ── helpers ── */
 function getMondayOf(d) {
   const r = new Date(d); const day = r.getDay() || 7;
-  r.setDate(r.getDate() - day + 1); r.setHours(0,0,0,0); return r;
+  r.setDate(r.getDate() - day + 1); r.setHours(12,0,0,0); return r;
 }
 function addDays(d, n) { const r = new Date(d); r.setDate(r.getDate()+n); return r; }
 function fmtDate(d) { return new Date(d).toLocaleDateString('ru',{day:'2-digit',month:'2-digit',year:'numeric'}); }

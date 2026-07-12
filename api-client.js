@@ -57,7 +57,7 @@ function getMondayOf(d) {
   const r = new Date(d);
   const day = r.getDay() || 7;
   r.setDate(r.getDate() - day + 1);
-  r.setHours(0, 0, 0, 0);
+  r.setHours(12, 0, 0, 0);
   return r;
 }
 

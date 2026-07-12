@@ -1,695 +1,476 @@
--- PAI CRM Seed Script
--- Запуск: psql $DATABASE_URL -f seed.sql
--- Админ: логин admin, пароль admin123
+-- PAI CRM Seed Data (data-only, schema must already exist)
+-- Generated: 2026-07-12T16:03:57.339Z
 
--- PAI CRM Database Schema
-
-DROP TABLE IF EXISTS report_aspect_links CASCADE;
-DROP TABLE IF EXISTS report_aspects CASCADE;
-DROP TABLE IF EXISTS reports CASCADE;
-DROP TABLE IF EXISTS call_scores CASCADE;
-DROP TABLE IF EXISTS call_candidates CASCADE;
-DROP TABLE IF EXISTS settings CASCADE;
-DROP TABLE IF EXISTS monthly_log CASCADE;
-DROP TABLE IF EXISTS weekly_history_scores CASCADE;
-DROP TABLE IF EXISTS weekly_history CASCADE;
-DROP TABLE IF EXISTS meeting_attendance CASCADE;
-DROP TABLE IF EXISTS meetings CASCADE;
-DROP TABLE IF EXISTS reprimands CASCADE;
-DROP TABLE IF EXISTS weekly_scores CASCADE;
-DROP TABLE IF EXISTS activities CASCADE;
-DROP TABLE IF EXISTS members CASCADE;
-DROP TABLE IF EXISTS ranks CASCADE;
-DROP TABLE IF EXISTS users CASCADE;
-
-DROP TYPE IF EXISTS user_role CASCADE;
-
-CREATE TYPE user_role AS ENUM (
-  'verification',
-  'pai_employee',
-  'pai_senior',
-  'admin'
-);
-
--- Users (auth & profiles)
-CREATE TABLE users (
-    id SERIAL PRIMARY KEY,
-    username VARCHAR(255) NOT NULL UNIQUE,
-    password_hash VARCHAR(255) NOT NULL,
-    first_name VARCHAR(100) DEFAULT '',
-    last_name VARCHAR(100) DEFAULT '',
-    game_id VARCHAR(50) DEFAULT '',
-    role user_role NOT NULL DEFAULT 'verification',
-    is_active BOOLEAN NOT NULL DEFAULT TRUE,
-    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-    updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-    last_sign_in_at TIMESTAMPTZ
-);
-
-CREATE INDEX idx_users_username ON users (LOWER(username));
-CREATE INDEX idx_users_role ON users (role);
-
--- 1. Ranks Table
-CREATE TABLE ranks (
-    name TEXT PRIMARY KEY,
-    order_index INTEGER DEFAULT 0
-);
-
--- 2. Members Table
-CREATE TABLE members (
-    id TEXT PRIMARY KEY,
-    first_name TEXT NOT NULL,
-    last_name TEXT NOT NULL,
-    name TEXT NOT NULL,
-    game_id TEXT NOT NULL,
-    rank TEXT REFERENCES ranks(name) ON UPDATE CASCADE ON DELETE SET NULL,
-    ooc TEXT DEFAULT '-',
-    phone TEXT DEFAULT '',
-    bank TEXT DEFAULT ''
-);
-
--- 3. Activities Table
-CREATE TABLE activities (
-    id TEXT PRIMARY KEY,
-    code TEXT NOT NULL UNIQUE,
-    name TEXT NOT NULL,
-    points INTEGER NOT NULL,
-    high_staff BOOLEAN DEFAULT FALSE,
-    note TEXT DEFAULT ''
-);
-
--- 4. Weekly Scores Table
-CREATE TABLE weekly_scores (
-    member_id TEXT REFERENCES members(id) ON DELETE CASCADE,
-    activity_id TEXT REFERENCES activities(id) ON DELETE CASCADE,
-    count INTEGER NOT NULL DEFAULT 0,
-    PRIMARY KEY (member_id, activity_id)
-);
-
--- 5. Reprimands Table
-CREATE TABLE reprimands (
-    member_id TEXT PRIMARY KEY REFERENCES members(id) ON DELETE CASCADE,
-    verbal INTEGER NOT NULL DEFAULT 0,
-    strict INTEGER NOT NULL DEFAULT 0
-);
-
--- 6. Questions Table
-CREATE TABLE questions (
-    id TEXT PRIMARY KEY,
-    q TEXT NOT NULL,
-    a TEXT NOT NULL
-);
-
--- 7. Meetings Table
-CREATE TABLE meetings (
-    id TEXT PRIMARY KEY,
-    title TEXT NOT NULL,
-    date TEXT NOT NULL,
-    time TEXT NOT NULL,
-    type TEXT NOT NULL,
-    note TEXT DEFAULT '',
-    reprimands_issued BOOLEAN DEFAULT FALSE,
-    created_at TEXT NOT NULL
-);
-
--- 8. Meeting Attendance Table
-CREATE TABLE meeting_attendance (
-    meeting_id TEXT REFERENCES meetings(id) ON DELETE CASCADE,
-    member_id TEXT REFERENCES members(id) ON DELETE CASCADE,
-    status TEXT NOT NULL,
-    note TEXT DEFAULT '',
-    PRIMARY KEY (meeting_id, member_id)
-);
-
--- 9. Weekly History Table
-CREATE TABLE weekly_history (
-    id TEXT PRIMARY KEY,
-    date TEXT NOT NULL,
-    archived_at TEXT NOT NULL,
-    date_from TEXT NOT NULL,
-    date_to TEXT NOT NULL,
-    week_num INTEGER NOT NULL
-);
-
--- 10. Weekly History Scores Table
-CREATE TABLE weekly_history_scores (
-    history_id TEXT REFERENCES weekly_history(id) ON DELETE CASCADE,
-    member_id TEXT NOT NULL,
-    activity_id TEXT NOT NULL,
-    count INTEGER NOT NULL,
-    PRIMARY KEY (history_id, member_id, activity_id)
-);
-
--- 11. Monthly Log Table
-CREATE TABLE monthly_log (
-    id TEXT PRIMARY KEY,
-    type TEXT NOT NULL,
-    date TEXT NOT NULL,
-    data JSONB NOT NULL
-);
-
--- 12. Settings Table
-CREATE TABLE settings (
-    key TEXT PRIMARY KEY,
-    value JSONB NOT NULL
-);
-
--- 13. Call Candidates Table
-CREATE TABLE call_candidates (
-    id TEXT PRIMARY KEY,
-    name TEXT NOT NULL,
-    game_id TEXT NOT NULL,
-    order_index INTEGER NOT NULL
-);
-
--- 14. Call Scores Table
-CREATE TABLE call_scores (
-    candidate_id TEXT REFERENCES call_candidates(id) ON DELETE CASCADE,
-    question_id TEXT REFERENCES questions(id) ON DELETE CASCADE,
-    score NUMERIC(3, 1) NOT NULL,
-    PRIMARY KEY (candidate_id, question_id)
-);
-
--- 15. Reports Table
-CREATE TABLE reports (
-    id TEXT PRIMARY KEY,
-    week_key TEXT NOT NULL,
-    week_label TEXT NOT NULL,
-    submitted_at TEXT NOT NULL,
-    name TEXT NOT NULL,
-    first_name TEXT NOT NULL,
-    last_name TEXT NOT NULL,
-    game_id TEXT NOT NULL,
-    status TEXT NOT NULL,
-    total_pts INTEGER NOT NULL,
-    mod_note TEXT DEFAULT '',
-    reviewed_at TEXT,
-    user_id INTEGER REFERENCES users(id) ON DELETE SET NULL
-);
-
--- 16. Report Aspects Table
-CREATE TABLE report_aspects (
-    id SERIAL PRIMARY KEY,
-    report_id TEXT REFERENCES reports(id) ON DELETE CASCADE,
-    act_id TEXT NOT NULL,
-    code TEXT NOT NULL,
-    name TEXT NOT NULL,
-    points INTEGER NOT NULL,
-    count INTEGER NOT NULL,
-    total_pts INTEGER NOT NULL
-);
-
--- 17. Report Aspect Links Table
-CREATE TABLE report_aspect_links (
-    id SERIAL PRIMARY KEY,
-    aspect_id INTEGER REFERENCES report_aspects(id) ON DELETE CASCADE,
-    link TEXT NOT NULL
-);
-
-
-INSERT INTO users (username, password_hash, first_name, last_name, game_id, role) VALUES ('admin', '280012a0029e2c9d9b8b2f8041ab5ca3:cf694a09bdf8f50d7d9af40fdc8f824e10d3c9b661c1f62683c2609aef937c0c2f2b74aebc05fe570ca0c140897ebb3878472578623dfe3d2f06f37d6bf04521', 'Admin', 'PAI', '', 'admin');
+DELETE FROM report_aspect_links;
+DELETE FROM report_aspects;
+DELETE FROM reports;
+DELETE FROM call_scores;
+DELETE FROM call_candidates;
+DELETE FROM settings;
+DELETE FROM monthly_log;
+DELETE FROM weekly_history_scores;
+DELETE FROM weekly_history;
+DELETE FROM meeting_attendance;
+DELETE FROM meetings;
+DELETE FROM reprimands;
+DELETE FROM weekly_scores;
+DELETE FROM activities;
+DELETE FROM members;
+DELETE FROM ranks;
+DELETE FROM questions;
 
 INSERT INTO ranks (name, order_index) VALUES ('Curator of Department', 0);
 INSERT INTO ranks (name, order_index) VALUES ('Head of Department', 1);
 INSERT INTO ranks (name, order_index) VALUES ('Deputy Head of Department', 2);
 INSERT INTO ranks (name, order_index) VALUES ('Instructor of Department', 3);
-INSERT INTO members (id, first_name, last_name, name, game_id, rank, ooc, phone, bank) VALUES ('m1', 'Richi', 'Londo', 'Richi Londo', '232430', 'Curator of Department', 'ООС Отпуск (22.06.26-25.06.26)', '', '');
-INSERT INTO members (id, first_name, last_name, name, game_id, rank, ooc, phone, bank) VALUES ('m4', 'Logan', 'Brooks', 'Logan Brooks', '159733', 'Curator of Department', '-', '', '');
-INSERT INTO members (id, first_name, last_name, name, game_id, rank, ooc, phone, bank) VALUES ('m15', 'Daryana', 'Londo', 'Daryana Londo', '30514', 'Head of Department', '-', '', '');
-INSERT INTO members (id, first_name, last_name, name, game_id, rank, ooc, phone, bank) VALUES ('m19', 'Anthony', 'Wilson', 'Anthony Wilson', '292488', 'Instructor of Department', '-', '', '');
-INSERT INTO members (id, first_name, last_name, name, game_id, rank, ooc, phone, bank) VALUES ('i17808319413133ci4', 'Kyka', 'Londo', 'Kyka Londo', '186776', 'Head of Department', '-', '', '');
-INSERT INTO members (id, first_name, last_name, name, game_id, rank, ooc, phone, bank) VALUES ('i1780833670884jza4', 'Ryker', 'Moonlight', 'Ryker Moonlight', '305966', 'Instructor of Department', '-', '', '');
-INSERT INTO members (id, first_name, last_name, name, game_id, rank, ooc, phone, bank) VALUES ('i1781452361976vitd', 'Cornelio', 'Londo', 'Cornelio Londo', '101475', 'Deputy Head of Department', '-', '', '');
-INSERT INTO members (id, first_name, last_name, name, game_id, rank, ooc, phone, bank) VALUES ('i1781452383425yq1w', 'Chaobi', 'Yuwi', 'Chaobi Yuwi', '156750', 'Deputy Head of Department', '-', '', '');
-INSERT INTO members (id, first_name, last_name, name, game_id, rank, ooc, phone, bank) VALUES ('i1781452448187t94n', 'Sato', 'Horikawa', 'Sato Horikawa', '158390', 'Deputy Head of Department', '-', '', '');
-INSERT INTO members (id, first_name, last_name, name, game_id, rank, ooc, phone, bank) VALUES ('i1781452469848uojk', 'Abdullah', 'Londo', 'Abdullah Londo', '207759', 'Instructor of Department', '-', '', '');
-INSERT INTO members (id, first_name, last_name, name, game_id, rank, ooc, phone, bank) VALUES ('i1782058246001zypf', 'Cheef', 'ForSainttez', 'Cheef ForSainttez', '267268', 'Deputy Head of Department', '-', '', '');
-INSERT INTO members (id, first_name, last_name, name, game_id, rank, ooc, phone, bank) VALUES ('i1782662593743xinc', 'John', 'Whou', 'John Whou', '227136', 'Instructor of Department', '-', '', '');
-INSERT INTO members (id, first_name, last_name, name, game_id, rank, ooc, phone, bank) VALUES ('i1782662618505udak', 'Violetta', 'Hive', 'Violetta Hive', '280427', 'Instructor of Department', '-', '', '');
-INSERT INTO members (id, first_name, last_name, name, game_id, rank, ooc, phone, bank) VALUES ('i1782662634913t0fm', 'Likki', 'Cartel', 'Likki Cartel', '71985', 'Instructor of Department', '-', '', '');
-INSERT INTO members (id, first_name, last_name, name, game_id, rank, ooc, phone, bank) VALUES ('i1782662666929rv1h', 'Hayden', 'Londo', 'Hayden Londo', '304891', 'Instructor of Department', '-', '', '');
-INSERT INTO members (id, first_name, last_name, name, game_id, rank, ooc, phone, bank) VALUES ('i1782662691351xpca', 'Jordan', 'Londo', 'Jordan Londo', '317616', 'Instructor of Department', '-', '', '');
-INSERT INTO members (id, first_name, last_name, name, game_id, rank, ooc, phone, bank) VALUES ('i1782662924519f0zw', 'Kento', 'Londo', 'Kento Londo', '118230', 'Instructor of Department', '-', '', '');
-INSERT INTO activities (id, code, name, points, high_staff, note) VALUES ('a1', 'LC', 'Выдача лицензии', 15, false, 'Заполнить количество выданных лицензий');
-INSERT INTO activities (id, code, name, points, high_staff, note) VALUES ('a2', 'EM', 'Трудоустройство (кадр. аудит)', 30, false, 'Оформление нового сотрудника');
-INSERT INTO activities (id, code, name, points, high_staff, note) VALUES ('a3', 'EX', 'Практический экзамен', 20, false, 'Проведение практического экзамена');
-INSERT INTO activities (id, code, name, points, high_staff, note) VALUES ('a4', 'RP', 'Проверка отчётность-pa', 10, false, 'Проверка отчётности в канале');
-INSERT INTO activities (id, code, name, points, high_staff, note) VALUES ('a5', 'GV', 'Отчётность по гос. волнам', 30, false, '3 скриншота = 1 запись');
-INSERT INTO activities (id, code, name, points, high_staff, note) VALUES ('a6', 'CK', 'Проверка трудоустройство', 10, false, 'Проверка документов трудоустройства');
-INSERT INTO activities (id, code, name, points, high_staff, note) VALUES ('a7', 'UP', 'Запрос-на-повышение', 5, false, 'Рассмотрение запроса на повышение');
-INSERT INTO activities (id, code, name, points, high_staff, note) VALUES ('a8', 'AC', 'Перевод из академии', 10, false, 'Перевод курсанта в полноценный состав');
-INSERT INTO activities (id, code, name, points, high_staff, note) VALUES ('a9', 'AG', 'Агитация в канал', 5, true, 'Только для High Staff (Head+)');
-INSERT INTO activities (id, code, name, points, high_staff, note) VALUES ('a10', 'CL', 'Обзвон в отдел PAI', 30, true, 'Только для High Staff (Head+)');
-INSERT INTO activities (id, code, name, points, high_staff, note) VALUES ('a11', 'DS', 'Рапорт-на-увольнение', 5, true, 'Только для High Staff (Head+)');
-INSERT INTO weekly_scores (member_id, activity_id, count) VALUES ('m19', 'a1', 47);
-INSERT INTO weekly_scores (member_id, activity_id, count) VALUES ('m19', 'a2', 15);
-INSERT INTO weekly_scores (member_id, activity_id, count) VALUES ('m19', 'a3', 0);
-INSERT INTO weekly_scores (member_id, activity_id, count) VALUES ('m19', 'a4', 40);
-INSERT INTO weekly_scores (member_id, activity_id, count) VALUES ('m19', 'a5', 3);
-INSERT INTO weekly_scores (member_id, activity_id, count) VALUES ('m19', 'a6', 0);
-INSERT INTO weekly_scores (member_id, activity_id, count) VALUES ('m19', 'a7', 0);
-INSERT INTO weekly_scores (member_id, activity_id, count) VALUES ('m19', 'a8', 0);
-INSERT INTO weekly_scores (member_id, activity_id, count) VALUES ('m19', 'a9', 0);
-INSERT INTO weekly_scores (member_id, activity_id, count) VALUES ('m19', 'a10', 1);
-INSERT INTO weekly_scores (member_id, activity_id, count) VALUES ('m19', 'a11', 1);
-INSERT INTO weekly_scores (member_id, activity_id, count) VALUES ('m1', 'a1', 0);
-INSERT INTO weekly_scores (member_id, activity_id, count) VALUES ('m4', 'a1', 33);
-INSERT INTO weekly_scores (member_id, activity_id, count) VALUES ('m4', 'a2', 65);
-INSERT INTO weekly_scores (member_id, activity_id, count) VALUES ('i1781452448187t94n', 'a1', 18);
-INSERT INTO weekly_scores (member_id, activity_id, count) VALUES ('i1781452448187t94n', 'a10', 1);
-INSERT INTO weekly_scores (member_id, activity_id, count) VALUES ('i1781452448187t94n', 'a7', 17);
-INSERT INTO weekly_scores (member_id, activity_id, count) VALUES ('i1781452448187t94n', 'a5', 2);
-INSERT INTO weekly_scores (member_id, activity_id, count) VALUES ('i1781452448187t94n', 'a3', 1);
-INSERT INTO weekly_scores (member_id, activity_id, count) VALUES ('i1781452448187t94n', 'a4', 31);
-INSERT INTO weekly_scores (member_id, activity_id, count) VALUES ('i1781452448187t94n', 'a2', 9);
-INSERT INTO weekly_scores (member_id, activity_id, count) VALUES ('i1781452448187t94n', 'a8', 6);
-INSERT INTO weekly_scores (member_id, activity_id, count) VALUES ('i1781452361976vitd', 'a8', 12);
-INSERT INTO weekly_scores (member_id, activity_id, count) VALUES ('i1781452361976vitd', 'a2', 24);
-INSERT INTO weekly_scores (member_id, activity_id, count) VALUES ('i1781452361976vitd', 'a4', 28);
-INSERT INTO weekly_scores (member_id, activity_id, count) VALUES ('i1781452361976vitd', 'a3', 5);
-INSERT INTO weekly_scores (member_id, activity_id, count) VALUES ('i1781452361976vitd', 'a5', 2);
-INSERT INTO weekly_scores (member_id, activity_id, count) VALUES ('i1781452383425yq1w', 'a4', 78);
-INSERT INTO weekly_scores (member_id, activity_id, count) VALUES ('i1781452383425yq1w', 'a8', 6);
-INSERT INTO weekly_scores (member_id, activity_id, count) VALUES ('i1781452383425yq1w', 'a2', 35);
-INSERT INTO weekly_scores (member_id, activity_id, count) VALUES ('i1781452383425yq1w', 'a5', 12);
-INSERT INTO weekly_scores (member_id, activity_id, count) VALUES ('i1781452383425yq1w', 'a1', 80);
-INSERT INTO weekly_scores (member_id, activity_id, count) VALUES ('i1781452383425yq1w', 'a3', 5);
-INSERT INTO reprimands (member_id, verbal, strict) VALUES ('m1', 0, 0);
-INSERT INTO reprimands (member_id, verbal, strict) VALUES ('m4', 0, 0);
-INSERT INTO reprimands (member_id, verbal, strict) VALUES ('m8', 0, 0);
-INSERT INTO reprimands (member_id, verbal, strict) VALUES ('m11', 0, 0);
-INSERT INTO reprimands (member_id, verbal, strict) VALUES ('m13', 0, 0);
-INSERT INTO reprimands (member_id, verbal, strict) VALUES ('m14', 0, 0);
-INSERT INTO reprimands (member_id, verbal, strict) VALUES ('m15', 0, 0);
-INSERT INTO reprimands (member_id, verbal, strict) VALUES ('m18', 0, 0);
-INSERT INTO reprimands (member_id, verbal, strict) VALUES ('m19', 0, 0);
-INSERT INTO reprimands (member_id, verbal, strict) VALUES ('m21', 0, 0);
-INSERT INTO reprimands (member_id, verbal, strict) VALUES ('i17808319413133ci4', 0, 0);
-INSERT INTO reprimands (member_id, verbal, strict) VALUES ('i1780833670884jza4', 0, 0);
-INSERT INTO reprimands (member_id, verbal, strict) VALUES ('i1781452361976vitd', 0, 0);
-INSERT INTO reprimands (member_id, verbal, strict) VALUES ('i1781452383425yq1w', 0, 0);
-INSERT INTO reprimands (member_id, verbal, strict) VALUES ('i1781452448187t94n', 0, 0);
-INSERT INTO reprimands (member_id, verbal, strict) VALUES ('i1781452469848uojk', 0, 0);
-INSERT INTO reprimands (member_id, verbal, strict) VALUES ('i1782058246001zypf', 0, 0);
-INSERT INTO reprimands (member_id, verbal, strict) VALUES ('i1782662593743xinc', 0, 0);
-INSERT INTO reprimands (member_id, verbal, strict) VALUES ('i1782662618505udak', 0, 0);
-INSERT INTO reprimands (member_id, verbal, strict) VALUES ('i1782662634913t0fm', 0, 0);
-INSERT INTO reprimands (member_id, verbal, strict) VALUES ('i1782662666929rv1h', 0, 0);
-INSERT INTO reprimands (member_id, verbal, strict) VALUES ('i1782662691351xpca', 0, 0);
-INSERT INTO reprimands (member_id, verbal, strict) VALUES ('i1782662924519f0zw', 0, 0);
-INSERT INTO questions (id, q, a) VALUES ('q1', 'Кто является старшим составом?', 'От Dep.H и выше');
-INSERT INTO questions (id, q, a) VALUES ('q2', 'Иерархия хай рангов?', 'Deputy Head → Head → Curator → Assistant → Advisor → Deputy Chief → Chief');
-INSERT INTO questions (id, q, a) VALUES ('q3', 'Какой отдел отвечает за внутренний контроль и надзор за сотрудниками?', 'IAD');
-INSERT INTO questions (id, q, a) VALUES ('q4', 'Кто выдаёт спецуху?', 'Storekeeper');
-INSERT INTO questions (id, q, a) VALUES ('q5', 'Что нужно сделать после получения спецухи?', 'Составить отчёт о получении. Рабочее время 14:00–22:00');
-INSERT INTO questions (id, q, a) VALUES ('q6', 'Правила IC и OOC отпуска?', 'IC: перерыв не более 5 ч, 1 раз в день, не освобождает от строёв. OOC: не более 7 дней, нельзя заходить в игру');
-INSERT INTO questions (id, q, a) VALUES ('q7', 'Кто может стоять в холле?', 'IAD и PAI');
-INSERT INTO questions (id, q, a) VALUES ('q8', 'Как принимать человека во фракцию?', 'Проверить заявку, провести собеседование, оформить кадровый аудит');
-INSERT INTO questions (id, q, a) VALUES ('q9', 'Что самое важное при проверке отчёта?', '1. Имя/фамилия/статик вручную и совпадают. 2. Не повышался сегодня. 3. Есть бодик. 4. Нет варнов');
-INSERT INTO questions (id, q, a) VALUES ('q10', 'Что делаем после проверки отчёта?', 'СОЗДАТЬ ВЕТКУ. Если ДА — отправить в канал запроса на повышение. Если НЕТ — объяснить причину отказа');
-INSERT INTO questions (id, q, a) VALUES ('q11', 'Почему нельзя проверять отчёты не по порядку?', 'Есть вероятность, что те, кто выше, останутся непроверенными');
-INSERT INTO questions (id, q, a) VALUES ('q12', 'Правила агитаций?', 'Агитация подаётся с 10:00 до 22:00 МСК. Пауза между агитациями отделов — 1 час (60 минут)');
-INSERT INTO questions (id, q, a) VALUES ('q13', 'Правила выдачи лицензий?', 'Проверить документы, выдать лицензию, зафиксировать в журнале');
-INSERT INTO questions (id, q, a) VALUES ('q14', 'Как повышать человека по восстановлению или переводу?', 'Проверить одобренный запрос, одобренный ранг (реакцией), в кадровом указать ссылку на одобренный запрос');
-INSERT INTO questions (id, q, a) VALUES ('q15', 'Что делать, если написал кадровый неправильно?', 'Удалить или поставить реакцию крестика');
-INSERT INTO questions (id, q, a) VALUES ('q16', 'Разрешено ли младшему составу (PA Cadet, Officer) проводить задержание?', 'Нет. Исключение: обездвижить и надеть наручники для передачи агентам');
-INSERT INTO questions (id, q, a) VALUES ('q17', 'Может ли отдел PAI выдавать наказания (ВУ) отделу PA?', 'Да, может');
-INSERT INTO questions (id, q, a) VALUES ('q18', 'Обязан ли сотрудник вызвать прока по запросу адвоката?', 'Да, если аргументированно и с перечислением статей');
-INSERT INTO questions (id, q, a) VALUES ('q19', 'Почему обязательно проверять человека с розыском по базе данных?', 'Проверить — функциональный розыск или нет');
-INSERT INTO questions (id, q, a) VALUES ('q20', 'Можно ли дать больше 5 лет срока?', 'Только по решению суда с постановлением');
-INSERT INTO questions (id, q, a) VALUES ('q21', 'Послать на хуй — какая статья?', '15.8 Провокация');
-INSERT INTO questions (id, q, a) VALUES ('q22', 'Отличие 12.8 от 12.8.1?', 'Гос. и негос. оружие');
-INSERT INTO meetings (id, title, date, time, type, note, reprimands_issued, created_at) VALUES ('i1781689724611cjua', '123', '2026-06-17', '20:00', 'weekly', '', false, '2026-06-17');
-INSERT INTO meeting_attendance (meeting_id, member_id, status, note) VALUES ('i1781689724611cjua', 'm1', 'none', '');
-INSERT INTO meeting_attendance (meeting_id, member_id, status, note) VALUES ('i1781689724611cjua', 'm2', 'none', '');
-INSERT INTO meeting_attendance (meeting_id, member_id, status, note) VALUES ('i1781689724611cjua', 'm4', 'none', '');
-INSERT INTO meeting_attendance (meeting_id, member_id, status, note) VALUES ('i1781689724611cjua', 'm10', 'none', '');
-INSERT INTO meeting_attendance (meeting_id, member_id, status, note) VALUES ('i1781689724611cjua', 'm15', 'none', '');
-INSERT INTO meeting_attendance (meeting_id, member_id, status, note) VALUES ('i1781689724611cjua', 'm19', 'none', '');
-INSERT INTO meeting_attendance (meeting_id, member_id, status, note) VALUES ('i1781689724611cjua', 'm20', 'none', '');
-INSERT INTO meeting_attendance (meeting_id, member_id, status, note) VALUES ('i1781689724611cjua', 'id_1780246701085_rt4ppx33i1', 'none', '');
-INSERT INTO meeting_attendance (meeting_id, member_id, status, note) VALUES ('i1781689724611cjua', 'id_1780246783483_wj5t4ndl8j', 'none', '');
-INSERT INTO meeting_attendance (meeting_id, member_id, status, note) VALUES ('i1781689724611cjua', 'i17808319413133ci4', 'none', '');
-INSERT INTO meeting_attendance (meeting_id, member_id, status, note) VALUES ('i1781689724611cjua', 'i1780833670884jza4', 'none', '');
-INSERT INTO meeting_attendance (meeting_id, member_id, status, note) VALUES ('i1781689724611cjua', 'i1781452270089wt0y', 'none', '');
-INSERT INTO meeting_attendance (meeting_id, member_id, status, note) VALUES ('i1781689724611cjua', 'i1781452361976vitd', 'none', '');
-INSERT INTO meeting_attendance (meeting_id, member_id, status, note) VALUES ('i1781689724611cjua', 'i1781452383425yq1w', 'none', '');
-INSERT INTO meeting_attendance (meeting_id, member_id, status, note) VALUES ('i1781689724611cjua', 'i1781452418839dj58', 'none', '');
-INSERT INTO meeting_attendance (meeting_id, member_id, status, note) VALUES ('i1781689724611cjua', 'i1781452448187t94n', 'none', '');
-INSERT INTO meeting_attendance (meeting_id, member_id, status, note) VALUES ('i1781689724611cjua', 'i1781452469848uojk', 'none', '');
-INSERT INTO meeting_attendance (meeting_id, member_id, status, note) VALUES ('i1781689724611cjua', 'i1781452485118xbs7', 'none', '');
-INSERT INTO meeting_attendance (meeting_id, member_id, status, note) VALUES ('i1781689724611cjua', 'i1781452502651sag1', 'none', '');
-INSERT INTO meeting_attendance (meeting_id, member_id, status, note) VALUES ('i1781689724611cjua', 'i1781452513490qgz4', 'none', '');
-INSERT INTO meetings (id, title, date, time, type, note, reprimands_issued, created_at) VALUES ('i1782058178259p0hr', 'Еженеделька состава', '2026-06-21', '19:00', 'weekly', '', false, '2026-06-21');
-INSERT INTO meeting_attendance (meeting_id, member_id, status, note) VALUES ('i1782058178259p0hr', 'm1', 'present', '');
-INSERT INTO meeting_attendance (meeting_id, member_id, status, note) VALUES ('i1782058178259p0hr', 'm2', 'absent', 'Рыбка поговорит');
-INSERT INTO meeting_attendance (meeting_id, member_id, status, note) VALUES ('i1782058178259p0hr', 'm4', 'present', '');
-INSERT INTO meeting_attendance (meeting_id, member_id, status, note) VALUES ('i1782058178259p0hr', 'm10', 'warned', 'Отпуск');
-INSERT INTO meeting_attendance (meeting_id, member_id, status, note) VALUES ('i1782058178259p0hr', 'm15', 'absent', 'Илюша напишет');
-INSERT INTO meeting_attendance (meeting_id, member_id, status, note) VALUES ('i1782058178259p0hr', 'm19', 'absent', 'Помилован');
-INSERT INTO meeting_attendance (meeting_id, member_id, status, note) VALUES ('i1782058178259p0hr', 'id_1780246783483_wj5t4ndl8j', 'warned', '');
-INSERT INTO meeting_attendance (meeting_id, member_id, status, note) VALUES ('i1782058178259p0hr', 'i17808319413133ci4', 'absent', 'Илюша напишет');
-INSERT INTO meeting_attendance (meeting_id, member_id, status, note) VALUES ('i1782058178259p0hr', 'i1780833670884jza4', 'absent', 'Вопросики');
-INSERT INTO meeting_attendance (meeting_id, member_id, status, note) VALUES ('i1782058178259p0hr', 'i1781452361976vitd', 'warned', '');
-INSERT INTO meeting_attendance (meeting_id, member_id, status, note) VALUES ('i1782058178259p0hr', 'i1781452383425yq1w', 'present', '');
-INSERT INTO meeting_attendance (meeting_id, member_id, status, note) VALUES ('i1782058178259p0hr', 'i1781452448187t94n', 'present', '');
-INSERT INTO meeting_attendance (meeting_id, member_id, status, note) VALUES ('i1782058178259p0hr', 'i1781452469848uojk', 'warned', '');
-INSERT INTO meeting_attendance (meeting_id, member_id, status, note) VALUES ('i1782058178259p0hr', 'i1781452485118xbs7', 'absent', 'Вопросики');
-INSERT INTO meeting_attendance (meeting_id, member_id, status, note) VALUES ('i1782058178259p0hr', 'i1781452502651sag1', 'absent', 'Уволился');
-INSERT INTO meeting_attendance (meeting_id, member_id, status, note) VALUES ('i1782058178259p0hr', 'i1781452513490qgz4', 'warned', 'Отпуск');
-INSERT INTO meeting_attendance (meeting_id, member_id, status, note) VALUES ('i1782058178259p0hr', 'i1781995977319mgic', 'warned', '');
-INSERT INTO meeting_attendance (meeting_id, member_id, status, note) VALUES ('i1782058178259p0hr', 'i1781996307063wsmr', 'warned', '');
-INSERT INTO meeting_attendance (meeting_id, member_id, status, note) VALUES ('i1782058178259p0hr', 'i1782058023687ba1x', 'present', '');
-INSERT INTO meeting_attendance (meeting_id, member_id, status, note) VALUES ('i1782058178259p0hr', 'i1782058046189shs4', 'absent', 'Не дома');
-INSERT INTO meeting_attendance (meeting_id, member_id, status, note) VALUES ('i1782058178259p0hr', 'i1782058104607nue4', 'absent', 'Новый');
-INSERT INTO meeting_attendance (meeting_id, member_id, status, note) VALUES ('i1782058178259p0hr', 'i1782058153934ll20', 'absent', 'Какого хуя');
-INSERT INTO meeting_attendance (meeting_id, member_id, status, note) VALUES ('i1782058178259p0hr', 'i1782058171999elgo', 'absent', 'Какого хуя');
-INSERT INTO meeting_attendance (meeting_id, member_id, status, note) VALUES ('i1782058178259p0hr', 'i1782058246001zypf', 'present', '');
-INSERT INTO meetings (id, title, date, time, type, note, reprimands_issued, created_at) VALUES ('i17826627186838vf3', 'Собрание отдела', '2026-06-28', '20:00', 'weekly', '', false, '2026-06-28');
-INSERT INTO meeting_attendance (meeting_id, member_id, status, note) VALUES ('i17826627186838vf3', 'm1', 'warned', '');
-INSERT INTO meeting_attendance (meeting_id, member_id, status, note) VALUES ('i17826627186838vf3', 'm4', 'present', '');
-INSERT INTO meeting_attendance (meeting_id, member_id, status, note) VALUES ('i17826627186838vf3', 'm15', 'present', '');
-INSERT INTO meeting_attendance (meeting_id, member_id, status, note) VALUES ('i17826627186838vf3', 'm19', 'present', '');
-INSERT INTO meeting_attendance (meeting_id, member_id, status, note) VALUES ('i17826627186838vf3', 'i17808319413133ci4', 'warned', '');
-INSERT INTO meeting_attendance (meeting_id, member_id, status, note) VALUES ('i17826627186838vf3', 'i1780833670884jza4', 'warned', '');
-INSERT INTO meeting_attendance (meeting_id, member_id, status, note) VALUES ('i17826627186838vf3', 'i1781452361976vitd', 'absent', '');
-INSERT INTO meeting_attendance (meeting_id, member_id, status, note) VALUES ('i17826627186838vf3', 'i1781452383425yq1w', 'warned', '');
-INSERT INTO meeting_attendance (meeting_id, member_id, status, note) VALUES ('i17826627186838vf3', 'i1781452448187t94n', 'warned', '');
-INSERT INTO meeting_attendance (meeting_id, member_id, status, note) VALUES ('i17826627186838vf3', 'i1781452469848uojk', 'absent', '');
-INSERT INTO meeting_attendance (meeting_id, member_id, status, note) VALUES ('i17826627186838vf3', 'i1782058246001zypf', 'absent', '');
-INSERT INTO meeting_attendance (meeting_id, member_id, status, note) VALUES ('i17826627186838vf3', 'i1782662593743xinc', 'warned', '');
-INSERT INTO meeting_attendance (meeting_id, member_id, status, note) VALUES ('i17826627186838vf3', 'i1782662618505udak', 'present', '');
-INSERT INTO meeting_attendance (meeting_id, member_id, status, note) VALUES ('i17826627186838vf3', 'i1782662634913t0fm', 'absent', '');
-INSERT INTO meeting_attendance (meeting_id, member_id, status, note) VALUES ('i17826627186838vf3', 'i1782662666929rv1h', 'present', '');
-INSERT INTO meeting_attendance (meeting_id, member_id, status, note) VALUES ('i17826627186838vf3', 'i1782662691351xpca', 'present', '');
-INSERT INTO weekly_history (id, date, archived_at, date_from, date_to, week_num) VALUES ('i1780820050136dm69', '2026-06-07', '07.06.2026', '01.06.2026', '07.06.2026', 23);
-INSERT INTO weekly_history_scores (history_id, member_id, activity_id, count) VALUES ('i1780820050136dm69', 'm1', 'a1', 24);
-INSERT INTO weekly_history_scores (history_id, member_id, activity_id, count) VALUES ('i1780820050136dm69', 'm1', 'a2', 16);
-INSERT INTO weekly_history_scores (history_id, member_id, activity_id, count) VALUES ('i1780820050136dm69', 'm1', 'a3', 7);
-INSERT INTO weekly_history_scores (history_id, member_id, activity_id, count) VALUES ('i1780820050136dm69', 'm1', 'a4', 14);
-INSERT INTO weekly_history_scores (history_id, member_id, activity_id, count) VALUES ('i1780820050136dm69', 'm1', 'a7', 13);
-INSERT INTO weekly_history_scores (history_id, member_id, activity_id, count) VALUES ('i1780820050136dm69', 'm1', 'a10', 2);
-INSERT INTO weekly_history_scores (history_id, member_id, activity_id, count) VALUES ('i1780820050136dm69', 'm1', 'a8', 7);
-INSERT INTO weekly_history_scores (history_id, member_id, activity_id, count) VALUES ('i1780820050136dm69', 'm2', 'a9', 0);
-INSERT INTO weekly_history_scores (history_id, member_id, activity_id, count) VALUES ('i1780820050136dm69', 'm6', 'a1', 46);
-INSERT INTO weekly_history_scores (history_id, member_id, activity_id, count) VALUES ('i1780820050136dm69', 'm6', 'a2', 35);
-INSERT INTO weekly_history_scores (history_id, member_id, activity_id, count) VALUES ('i1780820050136dm69', 'm6', 'a4', 19);
-INSERT INTO weekly_history_scores (history_id, member_id, activity_id, count) VALUES ('i1780820050136dm69', 'm10', 'a1', 17);
-INSERT INTO weekly_history_scores (history_id, member_id, activity_id, count) VALUES ('i1780820050136dm69', 'm10', 'a2', 3);
-INSERT INTO weekly_history_scores (history_id, member_id, activity_id, count) VALUES ('i1780820050136dm69', 'm10', 'a3', 5);
-INSERT INTO weekly_history_scores (history_id, member_id, activity_id, count) VALUES ('i1780820050136dm69', 'm10', 'a4', 11);
-INSERT INTO weekly_history_scores (history_id, member_id, activity_id, count) VALUES ('i1780820050136dm69', 'm10', 'a6', 14);
-INSERT INTO weekly_history_scores (history_id, member_id, activity_id, count) VALUES ('i1780820050136dm69', 'm10', 'a7', 14);
-INSERT INTO weekly_history_scores (history_id, member_id, activity_id, count) VALUES ('i1780820050136dm69', 'm15', 'a1', 29);
-INSERT INTO weekly_history_scores (history_id, member_id, activity_id, count) VALUES ('i1780820050136dm69', 'm15', 'a4', 1);
-INSERT INTO weekly_history_scores (history_id, member_id, activity_id, count) VALUES ('i1780820050136dm69', 'm15', 'a2', 30);
-INSERT INTO weekly_history_scores (history_id, member_id, activity_id, count) VALUES ('i1780820050136dm69', 'm15', 'a3', 19);
-INSERT INTO weekly_history_scores (history_id, member_id, activity_id, count) VALUES ('i1780820050136dm69', 'm16', 'a2', 9);
-INSERT INTO weekly_history_scores (history_id, member_id, activity_id, count) VALUES ('i1780820050136dm69', 'm16', 'a1', 16);
-INSERT INTO weekly_history_scores (history_id, member_id, activity_id, count) VALUES ('i1780820050136dm69', 'm16', 'a3', 5);
-INSERT INTO weekly_history_scores (history_id, member_id, activity_id, count) VALUES ('i1780820050136dm69', 'm16', 'a4', 6);
-INSERT INTO weekly_history_scores (history_id, member_id, activity_id, count) VALUES ('i1780820050136dm69', 'm17', 'a2', 9);
-INSERT INTO weekly_history_scores (history_id, member_id, activity_id, count) VALUES ('i1780820050136dm69', 'm17', 'a3', 27);
-INSERT INTO weekly_history_scores (history_id, member_id, activity_id, count) VALUES ('i1780820050136dm69', 'm17', 'a6', 0);
-INSERT INTO weekly_history_scores (history_id, member_id, activity_id, count) VALUES ('i1780820050136dm69', 'm17', 'a7', 1);
-INSERT INTO weekly_history_scores (history_id, member_id, activity_id, count) VALUES ('i1780820050136dm69', 'm19', 'a1', 9);
-INSERT INTO weekly_history_scores (history_id, member_id, activity_id, count) VALUES ('i1780820050136dm69', 'm19', 'a2', 6);
-INSERT INTO weekly_history_scores (history_id, member_id, activity_id, count) VALUES ('i1780820050136dm69', 'm19', 'a3', 5);
-INSERT INTO weekly_history_scores (history_id, member_id, activity_id, count) VALUES ('i1780820050136dm69', 'm19', 'a4', 51);
-INSERT INTO weekly_history_scores (history_id, member_id, activity_id, count) VALUES ('i1780820050136dm69', 'm20', 'a1', 3);
-INSERT INTO weekly_history_scores (history_id, member_id, activity_id, count) VALUES ('i1780820050136dm69', 'm20', 'a2', 2);
-INSERT INTO weekly_history_scores (history_id, member_id, activity_id, count) VALUES ('i1780820050136dm69', 'm20', 'a3', 6);
-INSERT INTO weekly_history_scores (history_id, member_id, activity_id, count) VALUES ('i1780820050136dm69', 'm20', 'a4', 4);
-INSERT INTO weekly_history_scores (history_id, member_id, activity_id, count) VALUES ('i1780820050136dm69', 'm22', 'a2', 3);
-INSERT INTO weekly_history_scores (history_id, member_id, activity_id, count) VALUES ('i1780820050136dm69', 'm22', 'a4', 3);
-INSERT INTO weekly_history_scores (history_id, member_id, activity_id, count) VALUES ('i1780820050136dm69', 'm22', 'a7', 2);
-INSERT INTO weekly_history (id, date, archived_at, date_from, date_to, week_num) VALUES ('i1780869559188lsvl', '2026-06-07', '08.06.2026', '08.06.2026', '14.06.2026', 24);
-INSERT INTO weekly_history_scores (history_id, member_id, activity_id, count) VALUES ('i1780869559188lsvl', 'm1', 'a1', 0);
-INSERT INTO weekly_history_scores (history_id, member_id, activity_id, count) VALUES ('i1780869559188lsvl', 'm1', 'a2', 0);
-INSERT INTO weekly_history_scores (history_id, member_id, activity_id, count) VALUES ('i1780869559188lsvl', 'm16', 'a1', 45);
-INSERT INTO weekly_history_scores (history_id, member_id, activity_id, count) VALUES ('i1780869559188lsvl', 'm16', 'a2', 30);
-INSERT INTO weekly_history_scores (history_id, member_id, activity_id, count) VALUES ('i1780869559188lsvl', 'm16', 'a7', 10);
-INSERT INTO weekly_history_scores (history_id, member_id, activity_id, count) VALUES ('i1780869559188lsvl', 'm16', 'a8', 4);
-INSERT INTO weekly_history_scores (history_id, member_id, activity_id, count) VALUES ('i1780869559188lsvl', 'm16', 'a3', 6);
-INSERT INTO weekly_history_scores (history_id, member_id, activity_id, count) VALUES ('i1780869559188lsvl', 'm20', 'a2', 10);
-INSERT INTO weekly_history_scores (history_id, member_id, activity_id, count) VALUES ('i1780869559188lsvl', 'm20', 'a5', 3);
-INSERT INTO weekly_history_scores (history_id, member_id, activity_id, count) VALUES ('i1780869559188lsvl', 'm20', 'a4', 33);
-INSERT INTO weekly_history_scores (history_id, member_id, activity_id, count) VALUES ('i1780869559188lsvl', 'm20', 'a1', 16);
-INSERT INTO weekly_history_scores (history_id, member_id, activity_id, count) VALUES ('i1780869559188lsvl', 'id_1780246795993_72yjh7t9f7d', 'a2', 10);
-INSERT INTO weekly_history_scores (history_id, member_id, activity_id, count) VALUES ('i1780869559188lsvl', 'id_1780246795993_72yjh7t9f7d', 'a4', 10);
-INSERT INTO weekly_history_scores (history_id, member_id, activity_id, count) VALUES ('i1780869559188lsvl', 'id_1780246795993_72yjh7t9f7d', 'a3', 6);
-INSERT INTO weekly_history_scores (history_id, member_id, activity_id, count) VALUES ('i1780869559188lsvl', 'id_1780246795993_72yjh7t9f7d', 'a1', 5);
-INSERT INTO weekly_history_scores (history_id, member_id, activity_id, count) VALUES ('i1780869559188lsvl', 'm15', 'a4', 22);
-INSERT INTO weekly_history_scores (history_id, member_id, activity_id, count) VALUES ('i1780869559188lsvl', 'm15', 'a3', 10);
-INSERT INTO weekly_history_scores (history_id, member_id, activity_id, count) VALUES ('i1780869559188lsvl', 'm15', 'a2', 27);
-INSERT INTO weekly_history_scores (history_id, member_id, activity_id, count) VALUES ('i1780869559188lsvl', 'm15', 'a1', 12);
-INSERT INTO weekly_history_scores (history_id, member_id, activity_id, count) VALUES ('i1780869559188lsvl', 'm15', 'a5', 2);
-INSERT INTO weekly_history_scores (history_id, member_id, activity_id, count) VALUES ('i1780869559188lsvl', 'id_1780246783483_wj5t4ndl8j', 'a4', 39);
-INSERT INTO weekly_history_scores (history_id, member_id, activity_id, count) VALUES ('i1780869559188lsvl', 'id_1780246783483_wj5t4ndl8j', 'a3', 44);
-INSERT INTO weekly_history_scores (history_id, member_id, activity_id, count) VALUES ('i1780869559188lsvl', 'id_1780246783483_wj5t4ndl8j', 'a2', 1);
-INSERT INTO weekly_history_scores (history_id, member_id, activity_id, count) VALUES ('i1780869559188lsvl', 'i17808319413133ci4', 'a4', 32);
-INSERT INTO weekly_history_scores (history_id, member_id, activity_id, count) VALUES ('i1780869559188lsvl', 'i17808319413133ci4', 'a3', 10);
-INSERT INTO weekly_history_scores (history_id, member_id, activity_id, count) VALUES ('i1780869559188lsvl', 'i17808319413133ci4', 'a7', 13);
-INSERT INTO weekly_history_scores (history_id, member_id, activity_id, count) VALUES ('i1780869559188lsvl', 'm19', 'a4', 50);
-INSERT INTO weekly_history_scores (history_id, member_id, activity_id, count) VALUES ('i1780869559188lsvl', 'm19', 'a3', 6);
-INSERT INTO weekly_history_scores (history_id, member_id, activity_id, count) VALUES ('i1780869559188lsvl', 'm19', 'a1', 91);
-INSERT INTO weekly_history_scores (history_id, member_id, activity_id, count) VALUES ('i1780869559188lsvl', 'm19', 'a5', 1);
-INSERT INTO weekly_history_scores (history_id, member_id, activity_id, count) VALUES ('i1780869559188lsvl', 'm19', 'a2', 37);
-INSERT INTO weekly_history_scores (history_id, member_id, activity_id, count) VALUES ('i1780869559188lsvl', 'm19', 'a8', 24);
-INSERT INTO weekly_history_scores (history_id, member_id, activity_id, count) VALUES ('i1780869559188lsvl', 'i1780832354801ym38', 'a1', 37);
-INSERT INTO weekly_history_scores (history_id, member_id, activity_id, count) VALUES ('i1780869559188lsvl', 'i1780832354801ym38', 'a2', 5);
-INSERT INTO weekly_history_scores (history_id, member_id, activity_id, count) VALUES ('i1780869559188lsvl', 'i1780832354801ym38', 'a3', 6);
-INSERT INTO weekly_history_scores (history_id, member_id, activity_id, count) VALUES ('i1780869559188lsvl', 'id_1780246701085_rt4ppx33i1', 'a3', 18);
-INSERT INTO weekly_history_scores (history_id, member_id, activity_id, count) VALUES ('i1780869559188lsvl', 'id_1780246701085_rt4ppx33i1', 'a4', 17);
-INSERT INTO weekly_history_scores (history_id, member_id, activity_id, count) VALUES ('i1780869559188lsvl', 'm2', 'a2', 8);
-INSERT INTO weekly_history_scores (history_id, member_id, activity_id, count) VALUES ('i1780869559188lsvl', 'm2', 'a11', 8);
-INSERT INTO weekly_history_scores (history_id, member_id, activity_id, count) VALUES ('i1780869559188lsvl', 'm2', 'a3', 12);
-INSERT INTO weekly_history_scores (history_id, member_id, activity_id, count) VALUES ('i1780869559188lsvl', 'm2', 'a1', 33);
-INSERT INTO weekly_history_scores (history_id, member_id, activity_id, count) VALUES ('i1780869559188lsvl', 'm4', 'a2', 29);
-INSERT INTO weekly_history_scores (history_id, member_id, activity_id, count) VALUES ('i1780869559188lsvl', 'm4', 'a4', 61);
-INSERT INTO weekly_history_scores (history_id, member_id, activity_id, count) VALUES ('i1780869559188lsvl', 'm4', 'a5', 10);
-INSERT INTO weekly_history_scores (history_id, member_id, activity_id, count) VALUES ('i1780869559188lsvl', 'm4', 'a8', 18);
-INSERT INTO weekly_history_scores (history_id, member_id, activity_id, count) VALUES ('i1780869559188lsvl', 'm4', 'a1', 33);
-INSERT INTO monthly_log (id, type, date, data) VALUES ('i1780776501143xm2k', 'reprimand', '2026-06-06', '{"mid":"m1","memberName":"Richi Londo","repType":"verbal","val":1}'::jsonb);
-INSERT INTO monthly_log (id, type, date, data) VALUES ('i1780776501761mg0t', 'reprimand', '2026-06-06', '{"mid":"m1","memberName":"Richi Londo","repType":"strict","val":1}'::jsonb);
-INSERT INTO monthly_log (id, type, date, data) VALUES ('i1780776502253158s', 'reprimand', '2026-06-06', '{"mid":"m1","memberName":"Richi Londo","repType":"verbal","val":0}'::jsonb);
-INSERT INTO monthly_log (id, type, date, data) VALUES ('i1780776502642dqnf', 'reprimand', '2026-06-06', '{"mid":"m1","memberName":"Richi Londo","repType":"strict","val":0}'::jsonb);
-INSERT INTO monthly_log (id, type, date, data) VALUES ('i1780820050136w2p3', 'scores-reset', '2026-06-07', '{"scores":{"m1":{"a1":24,"a2":16,"a3":7,"a4":14,"a7":13,"a10":2,"a8":7},"m2":{"a9":0},"m6":{"a1":46,"a2":35,"a4":19},"m10":{"a1":17,"a2":3,"a3":5,"a4":11,"a6":14,"a7":14},"m15":{"a1":29,"a4":1,"a2":30,"a3":19},"m16":{"a2":9,"a1":16,"a3":5,"a4":6},"m17":{"a2":9,"a3":27,"a6":0,"a7":1},"m19":{"a1":9,"a2":6,"a3":5,"a4":51},"m20":{"a1":3,"a2":2,"a3":6,"a4":4},"m22":{"a2":3,"a4":3,"a7":2}}}'::jsonb);
-INSERT INTO monthly_log (id, type, date, data) VALUES ('i1780869559189a4m8', 'scores-reset', '2026-06-07', '{"scores":{"m1":{"a1":0,"a2":0},"m16":{"a1":45,"a2":30,"a7":10,"a8":4,"a3":6},"m20":{"a2":10,"a5":3,"a4":33,"a1":16},"id_1780246795993_72yjh7t9f7d":{"a2":10,"a4":10,"a3":6,"a1":5},"m15":{"a4":22,"a3":10,"a2":27,"a1":12,"a5":2},"id_1780246783483_wj5t4ndl8j":{"a4":39,"a3":44,"a2":1},"i17808319413133ci4":{"a4":32,"a3":10,"a7":13},"m19":{"a4":50,"a3":6,"a1":91,"a5":1,"a2":37,"a8":24},"i1780832354801ym38":{"a1":37,"a2":5,"a3":6},"id_1780246701085_rt4ppx33i1":{"a3":18,"a4":17},"m2":{"a2":8,"a11":8,"a3":12,"a1":33},"m4":{"a2":29,"a4":61,"a5":10,"a8":18,"a1":33}}}'::jsonb);
-INSERT INTO monthly_log (id, type, date, data) VALUES ('i1780902765717b7bl', 'meeting', '2026-06-08', '{"title":"Собрание отдела","present":12,"warned":3,"absent":3,"total":18,"detail":[{"id":"m1","name":"Richi Londo","status":"present","note":""},{"id":"m2","name":"Mir Li","status":"present","note":""},{"id":"m3","name":"Francesco IceTwice","status":"present","note":""},{"id":"m4","name":"Logan Brooks","status":"present","note":""},{"id":"m10","name":"Miran Zekari","status":"present","note":""},{"id":"m15","name":"Daryana Londo","status":"present","note":""},{"id":"m16","name":"Neko Toujou","status":"present","note":""},{"id":"m19","name":"Anthony Wilson","status":"present","note":""},{"id":"m20","name":"Aomine Londo","status":"present","note":""},{"id":"id_1780246654453_gkl6e4m2ewo","name":"Shaggy Furia","status":"present","note":""},{"id":"id_1780246701085_rt4ppx33i1","name":"Kalyaka Mart","status":"present","note":""},{"id":"id_1780246783483_wj5t4ndl8j","name":"Vex Londo","status":"warned","note":""},{"id":"id_1780246795993_72yjh7t9f7d","name":"Egor Blazer","status":"warned","note":""},{"id":"i17808319413133ci4","name":"Kyka Londo","status":"present","note":""},{"id":"i1780832354801ym38","name":"Doshy Unfairz","status":"warned","note":""},{"id":"i1780833670884jza4","name":"Ryker Moonlight","status":"absent","note":""},{"id":"i1780833688077woux","name":"Wiski IceTwice","status":"absent","note":""},{"id":"i17808337037678l8f","name":"Vanco Londo","status":"absent","note":""}]}'::jsonb);
-INSERT INTO monthly_log (id, type, date, data) VALUES ('i1780902771205rpso', 'reprimand', '2026-06-08', '{"mid":"i1780833670884jza4","memberName":"Ryker Moonlight","repType":"verbal","val":1,"reason":"Отсутствие на собрании"}'::jsonb);
-INSERT INTO monthly_log (id, type, date, data) VALUES ('i178090277120512jt', 'reprimand', '2026-06-08', '{"mid":"i1780833688077woux","memberName":"Wiski IceTwice","repType":"verbal","val":1,"reason":"Отсутствие на собрании"}'::jsonb);
-INSERT INTO monthly_log (id, type, date, data) VALUES ('i1780902771205j70k', 'reprimand', '2026-06-08', '{"mid":"i17808337037678l8f","memberName":"Vanco Londo","repType":"verbal","val":1,"reason":"Отсутствие на собрании"}'::jsonb);
-INSERT INTO monthly_log (id, type, date, data) VALUES ('i17809027789193l7q', 'reprimand', '2026-06-08', '{"mid":"i1780833670884jza4","memberName":"Ryker Moonlight","repType":"verbal","val":0}'::jsonb);
-INSERT INTO monthly_log (id, type, date, data) VALUES ('i17809027797809s41', 'reprimand', '2026-06-08', '{"mid":"i1780833688077woux","memberName":"Wiski IceTwice","repType":"verbal","val":0}'::jsonb);
-INSERT INTO monthly_log (id, type, date, data) VALUES ('i1780902780571fzj1', 'reprimand', '2026-06-08', '{"mid":"i17808337037678l8f","memberName":"Vanco Londo","repType":"verbal","val":0}'::jsonb);
-INSERT INTO monthly_log (id, type, date, data) VALUES ('i1780902780850eusw', 'reprimand', '2026-06-08', '{"mid":"i17808337037678l8f","memberName":"Vanco Londo","repType":"verbal","val":1}'::jsonb);
-INSERT INTO monthly_log (id, type, date, data) VALUES ('i1780902781360wufp', 'reprimand', '2026-06-08', '{"mid":"i17808337037678l8f","memberName":"Vanco Londo","repType":"verbal","val":0}'::jsonb);
-INSERT INTO monthly_log (id, type, date, data) VALUES ('i1780902781752366v', 'reprimand', '2026-06-08', '{"mid":"i17808337037678l8f","memberName":"Vanco Londo","repType":"strict","val":1}'::jsonb);
-INSERT INTO monthly_log (id, type, date, data) VALUES ('i17809027822355tx3', 'reprimand', '2026-06-08', '{"mid":"i17808337037678l8f","memberName":"Vanco Londo","repType":"strict","val":0}'::jsonb);
-INSERT INTO monthly_log (id, type, date, data) VALUES ('i1781689565443vc8a', 'reprimand', '2026-06-17', '{"mid":"m1","memberName":"Richi Londo","repType":"verbal","val":1}'::jsonb);
-INSERT INTO monthly_log (id, type, date, data) VALUES ('i1781689567710zomf', 'reprimand', '2026-06-17', '{"mid":"m1","memberName":"Richi Londo","repType":"verbal","val":0}'::jsonb);
-INSERT INTO monthly_log (id, type, date, data) VALUES ('i178168974243290h9', 'meeting', '2026-06-17', '{"title":"123","present":0,"warned":0,"absent":0,"total":20,"detail":[{"id":"m1","name":"Richi Londo","status":"none","note":""},{"id":"m2","name":"Mir Li","status":"none","note":""},{"id":"m4","name":"Logan Brooks","status":"none","note":""},{"id":"m10","name":"Miran Londo","status":"none","note":""},{"id":"m15","name":"Daryana Londo","status":"none","note":""},{"id":"m19","name":"Anthony Wilson","status":"none","note":""},{"id":"m20","name":"Aomine Londo","status":"none","note":""},{"id":"id_1780246701085_rt4ppx33i1","name":"Kalyaka Mart","status":"none","note":""},{"id":"id_1780246783483_wj5t4ndl8j","name":"Vex Londo","status":"none","note":""},{"id":"i17808319413133ci4","name":"Kyka Londo","status":"none","note":""},{"id":"i1780833670884jza4","name":"Ryker Moonlight","status":"none","note":""},{"id":"i1781452270089wt0y","name":"Ruan Yuwi","status":"none","note":""},{"id":"i1781452361976vitd","name":"Cornelio Londo","status":"none","note":""},{"id":"i1781452383425yq1w","name":"Chaobi Yuwi","status":"none","note":""},{"id":"i1781452418839dj58","name":"Qwelst Phoenix","status":"none","note":""},{"id":"i1781452448187t94n","name":"Sato Horikawa","status":"none","note":""},{"id":"i1781452469848uojk","name":"Abdullah Londo","status":"none","note":""},{"id":"i1781452485118xbs7","name":"John Whou","status":"none","note":""},{"id":"i1781452502651sag1","name":"Jannik Londo","status":"none","note":""},{"id":"i1781452513490qgz4","name":"Alexandr Mirror","status":"none","note":""}]}'::jsonb);
-INSERT INTO monthly_log (id, type, date, data) VALUES ('i17820583436085yv9', 'meeting', '2026-06-21', '{"title":"Еженеделька состава","present":6,"warned":7,"absent":11,"total":24,"detail":[{"id":"m1","name":"Richi Londo","status":"present","note":""},{"id":"m2","name":"Mir Li","status":"absent","note":"Рыбка поговорит"},{"id":"m4","name":"Logan Brooks","status":"present","note":""},{"id":"m10","name":"Miran Londo","status":"warned","note":"Отпуск"},{"id":"m15","name":"Daryana Londo","status":"absent","note":"Илюша напишет"},{"id":"m19","name":"Anthony Wilson","status":"absent","note":"Помилован"},{"id":"id_1780246783483_wj5t4ndl8j","name":"Vex Londo","status":"warned","note":""},{"id":"i17808319413133ci4","name":"Kyka Londo","status":"absent","note":"Илюша напишет"},{"id":"i1780833670884jza4","name":"Ryker Moonlight","status":"absent","note":"Вопросики"},{"id":"i1781452361976vitd","name":"Cornelio Londo","status":"warned","note":""},{"id":"i1781452383425yq1w","name":"Chaobi Yuwi","status":"present","note":""},{"id":"i1781452448187t94n","name":"Sato Horikawa","status":"present","note":""},{"id":"i1781452469848uojk","name":"Abdullah Londo","status":"warned","note":""},{"id":"i1781452485118xbs7","name":"John Whou","status":"absent","note":"Вопросики"},{"id":"i1781452502651sag1","name":"Jannik Londo","status":"absent","note":"Уволился"},{"id":"i1781452513490qgz4","name":"Alexandr Mirror","status":"warned","note":"Отпуск"},{"id":"i1781995977319mgic","name":"Jojo Krager","status":"warned","note":""},{"id":"i1781996307063wsmr","name":"Raze Zubovich","status":"warned","note":""},{"id":"i1782058023687ba1x","name":"Abduhalim Faze","status":"present","note":""},{"id":"i1782058046189shs4","name":"Twix London","status":"absent","note":"Не дома"},{"id":"i1782058104607nue4","name":"Vladislav Bumaga","status":"absent","note":"Новый"},{"id":"i1782058153934ll20","name":"Kate Staffary","status":"absent","note":"Какого хуя"},{"id":"i1782058171999elgo","name":"Denis Armstrong","status":"absent","note":"Какого хуя"},{"id":"i1782058246001zypf","name":"Cheef ForSainttez","status":"present","note":""}]}'::jsonb);
-INSERT INTO monthly_log (id, type, date, data) VALUES ('i1782662903891j12u', 'meeting', '2026-06-28', '{"title":"Собрание отдела","present":6,"warned":6,"absent":4,"total":16,"detail":[{"id":"m1","name":"Richi Londo","status":"warned","note":""},{"id":"m4","name":"Logan Brooks","status":"present","note":""},{"id":"m15","name":"Daryana Londo","status":"present","note":""},{"id":"m19","name":"Anthony Wilson","status":"present","note":""},{"id":"i17808319413133ci4","name":"Kyka Londo","status":"warned","note":""},{"id":"i1780833670884jza4","name":"Ryker Moonlight","status":"warned","note":""},{"id":"i1781452361976vitd","name":"Cornelio Londo","status":"absent","note":""},{"id":"i1781452383425yq1w","name":"Chaobi Yuwi","status":"warned","note":""},{"id":"i1781452448187t94n","name":"Sato Horikawa","status":"warned","note":""},{"id":"i1781452469848uojk","name":"Abdullah Londo","status":"absent","note":""},{"id":"i1782058246001zypf","name":"Cheef ForSainttez","status":"absent","note":""},{"id":"i1782662593743xinc","name":"John Whou","status":"warned","note":""},{"id":"i1782662618505udak","name":"Violetta Hive","status":"present","note":""},{"id":"i1782662634913t0fm","name":"Likki Cartel","status":"absent","note":""},{"id":"i1782662666929rv1h","name":"Hayden Londo","status":"present","note":""},{"id":"i1782662691351xpca","name":"Jordan Londo","status":"present","note":""}]}'::jsonb);
-INSERT INTO settings (key, value) VALUES ('meeting', '{"date":"2026-05-29","attendance":{"m1":{"status":"none","note":""},"m4":{"status":"none","note":""},"m15":{"status":"none","note":""},"m19":{"status":"none","note":""},"i17808319413133ci4":{"status":"none","note":""},"i1780833670884jza4":{"status":"none","note":""},"i1781452361976vitd":{"status":"none","note":""},"i1781452383425yq1w":{"status":"none","note":""},"i1781452448187t94n":{"status":"none","note":""},"i1781452469848uojk":{"status":"none","note":""},"i1782058246001zypf":{"status":"none","note":""},"i1782662593743xinc":{"status":"none","note":""},"i1782662618505udak":{"status":"none","note":""},"i1782662634913t0fm":{"status":"none","note":""},"i1782662666929rv1h":{"status":"none","note":""},"i1782662691351xpca":{"status":"none","note":""},"i1782662924519f0zw":{"status":"none","note":""}}}'::jsonb);
-INSERT INTO settings (key, value) VALUES ('call_date', '{"date":"2026-05-29"}'::jsonb);
-INSERT INTO reports (id, week_key, week_label, submitted_at, name, first_name, last_name, game_id, status, total_pts, mod_note, reviewed_at) VALUES ('r1780903547522glh6', '2026-06-07', '08.06.2026 — 14.06.2026', '2026-06-08T07:25:47.522Z', 'Okuname Londo', 'Okuname', 'Londo', '155604', 'rejected', 2055, '', '2026-06-08T07:31:37.802Z');
-INSERT INTO report_aspects (report_id, act_id, code, name, points, count, total_pts) VALUES ('r1780903547522glh6', 'a1', 'LC', 'Выдача лицензии', 15, 1, 15);
-INSERT INTO report_aspect_links (aspect_id, link) SELECT id, 'https://fotora.ru/uploaded/?ID=ROCVQ06062026110641' FROM report_aspects WHERE report_id = 'r1780903547522glh6' AND act_id = 'a1' ORDER BY id DESC LIMIT 1;
-INSERT INTO report_aspects (report_id, act_id, code, name, points, count, total_pts) VALUES ('r1780903547522glh6', 'a2', 'EM', 'Трудоустройство (кадр. аудит)', 30, 37, 1110);
-INSERT INTO report_aspect_links (aspect_id, link) SELECT id, '1.https://discord.com/channels/1382609371510607923/1382609372957376594/1510782567471779850' FROM report_aspects WHERE report_id = 'r1780903547522glh6' AND act_id = 'a2' ORDER BY id DESC LIMIT 1;
-INSERT INTO report_aspect_links (aspect_id, link) SELECT id, '2.https://discord.com/channels/1382609371510607923/1382609372957376594/1510782882505949215' FROM report_aspects WHERE report_id = 'r1780903547522glh6' AND act_id = 'a2' ORDER BY id DESC LIMIT 1;
-INSERT INTO report_aspect_links (aspect_id, link) SELECT id, '3.https://discord.com/channels/1382609371510607923/1382609372957376594/1510785534883266671' FROM report_aspects WHERE report_id = 'r1780903547522glh6' AND act_id = 'a2' ORDER BY id DESC LIMIT 1;
-INSERT INTO report_aspect_links (aspect_id, link) SELECT id, '4.https://discord.com/channels/1382609371510607923/1382609372957376594/1510863760183660686' FROM report_aspects WHERE report_id = 'r1780903547522glh6' AND act_id = 'a2' ORDER BY id DESC LIMIT 1;
-INSERT INTO report_aspect_links (aspect_id, link) SELECT id, '5.https://discord.com/channels/1382609371510607923/1382609372957376594/1510933091722465341' FROM report_aspects WHERE report_id = 'r1780903547522glh6' AND act_id = 'a2' ORDER BY id DESC LIMIT 1;
-INSERT INTO report_aspect_links (aspect_id, link) SELECT id, '6.https://discord.com/channels/1382609371510607923/1382609372957376594/1510933453506609162' FROM report_aspects WHERE report_id = 'r1780903547522glh6' AND act_id = 'a2' ORDER BY id DESC LIMIT 1;
-INSERT INTO report_aspect_links (aspect_id, link) SELECT id, '7.https://discord.com/channels/1382609371510607923/1382609372957376594/1510948735532667010' FROM report_aspects WHERE report_id = 'r1780903547522glh6' AND act_id = 'a2' ORDER BY id DESC LIMIT 1;
-INSERT INTO report_aspect_links (aspect_id, link) SELECT id, '8.https://discord.com/channels/1382609371510607923/1382609372957376594/1510970379894657075' FROM report_aspects WHERE report_id = 'r1780903547522glh6' AND act_id = 'a2' ORDER BY id DESC LIMIT 1;
-INSERT INTO report_aspect_links (aspect_id, link) SELECT id, '9.https://discord.com/channels/1382609371510607923/1382609372957376594/1511163703427465307' FROM report_aspects WHERE report_id = 'r1780903547522glh6' AND act_id = 'a2' ORDER BY id DESC LIMIT 1;
-INSERT INTO report_aspect_links (aspect_id, link) SELECT id, '10.https://discord.com/channels/1382609371510607923/1382609372957376594/1511279812633825431' FROM report_aspects WHERE report_id = 'r1780903547522glh6' AND act_id = 'a2' ORDER BY id DESC LIMIT 1;
-INSERT INTO report_aspect_links (aspect_id, link) SELECT id, '11.https://discord.com/channels/1382609371510607923/1382609372957376594/1511281136339259432' FROM report_aspects WHERE report_id = 'r1780903547522glh6' AND act_id = 'a2' ORDER BY id DESC LIMIT 1;
-INSERT INTO report_aspect_links (aspect_id, link) SELECT id, '12.https://discord.com/channels/1382609371510607923/1382609372957376594/1511281487373406239' FROM report_aspects WHERE report_id = 'r1780903547522glh6' AND act_id = 'a2' ORDER BY id DESC LIMIT 1;
-INSERT INTO report_aspect_links (aspect_id, link) SELECT id, '13.https://discord.com/channels/1382609371510607923/1382609372957376594/1511314023742967841' FROM report_aspects WHERE report_id = 'r1780903547522glh6' AND act_id = 'a2' ORDER BY id DESC LIMIT 1;
-INSERT INTO report_aspect_links (aspect_id, link) SELECT id, '14.https://discord.com/channels/1382609371510607923/1382609372957376594/1511325080200679466' FROM report_aspects WHERE report_id = 'r1780903547522glh6' AND act_id = 'a2' ORDER BY id DESC LIMIT 1;
-INSERT INTO report_aspect_links (aspect_id, link) SELECT id, '15.https://discord.com/channels/1382609371510607923/1382609372957376594/1511327088463056928' FROM report_aspects WHERE report_id = 'r1780903547522glh6' AND act_id = 'a2' ORDER BY id DESC LIMIT 1;
-INSERT INTO report_aspect_links (aspect_id, link) SELECT id, '16.https://discord.com/channels/1382609371510607923/1382609372957376594/1511327496123973765' FROM report_aspects WHERE report_id = 'r1780903547522glh6' AND act_id = 'a2' ORDER BY id DESC LIMIT 1;
-INSERT INTO report_aspect_links (aspect_id, link) SELECT id, '17.https://discord.com/channels/1382609371510607923/1382609372957376594/1511327895535226950' FROM report_aspects WHERE report_id = 'r1780903547522glh6' AND act_id = 'a2' ORDER BY id DESC LIMIT 1;
-INSERT INTO report_aspect_links (aspect_id, link) SELECT id, '18.https://discord.com/channels/1382609371510607923/1382609372957376594/1511625545589194814' FROM report_aspects WHERE report_id = 'r1780903547522glh6' AND act_id = 'a2' ORDER BY id DESC LIMIT 1;
-INSERT INTO report_aspect_links (aspect_id, link) SELECT id, '19.https://discord.com/channels/1382609371510607923/1382609372957376594/1511650380650643577' FROM report_aspects WHERE report_id = 'r1780903547522glh6' AND act_id = 'a2' ORDER BY id DESC LIMIT 1;
-INSERT INTO report_aspect_links (aspect_id, link) SELECT id, '20.https://discord.com/channels/1382609371510607923/1382609372957376594/1511652980170948669' FROM report_aspects WHERE report_id = 'r1780903547522glh6' AND act_id = 'a2' ORDER BY id DESC LIMIT 1;
-INSERT INTO report_aspect_links (aspect_id, link) SELECT id, '21.https://discord.com/channels/1382609371510607923/1382609372957376594/1511707101389656094' FROM report_aspects WHERE report_id = 'r1780903547522glh6' AND act_id = 'a2' ORDER BY id DESC LIMIT 1;
-INSERT INTO report_aspect_links (aspect_id, link) SELECT id, '22.https://discord.com/channels/1382609371510607923/1382609372957376594/1511708509551595633' FROM report_aspects WHERE report_id = 'r1780903547522glh6' AND act_id = 'a2' ORDER BY id DESC LIMIT 1;
-INSERT INTO report_aspect_links (aspect_id, link) SELECT id, '23.https://discord.com/channels/1382609371510607923/1382609372957376594/1511711929352192121' FROM report_aspects WHERE report_id = 'r1780903547522glh6' AND act_id = 'a2' ORDER BY id DESC LIMIT 1;
-INSERT INTO report_aspect_links (aspect_id, link) SELECT id, '24.https://discord.com/channels/1382609371510607923/1382609372957376594/1512031032537252106' FROM report_aspects WHERE report_id = 'r1780903547522glh6' AND act_id = 'a2' ORDER BY id DESC LIMIT 1;
-INSERT INTO report_aspect_links (aspect_id, link) SELECT id, '25.https://discord.com/channels/1382609371510607923/1382609372957376594/1512031662999867512' FROM report_aspects WHERE report_id = 'r1780903547522glh6' AND act_id = 'a2' ORDER BY id DESC LIMIT 1;
-INSERT INTO report_aspect_links (aspect_id, link) SELECT id, '26.https://discord.com/channels/1382609371510607923/1382609372957376594/1512037341479436340' FROM report_aspects WHERE report_id = 'r1780903547522glh6' AND act_id = 'a2' ORDER BY id DESC LIMIT 1;
-INSERT INTO report_aspect_links (aspect_id, link) SELECT id, '27.https://discord.com/channels/1382609371510607923/1382609372957376594/1512362533653184612' FROM report_aspects WHERE report_id = 'r1780903547522glh6' AND act_id = 'a2' ORDER BY id DESC LIMIT 1;
-INSERT INTO report_aspect_links (aspect_id, link) SELECT id, '28.https://discord.com/channels/1382609371510607923/1382609372957376594/1512377107416879174' FROM report_aspects WHERE report_id = 'r1780903547522glh6' AND act_id = 'a2' ORDER BY id DESC LIMIT 1;
-INSERT INTO report_aspect_links (aspect_id, link) SELECT id, '29.https://discord.com/channels/1382609371510607923/1382609372957376594/1512394949860003971' FROM report_aspects WHERE report_id = 'r1780903547522glh6' AND act_id = 'a2' ORDER BY id DESC LIMIT 1;
-INSERT INTO report_aspect_links (aspect_id, link) SELECT id, '30.https://discord.com/channels/1382609371510607923/1382609372957376594/1512453019613134888' FROM report_aspects WHERE report_id = 'r1780903547522glh6' AND act_id = 'a2' ORDER BY id DESC LIMIT 1;
-INSERT INTO report_aspect_links (aspect_id, link) SELECT id, '31.https://discord.com/channels/1382609371510607923/1382609372957376594/1512456554933260318' FROM report_aspects WHERE report_id = 'r1780903547522glh6' AND act_id = 'a2' ORDER BY id DESC LIMIT 1;
-INSERT INTO report_aspect_links (aspect_id, link) SELECT id, '32.https://discord.com/channels/1382609371510607923/1382609372957376594/1512457459544096809' FROM report_aspects WHERE report_id = 'r1780903547522glh6' AND act_id = 'a2' ORDER BY id DESC LIMIT 1;
-INSERT INTO report_aspect_links (aspect_id, link) SELECT id, '33.https://discord.com/channels/1382609371510607923/1382609372957376594/1512458218117267588' FROM report_aspects WHERE report_id = 'r1780903547522glh6' AND act_id = 'a2' ORDER BY id DESC LIMIT 1;
-INSERT INTO report_aspect_links (aspect_id, link) SELECT id, '34.https://discord.com/channels/1382609371510607923/1382609372957376594/1512480516589223957' FROM report_aspects WHERE report_id = 'r1780903547522glh6' AND act_id = 'a2' ORDER BY id DESC LIMIT 1;
-INSERT INTO report_aspect_links (aspect_id, link) SELECT id, '35.https://discord.com/channels/1382609371510607923/1382609372957376594/1512482044272312452' FROM report_aspects WHERE report_id = 'r1780903547522glh6' AND act_id = 'a2' ORDER BY id DESC LIMIT 1;
-INSERT INTO report_aspect_links (aspect_id, link) SELECT id, '36.https://discord.com/channels/1382609371510607923/1382609372957376594/1512482465841811630' FROM report_aspects WHERE report_id = 'r1780903547522glh6' AND act_id = 'a2' ORDER BY id DESC LIMIT 1;
-INSERT INTO report_aspect_links (aspect_id, link) SELECT id, '37.https://discord.com/channels/1382609371510607923/1382609372957376594/1512483938533245120' FROM report_aspects WHERE report_id = 'r1780903547522glh6' AND act_id = 'a2' ORDER BY id DESC LIMIT 1;
-INSERT INTO report_aspects (report_id, act_id, code, name, points, count, total_pts) VALUES ('r1780903547522glh6', 'a3', 'EX', 'Практический экзамен', 20, 6, 120);
-INSERT INTO report_aspect_links (aspect_id, link) SELECT id, '1.https://discord.com/channels/1382609371510607923/1510730225263050782/1510824257591185408' FROM report_aspects WHERE report_id = 'r1780903547522glh6' AND act_id = 'a3' ORDER BY id DESC LIMIT 1;
-INSERT INTO report_aspect_links (aspect_id, link) SELECT id, '2.https://discord.com/channels/1382609371510607923/1510730225263050782/1510961206473523311' FROM report_aspects WHERE report_id = 'r1780903547522glh6' AND act_id = 'a3' ORDER BY id DESC LIMIT 1;
-INSERT INTO report_aspect_links (aspect_id, link) SELECT id, '3.https://discord.com/channels/1382609371510607923/1510730225263050782/1511151280293417001' FROM report_aspects WHERE report_id = 'r1780903547522glh6' AND act_id = 'a3' ORDER BY id DESC LIMIT 1;
-INSERT INTO report_aspect_links (aspect_id, link) SELECT id, '4.https://discord.com/channels/1382609371510607923/1510730225263050782/1511161598889426944' FROM report_aspects WHERE report_id = 'r1780903547522glh6' AND act_id = 'a3' ORDER BY id DESC LIMIT 1;
-INSERT INTO report_aspect_links (aspect_id, link) SELECT id, '5.https://discord.com/channels/1382609371510607923/1510730225263050782/1511665711775485952' FROM report_aspects WHERE report_id = 'r1780903547522glh6' AND act_id = 'a3' ORDER BY id DESC LIMIT 1;
-INSERT INTO report_aspect_links (aspect_id, link) SELECT id, '6.https://discord.com/channels/1382609371510607923/1510730225263050782/1511668251602583612' FROM report_aspects WHERE report_id = 'r1780903547522glh6' AND act_id = 'a3' ORDER BY id DESC LIMIT 1;
-INSERT INTO report_aspects (report_id, act_id, code, name, points, count, total_pts) VALUES ('r1780903547522glh6', 'a4', 'RP', 'Проверка отчётность-pa', 10, 50, 500);
-INSERT INTO report_aspect_links (aspect_id, link) SELECT id, '1.https://discord.com/channels/1382609371510607923/1507850086716018780/1510764245774635138' FROM report_aspects WHERE report_id = 'r1780903547522glh6' AND act_id = 'a4' ORDER BY id DESC LIMIT 1;
-INSERT INTO report_aspect_links (aspect_id, link) SELECT id, '2.https://discord.com/channels/1382609371510607923/1507850086716018780/1510765131179757652' FROM report_aspects WHERE report_id = 'r1780903547522glh6' AND act_id = 'a4' ORDER BY id DESC LIMIT 1;
-INSERT INTO report_aspect_links (aspect_id, link) SELECT id, '3.https://discord.com/channels/1382609371510607923/1507850086716018780/1510766669369315558' FROM report_aspects WHERE report_id = 'r1780903547522glh6' AND act_id = 'a4' ORDER BY id DESC LIMIT 1;
-INSERT INTO report_aspect_links (aspect_id, link) SELECT id, '4.https://discord.com/channels/1382609371510607923/1507850086716018780/1510769139843600435' FROM report_aspects WHERE report_id = 'r1780903547522glh6' AND act_id = 'a4' ORDER BY id DESC LIMIT 1;
-INSERT INTO report_aspect_links (aspect_id, link) SELECT id, '5.https://discord.com/channels/1382609371510607923/1507850086716018780/1510770114549780511' FROM report_aspects WHERE report_id = 'r1780903547522glh6' AND act_id = 'a4' ORDER BY id DESC LIMIT 1;
-INSERT INTO report_aspect_links (aspect_id, link) SELECT id, '6.https://discord.com/channels/1382609371510607923/1507850086716018780/1510772886573420765' FROM report_aspects WHERE report_id = 'r1780903547522glh6' AND act_id = 'a4' ORDER BY id DESC LIMIT 1;
-INSERT INTO report_aspect_links (aspect_id, link) SELECT id, '7.https://discord.com/channels/1382609371510607923/1507850086716018780/1510855669308461140' FROM report_aspects WHERE report_id = 'r1780903547522glh6' AND act_id = 'a4' ORDER BY id DESC LIMIT 1;
-INSERT INTO report_aspect_links (aspect_id, link) SELECT id, '8.https://discord.com/channels/1382609371510607923/1507850086716018780/1510919223919116388' FROM report_aspects WHERE report_id = 'r1780903547522glh6' AND act_id = 'a4' ORDER BY id DESC LIMIT 1;
-INSERT INTO report_aspect_links (aspect_id, link) SELECT id, '9.https://discord.com/channels/1382609371510607923/1507850086716018780/1510940670469083221' FROM report_aspects WHERE report_id = 'r1780903547522glh6' AND act_id = 'a4' ORDER BY id DESC LIMIT 1;
-INSERT INTO report_aspect_links (aspect_id, link) SELECT id, '10.https://discord.com/channels/1382609371510607923/1507850086716018780/1510944016655712317' FROM report_aspects WHERE report_id = 'r1780903547522glh6' AND act_id = 'a4' ORDER BY id DESC LIMIT 1;
-INSERT INTO report_aspect_links (aspect_id, link) SELECT id, '11.https://discord.com/channels/1382609371510607923/1507850086716018780/1510945124761206795' FROM report_aspects WHERE report_id = 'r1780903547522glh6' AND act_id = 'a4' ORDER BY id DESC LIMIT 1;
-INSERT INTO report_aspect_links (aspect_id, link) SELECT id, '12.https://discord.com/channels/1382609371510607923/1507850086716018780/1510946857646293082' FROM report_aspects WHERE report_id = 'r1780903547522glh6' AND act_id = 'a4' ORDER BY id DESC LIMIT 1;
-INSERT INTO report_aspect_links (aspect_id, link) SELECT id, '13.https://discord.com/channels/1382609371510607923/1507850086716018780/1510947792950923435' FROM report_aspects WHERE report_id = 'r1780903547522glh6' AND act_id = 'a4' ORDER BY id DESC LIMIT 1;
-INSERT INTO report_aspect_links (aspect_id, link) SELECT id, '14.https://discord.com/channels/1382609371510607923/1507850086716018780/1510948042436775997' FROM report_aspects WHERE report_id = 'r1780903547522glh6' AND act_id = 'a4' ORDER BY id DESC LIMIT 1;
-INSERT INTO report_aspect_links (aspect_id, link) SELECT id, '15.https://discord.com/channels/1382609371510607923/1507850086716018780/1511269145075777586' FROM report_aspects WHERE report_id = 'r1780903547522glh6' AND act_id = 'a4' ORDER BY id DESC LIMIT 1;
-INSERT INTO report_aspect_links (aspect_id, link) SELECT id, '16.https://discord.com/channels/1382609371510607923/1507850086716018780/1511272749169901588' FROM report_aspects WHERE report_id = 'r1780903547522glh6' AND act_id = 'a4' ORDER BY id DESC LIMIT 1;
-INSERT INTO report_aspect_links (aspect_id, link) SELECT id, '17.https://discord.com/channels/1382609371510607923/1507850086716018780/1511298351922938027' FROM report_aspects WHERE report_id = 'r1780903547522glh6' AND act_id = 'a4' ORDER BY id DESC LIMIT 1;
-INSERT INTO report_aspect_links (aspect_id, link) SELECT id, '18.https://discord.com/channels/1382609371510607923/1507850086716018780/1511298957035176057' FROM report_aspects WHERE report_id = 'r1780903547522glh6' AND act_id = 'a4' ORDER BY id DESC LIMIT 1;
-INSERT INTO report_aspect_links (aspect_id, link) SELECT id, '19.https://discord.com/channels/1382609371510607923/1507850086716018780/1511299240301694976' FROM report_aspects WHERE report_id = 'r1780903547522glh6' AND act_id = 'a4' ORDER BY id DESC LIMIT 1;
-INSERT INTO report_aspect_links (aspect_id, link) SELECT id, '20.https://discord.com/channels/1382609371510607923/1507850086716018780/1511301898207105095' FROM report_aspects WHERE report_id = 'r1780903547522glh6' AND act_id = 'a4' ORDER BY id DESC LIMIT 1;
-INSERT INTO report_aspect_links (aspect_id, link) SELECT id, '21.https://discord.com/channels/1382609371510607923/1507850086716018780/1511317070233604228' FROM report_aspects WHERE report_id = 'r1780903547522glh6' AND act_id = 'a4' ORDER BY id DESC LIMIT 1;
-INSERT INTO report_aspect_links (aspect_id, link) SELECT id, '22.https://discord.com/channels/1382609371510607923/1507850086716018780/1511320692543586354' FROM report_aspects WHERE report_id = 'r1780903547522glh6' AND act_id = 'a4' ORDER BY id DESC LIMIT 1;
-INSERT INTO report_aspect_links (aspect_id, link) SELECT id, '23.https://discord.com/channels/1382609371510607923/1507850086716018780/1511321199844790302' FROM report_aspects WHERE report_id = 'r1780903547522glh6' AND act_id = 'a4' ORDER BY id DESC LIMIT 1;
-INSERT INTO report_aspect_links (aspect_id, link) SELECT id, '24.https://discord.com/channels/1382609371510607923/1507850086716018780/1511322801863393290' FROM report_aspects WHERE report_id = 'r1780903547522glh6' AND act_id = 'a4' ORDER BY id DESC LIMIT 1;
-INSERT INTO report_aspect_links (aspect_id, link) SELECT id, '25.https://discord.com/channels/1382609371510607923/1507850086716018780/1511332001674821683' FROM report_aspects WHERE report_id = 'r1780903547522glh6' AND act_id = 'a4' ORDER BY id DESC LIMIT 1;
-INSERT INTO report_aspect_links (aspect_id, link) SELECT id, '26.https://discord.com/channels/1382609371510607923/1507850086716018780/1511332241085567028' FROM report_aspects WHERE report_id = 'r1780903547522glh6' AND act_id = 'a4' ORDER BY id DESC LIMIT 1;
-INSERT INTO report_aspect_links (aspect_id, link) SELECT id, '27.https://discord.com/channels/1382609371510607923/1507850086716018780/1511607069587935293' FROM report_aspects WHERE report_id = 'r1780903547522glh6' AND act_id = 'a4' ORDER BY id DESC LIMIT 1;
-INSERT INTO report_aspect_links (aspect_id, link) SELECT id, '28.https://discord.com/channels/1382609371510607923/1507850086716018780/1511609329990500543' FROM report_aspects WHERE report_id = 'r1780903547522glh6' AND act_id = 'a4' ORDER BY id DESC LIMIT 1;
-INSERT INTO report_aspect_links (aspect_id, link) SELECT id, '29.https://discord.com/channels/1382609371510607923/1507850086716018780/1511621592487039167' FROM report_aspects WHERE report_id = 'r1780903547522glh6' AND act_id = 'a4' ORDER BY id DESC LIMIT 1;
-INSERT INTO report_aspect_links (aspect_id, link) SELECT id, '30.https://discord.com/channels/1382609371510607923/1507850086716018780/1511623224356638830' FROM report_aspects WHERE report_id = 'r1780903547522glh6' AND act_id = 'a4' ORDER BY id DESC LIMIT 1;
-INSERT INTO report_aspect_links (aspect_id, link) SELECT id, '31.https://discord.com/channels/1382609371510607923/1507850086716018780/1511995333650022442' FROM report_aspects WHERE report_id = 'r1780903547522glh6' AND act_id = 'a4' ORDER BY id DESC LIMIT 1;
-INSERT INTO report_aspect_links (aspect_id, link) SELECT id, '32.https://discord.com/channels/1382609371510607923/1507850086716018780/1512011386581024898' FROM report_aspects WHERE report_id = 'r1780903547522glh6' AND act_id = 'a4' ORDER BY id DESC LIMIT 1;
-INSERT INTO report_aspect_links (aspect_id, link) SELECT id, '33.https://discord.com/channels/1382609371510607923/1507850086716018780/1512012171264000041' FROM report_aspects WHERE report_id = 'r1780903547522glh6' AND act_id = 'a4' ORDER BY id DESC LIMIT 1;
-INSERT INTO report_aspect_links (aspect_id, link) SELECT id, '34.https://discord.com/channels/1382609371510607923/1507850086716018780/1512091244661182544' FROM report_aspects WHERE report_id = 'r1780903547522glh6' AND act_id = 'a4' ORDER BY id DESC LIMIT 1;
-INSERT INTO report_aspect_links (aspect_id, link) SELECT id, '35.https://discord.com/channels/1382609371510607923/1507850086716018780/1512449175495639092' FROM report_aspects WHERE report_id = 'r1780903547522glh6' AND act_id = 'a4' ORDER BY id DESC LIMIT 1;
-INSERT INTO report_aspect_links (aspect_id, link) SELECT id, '36.https://discord.com/channels/1382609371510607923/1507850086716018780/1512449453553090621' FROM report_aspects WHERE report_id = 'r1780903547522glh6' AND act_id = 'a4' ORDER BY id DESC LIMIT 1;
-INSERT INTO report_aspect_links (aspect_id, link) SELECT id, '37.https://discord.com/channels/1382609371510607923/1507850086716018780/1512450672434479257' FROM report_aspects WHERE report_id = 'r1780903547522glh6' AND act_id = 'a4' ORDER BY id DESC LIMIT 1;
-INSERT INTO report_aspect_links (aspect_id, link) SELECT id, '38.https://discord.com/channels/1382609371510607923/1507850086716018780/1512451421293777087' FROM report_aspects WHERE report_id = 'r1780903547522glh6' AND act_id = 'a4' ORDER BY id DESC LIMIT 1;
-INSERT INTO report_aspect_links (aspect_id, link) SELECT id, '39.https://discord.com/channels/1382609371510607923/1507850086716018780/1512453523915276399' FROM report_aspects WHERE report_id = 'r1780903547522glh6' AND act_id = 'a4' ORDER BY id DESC LIMIT 1;
-INSERT INTO report_aspect_links (aspect_id, link) SELECT id, '40.https://discord.com/channels/1382609371510607923/1507850086716018780/1512457216119275722' FROM report_aspects WHERE report_id = 'r1780903547522glh6' AND act_id = 'a4' ORDER BY id DESC LIMIT 1;
-INSERT INTO report_aspect_links (aspect_id, link) SELECT id, '41.https://discord.com/channels/1382609371510607923/1507850086716018780/1512464867120906461' FROM report_aspects WHERE report_id = 'r1780903547522glh6' AND act_id = 'a4' ORDER BY id DESC LIMIT 1;
-INSERT INTO report_aspect_links (aspect_id, link) SELECT id, '42.https://discord.com/channels/1382609371510607923/1507850086716018780/1512466067266601073' FROM report_aspects WHERE report_id = 'r1780903547522glh6' AND act_id = 'a4' ORDER BY id DESC LIMIT 1;
-INSERT INTO report_aspect_links (aspect_id, link) SELECT id, '43.https://discord.com/channels/1382609371510607923/1507850086716018780/1512466531303297234' FROM report_aspects WHERE report_id = 'r1780903547522glh6' AND act_id = 'a4' ORDER BY id DESC LIMIT 1;
-INSERT INTO report_aspect_links (aspect_id, link) SELECT id, '44.https://discord.com/channels/1382609371510607923/1507850086716018780/1512734444929286185' FROM report_aspects WHERE report_id = 'r1780903547522glh6' AND act_id = 'a4' ORDER BY id DESC LIMIT 1;
-INSERT INTO report_aspect_links (aspect_id, link) SELECT id, '45.https://discord.com/channels/1382609371510607923/1507850086716018780/1512739482716078083' FROM report_aspects WHERE report_id = 'r1780903547522glh6' AND act_id = 'a4' ORDER BY id DESC LIMIT 1;
-INSERT INTO report_aspect_links (aspect_id, link) SELECT id, '46.https://discord.com/channels/1382609371510607923/1507850086716018780/1512750756288139354' FROM report_aspects WHERE report_id = 'r1780903547522glh6' AND act_id = 'a4' ORDER BY id DESC LIMIT 1;
-INSERT INTO report_aspect_links (aspect_id, link) SELECT id, '47.https://discord.com/channels/1382609371510607923/1507850086716018780/1512752938496425994' FROM report_aspects WHERE report_id = 'r1780903547522glh6' AND act_id = 'a4' ORDER BY id DESC LIMIT 1;
-INSERT INTO report_aspect_links (aspect_id, link) SELECT id, '48.https://discord.com/channels/1382609371510607923/1507850086716018780/1512767688810696796' FROM report_aspects WHERE report_id = 'r1780903547522glh6' AND act_id = 'a4' ORDER BY id DESC LIMIT 1;
-INSERT INTO report_aspect_links (aspect_id, link) SELECT id, '49.https://discord.com/channels/1382609371510607923/1507850086716018780/1512768424047280140' FROM report_aspects WHERE report_id = 'r1780903547522glh6' AND act_id = 'a4' ORDER BY id DESC LIMIT 1;
-INSERT INTO report_aspect_links (aspect_id, link) SELECT id, '50.https://discord.com/channels/1382609371510607923/1507850086716018780/1512769715880071268' FROM report_aspects WHERE report_id = 'r1780903547522glh6' AND act_id = 'a4' ORDER BY id DESC LIMIT 1;
-INSERT INTO report_aspects (report_id, act_id, code, name, points, count, total_pts) VALUES ('r1780903547522glh6', 'a5', 'GV', 'Отчётность по гос. волнам', 30, 2, 60);
-INSERT INTO report_aspect_links (aspect_id, link) SELECT id, '1.https://discord.com/channels/1382609371510607923/1507703544361259068/1512478313992421426' FROM report_aspects WHERE report_id = 'r1780903547522glh6' AND act_id = 'a5' ORDER BY id DESC LIMIT 1;
-INSERT INTO report_aspect_links (aspect_id, link) SELECT id, '2.https://discord.com/channels/1382609371510607923/1507703544361259068/1512478313992421426' FROM report_aspects WHERE report_id = 'r1780903547522glh6' AND act_id = 'a5' ORDER BY id DESC LIMIT 1;
-INSERT INTO report_aspects (report_id, act_id, code, name, points, count, total_pts) VALUES ('r1780903547522glh6', 'a6', 'CK', 'Проверка трудоустройство', 10, 0, 0);
-INSERT INTO report_aspects (report_id, act_id, code, name, points, count, total_pts) VALUES ('r1780903547522glh6', 'a7', 'UP', 'Запрос-на-повышение', 5, 0, 0);
-INSERT INTO report_aspects (report_id, act_id, code, name, points, count, total_pts) VALUES ('r1780903547522glh6', 'a8', 'AC', 'Перевод из академии', 10, 24, 240);
-INSERT INTO report_aspect_links (aspect_id, link) SELECT id, '1.https://discord.com/channels/1382609371510607923/1382609372957376594/1510757014127775955' FROM report_aspects WHERE report_id = 'r1780903547522glh6' AND act_id = 'a8' ORDER BY id DESC LIMIT 1;
-INSERT INTO report_aspect_links (aspect_id, link) SELECT id, '2.https://discord.com/channels/1382609371510607923/1382609372957376594/1510760468204093674' FROM report_aspects WHERE report_id = 'r1780903547522glh6' AND act_id = 'a8' ORDER BY id DESC LIMIT 1;
-INSERT INTO report_aspect_links (aspect_id, link) SELECT id, '3.https://discord.com/channels/1382609371510607923/1382609372957376594/1510769763347988690' FROM report_aspects WHERE report_id = 'r1780903547522glh6' AND act_id = 'a8' ORDER BY id DESC LIMIT 1;
-INSERT INTO report_aspect_links (aspect_id, link) SELECT id, '4.https://discord.com/channels/1382609371510607923/1382609372957376594/1510770269764190333' FROM report_aspects WHERE report_id = 'r1780903547522glh6' AND act_id = 'a8' ORDER BY id DESC LIMIT 1;
-INSERT INTO report_aspect_links (aspect_id, link) SELECT id, '5.https://discord.com/channels/1382609371510607923/1382609372957376594/1510770703505293483' FROM report_aspects WHERE report_id = 'r1780903547522glh6' AND act_id = 'a8' ORDER BY id DESC LIMIT 1;
-INSERT INTO report_aspect_links (aspect_id, link) SELECT id, '6.https://discord.com/channels/1382609371510607923/1382609372957376594/1510771026043080735' FROM report_aspects WHERE report_id = 'r1780903547522glh6' AND act_id = 'a8' ORDER BY id DESC LIMIT 1;
-INSERT INTO report_aspect_links (aspect_id, link) SELECT id, '7.https://discord.com/channels/1382609371510607923/1382609372957376594/1510771575669133413' FROM report_aspects WHERE report_id = 'r1780903547522glh6' AND act_id = 'a8' ORDER BY id DESC LIMIT 1;
-INSERT INTO report_aspect_links (aspect_id, link) SELECT id, '8.https://discord.com/channels/1382609371510607923/1382609372957376594/1510921226997071922' FROM report_aspects WHERE report_id = 'r1780903547522glh6' AND act_id = 'a8' ORDER BY id DESC LIMIT 1;
-INSERT INTO report_aspect_links (aspect_id, link) SELECT id, '9.https://discord.com/channels/1382609371510607923/1382609372957376594/1511159516928933979' FROM report_aspects WHERE report_id = 'r1780903547522glh6' AND act_id = 'a8' ORDER BY id DESC LIMIT 1;
-INSERT INTO report_aspect_links (aspect_id, link) SELECT id, '10.https://discord.com/channels/1382609371510607923/1382609372957376594/1511269120463736892' FROM report_aspects WHERE report_id = 'r1780903547522glh6' AND act_id = 'a8' ORDER BY id DESC LIMIT 1;
-INSERT INTO report_aspect_links (aspect_id, link) SELECT id, '11.https://discord.com/channels/1382609371510607923/1382609372957376594/1511269828940267590' FROM report_aspects WHERE report_id = 'r1780903547522glh6' AND act_id = 'a8' ORDER BY id DESC LIMIT 1;
-INSERT INTO report_aspect_links (aspect_id, link) SELECT id, '12.https://discord.com/channels/1382609371510607923/1382609372957376594/1511321561217634375' FROM report_aspects WHERE report_id = 'r1780903547522glh6' AND act_id = 'a8' ORDER BY id DESC LIMIT 1;
-INSERT INTO report_aspect_links (aspect_id, link) SELECT id, '13.https://discord.com/channels/1382609371510607923/1382609372957376594/1511332956461863002' FROM report_aspects WHERE report_id = 'r1780903547522glh6' AND act_id = 'a8' ORDER BY id DESC LIMIT 1;
-INSERT INTO report_aspect_links (aspect_id, link) SELECT id, '14.https://discord.com/channels/1382609371510607923/1382609372957376594/1511333436445425764' FROM report_aspects WHERE report_id = 'r1780903547522glh6' AND act_id = 'a8' ORDER BY id DESC LIMIT 1;
-INSERT INTO report_aspect_links (aspect_id, link) SELECT id, '15.https://discord.com/channels/1382609371510607923/1382609372957376594/1511616398252707870' FROM report_aspects WHERE report_id = 'r1780903547522glh6' AND act_id = 'a8' ORDER BY id DESC LIMIT 1;
-INSERT INTO report_aspect_links (aspect_id, link) SELECT id, '16.https://discord.com/channels/1382609371510607923/1382609372957376594/1511616969508388907' FROM report_aspects WHERE report_id = 'r1780903547522glh6' AND act_id = 'a8' ORDER BY id DESC LIMIT 1;
-INSERT INTO report_aspect_links (aspect_id, link) SELECT id, '17.https://discord.com/channels/1382609371510607923/1382609372957376594/1511622828728913941' FROM report_aspects WHERE report_id = 'r1780903547522glh6' AND act_id = 'a8' ORDER BY id DESC LIMIT 1;
-INSERT INTO report_aspect_links (aspect_id, link) SELECT id, '18.https://discord.com/channels/1382609371510607923/1382609372957376594/1511624064974979184' FROM report_aspects WHERE report_id = 'r1780903547522glh6' AND act_id = 'a8' ORDER BY id DESC LIMIT 1;
-INSERT INTO report_aspect_links (aspect_id, link) SELECT id, '19.https://discord.com/channels/1382609371510607923/1382609372957376594/1511624342218211468' FROM report_aspects WHERE report_id = 'r1780903547522glh6' AND act_id = 'a8' ORDER BY id DESC LIMIT 1;
-INSERT INTO report_aspect_links (aspect_id, link) SELECT id, '20.https://discord.com/channels/1382609371510607923/1382609372957376594/1512008664062365786' FROM report_aspects WHERE report_id = 'r1780903547522glh6' AND act_id = 'a8' ORDER BY id DESC LIMIT 1;
-INSERT INTO report_aspect_links (aspect_id, link) SELECT id, '21.https://discord.com/channels/1382609371510607923/1382609372957376594/1512765537489387731' FROM report_aspects WHERE report_id = 'r1780903547522glh6' AND act_id = 'a8' ORDER BY id DESC LIMIT 1;
-INSERT INTO report_aspect_links (aspect_id, link) SELECT id, '22.https://discord.com/channels/1382609371510607923/1382609372957376594/1512766118115151933' FROM report_aspects WHERE report_id = 'r1780903547522glh6' AND act_id = 'a8' ORDER BY id DESC LIMIT 1;
-INSERT INTO report_aspect_links (aspect_id, link) SELECT id, '23.https://discord.com/channels/1382609371510607923/1382609372957376594/1512769292838633493' FROM report_aspects WHERE report_id = 'r1780903547522glh6' AND act_id = 'a8' ORDER BY id DESC LIMIT 1;
-INSERT INTO report_aspect_links (aspect_id, link) SELECT id, '24.https://discord.com/channels/1382609371510607923/1382609372957376594/1512771002713767936' FROM report_aspects WHERE report_id = 'r1780903547522glh6' AND act_id = 'a8' ORDER BY id DESC LIMIT 1;
-INSERT INTO report_aspects (report_id, act_id, code, name, points, count, total_pts) VALUES ('r1780903547522glh6', 'a9', 'AG', 'Агитация в канал', 5, 2, 10);
-INSERT INTO report_aspect_links (aspect_id, link) SELECT id, '1.https://discord.com/channels/1382609371510607923/1382609374744150017/1512498443950489862' FROM report_aspects WHERE report_id = 'r1780903547522glh6' AND act_id = 'a9' ORDER BY id DESC LIMIT 1;
-INSERT INTO report_aspect_links (aspect_id, link) SELECT id, '2.https://discord.com/channels/1382609371510607923/1382609374744150017/1512064257133645834' FROM report_aspects WHERE report_id = 'r1780903547522glh6' AND act_id = 'a9' ORDER BY id DESC LIMIT 1;
-INSERT INTO report_aspects (report_id, act_id, code, name, points, count, total_pts) VALUES ('r1780903547522glh6', 'a10', 'CL', 'Обзвон в отдел PAI', 30, 0, 0);
-INSERT INTO report_aspects (report_id, act_id, code, name, points, count, total_pts) VALUES ('r1780903547522glh6', 'a11', 'DS', 'Рапорт-на-увольнение', 5, 0, 0);
-INSERT INTO reports (id, week_key, week_label, submitted_at, name, first_name, last_name, game_id, status, total_pts, mod_note, reviewed_at) VALUES ('r1780903993264mr6n', '2026-06-07', '08.06.2026 — 14.06.2026', '2026-06-08T07:33:13.264Z', 'Okuname Londo', 'Okuname', 'Londo', '155604', 'rejected', 245, '', '2026-06-08T07:40:57.863Z');
-INSERT INTO report_aspects (report_id, act_id, code, name, points, count, total_pts) VALUES ('r1780903993264mr6n', 'a1', 'LC', 'Выдача лицензии', 15, 6, 90);
-INSERT INTO report_aspect_links (aspect_id, link) SELECT id, 'https://discord.com/channels/1382609371510607923/1507850086716018780/1510764245774635138' FROM report_aspects WHERE report_id = 'r1780903993264mr6n' AND act_id = 'a1' ORDER BY id DESC LIMIT 1;
-INSERT INTO report_aspect_links (aspect_id, link) SELECT id, 'https://discord.com/channels/1382609371510607923/1507850086716018780/1510764245774635138' FROM report_aspects WHERE report_id = 'r1780903993264mr6n' AND act_id = 'a1' ORDER BY id DESC LIMIT 1;
-INSERT INTO report_aspect_links (aspect_id, link) SELECT id, 'https://discord.com/channels/1382609371510607923/1507850086716018780/1510764245774635138' FROM report_aspects WHERE report_id = 'r1780903993264mr6n' AND act_id = 'a1' ORDER BY id DESC LIMIT 1;
-INSERT INTO report_aspect_links (aspect_id, link) SELECT id, 'https://discord.com/channels/1382609371510607923/1507850086716018780/1510764245774635138' FROM report_aspects WHERE report_id = 'r1780903993264mr6n' AND act_id = 'a1' ORDER BY id DESC LIMIT 1;
-INSERT INTO report_aspect_links (aspect_id, link) SELECT id, 'https://discord.com/channels/1382609371510607923/1507850086716018780/1510764245774635138' FROM report_aspects WHERE report_id = 'r1780903993264mr6n' AND act_id = 'a1' ORDER BY id DESC LIMIT 1;
-INSERT INTO report_aspect_links (aspect_id, link) SELECT id, 'https://discord.com/channels/1382609371510607923/1507850086716018780/1510764245774635138' FROM report_aspects WHERE report_id = 'r1780903993264mr6n' AND act_id = 'a1' ORDER BY id DESC LIMIT 1;
-INSERT INTO report_aspects (report_id, act_id, code, name, points, count, total_pts) VALUES ('r1780903993264mr6n', 'a2', 'EM', 'Трудоустройство (кадр. аудит)', 30, 1, 30);
-INSERT INTO report_aspect_links (aspect_id, link) SELECT id, 'https://discord.com/channels/1382609371510607923/1507850086716018780/1510764245774635138' FROM report_aspects WHERE report_id = 'r1780903993264mr6n' AND act_id = 'a2' ORDER BY id DESC LIMIT 1;
-INSERT INTO report_aspects (report_id, act_id, code, name, points, count, total_pts) VALUES ('r1780903993264mr6n', 'a3', 'EX', 'Практический экзамен', 20, 1, 20);
-INSERT INTO report_aspect_links (aspect_id, link) SELECT id, 'https://discord.com/channels/1382609371510607923/1507850086716018780/1510764245774635138' FROM report_aspects WHERE report_id = 'r1780903993264mr6n' AND act_id = 'a3' ORDER BY id DESC LIMIT 1;
-INSERT INTO report_aspects (report_id, act_id, code, name, points, count, total_pts) VALUES ('r1780903993264mr6n', 'a4', 'RP', 'Проверка отчётность-pa', 10, 1, 10);
-INSERT INTO report_aspect_links (aspect_id, link) SELECT id, 'https://discord.com/channels/1382609371510607923/1507850086716018780/1510764245774635138' FROM report_aspects WHERE report_id = 'r1780903993264mr6n' AND act_id = 'a4' ORDER BY id DESC LIMIT 1;
-INSERT INTO report_aspects (report_id, act_id, code, name, points, count, total_pts) VALUES ('r1780903993264mr6n', 'a5', 'GV', 'Отчётность по гос. волнам', 30, 1, 30);
-INSERT INTO report_aspect_links (aspect_id, link) SELECT id, 'https://discord.com/channels/1382609371510607923/1507850086716018780/1510764245774635138' FROM report_aspects WHERE report_id = 'r1780903993264mr6n' AND act_id = 'a5' ORDER BY id DESC LIMIT 1;
-INSERT INTO report_aspects (report_id, act_id, code, name, points, count, total_pts) VALUES ('r1780903993264mr6n', 'a6', 'CK', 'Проверка трудоустройство', 10, 1, 10);
-INSERT INTO report_aspect_links (aspect_id, link) SELECT id, 'https://discord.com/channels/1382609371510607923/1507850086716018780/1510764245774635138' FROM report_aspects WHERE report_id = 'r1780903993264mr6n' AND act_id = 'a6' ORDER BY id DESC LIMIT 1;
-INSERT INTO report_aspects (report_id, act_id, code, name, points, count, total_pts) VALUES ('r1780903993264mr6n', 'a7', 'UP', 'Запрос-на-повышение', 5, 1, 5);
-INSERT INTO report_aspect_links (aspect_id, link) SELECT id, 'https://discord.com/channels/1382609371510607923/1507850086716018780/1510764245774635138' FROM report_aspects WHERE report_id = 'r1780903993264mr6n' AND act_id = 'a7' ORDER BY id DESC LIMIT 1;
-INSERT INTO report_aspects (report_id, act_id, code, name, points, count, total_pts) VALUES ('r1780903993264mr6n', 'a8', 'AC', 'Перевод из академии', 10, 1, 10);
-INSERT INTO report_aspect_links (aspect_id, link) SELECT id, 'https://discord.com/channels/1382609371510607923/1507850086716018780/1510764245774635138' FROM report_aspects WHERE report_id = 'r1780903993264mr6n' AND act_id = 'a8' ORDER BY id DESC LIMIT 1;
-INSERT INTO report_aspects (report_id, act_id, code, name, points, count, total_pts) VALUES ('r1780903993264mr6n', 'a9', 'AG', 'Агитация в канал', 5, 1, 5);
-INSERT INTO report_aspect_links (aspect_id, link) SELECT id, 'https://discord.com/channels/1382609371510607923/1507850086716018780/1510764245774635138' FROM report_aspects WHERE report_id = 'r1780903993264mr6n' AND act_id = 'a9' ORDER BY id DESC LIMIT 1;
-INSERT INTO report_aspects (report_id, act_id, code, name, points, count, total_pts) VALUES ('r1780903993264mr6n', 'a10', 'CL', 'Обзвон в отдел PAI', 30, 1, 30);
-INSERT INTO report_aspect_links (aspect_id, link) SELECT id, 'https://discord.com/channels/1382609371510607923/1507850086716018780/1510764245774635138' FROM report_aspects WHERE report_id = 'r1780903993264mr6n' AND act_id = 'a10' ORDER BY id DESC LIMIT 1;
-INSERT INTO report_aspects (report_id, act_id, code, name, points, count, total_pts) VALUES ('r1780903993264mr6n', 'a11', 'DS', 'Рапорт-на-увольнение', 5, 1, 5);
-INSERT INTO report_aspect_links (aspect_id, link) SELECT id, 'https://discord.com/channels/1382609371510607923/1507850086716018780/1510764245774635138' FROM report_aspects WHERE report_id = 'r1780903993264mr6n' AND act_id = 'a11' ORDER BY id DESC LIMIT 1;
-INSERT INTO reports (id, week_key, week_label, submitted_at, name, first_name, last_name, game_id, status, total_pts, mod_note, reviewed_at) VALUES ('r17809040589776gps', '2026-06-07', '08.06.2026 — 14.06.2026', '2026-06-08T07:34:18.977Z', 'Anthony Wilson', 'Anthony', 'Wilson', '292488', 'approved', 170, '', '2026-06-08T07:34:32.146Z');
-INSERT INTO report_aspects (report_id, act_id, code, name, points, count, total_pts) VALUES ('r17809040589776gps', 'a1', 'LC', 'Выдача лицензии', 15, 3, 45);
-INSERT INTO report_aspect_links (aspect_id, link) SELECT id, 'https://discord.com/channels/1382609371510607923/1507850086716018780/1512451421293777087' FROM report_aspects WHERE report_id = 'r17809040589776gps' AND act_id = 'a1' ORDER BY id DESC LIMIT 1;
-INSERT INTO report_aspect_links (aspect_id, link) SELECT id, 'https://discord.com/channels/1382609371510607923/1507850086716018780/1512451421293777087' FROM report_aspects WHERE report_id = 'r17809040589776gps' AND act_id = 'a1' ORDER BY id DESC LIMIT 1;
-INSERT INTO report_aspect_links (aspect_id, link) SELECT id, 'https://discord.com/channels/1382609371510607923/1507850086716018780/1512451421293777087' FROM report_aspects WHERE report_id = 'r17809040589776gps' AND act_id = 'a1' ORDER BY id DESC LIMIT 1;
-INSERT INTO report_aspects (report_id, act_id, code, name, points, count, total_pts) VALUES ('r17809040589776gps', 'a2', 'EM', 'Трудоустройство (кадр. аудит)', 30, 1, 30);
-INSERT INTO report_aspect_links (aspect_id, link) SELECT id, 'https://discord.com/channels/1382609371510607923/1507850086716018780/1512451421293777087' FROM report_aspects WHERE report_id = 'r17809040589776gps' AND act_id = 'a2' ORDER BY id DESC LIMIT 1;
-INSERT INTO report_aspects (report_id, act_id, code, name, points, count, total_pts) VALUES ('r17809040589776gps', 'a3', 'EX', 'Практический экзамен', 20, 1, 20);
-INSERT INTO report_aspect_links (aspect_id, link) SELECT id, 'https://discord.com/channels/1382609371510607923/1507850086716018780/1512451421293777087' FROM report_aspects WHERE report_id = 'r17809040589776gps' AND act_id = 'a3' ORDER BY id DESC LIMIT 1;
-INSERT INTO report_aspects (report_id, act_id, code, name, points, count, total_pts) VALUES ('r17809040589776gps', 'a4', 'RP', 'Проверка отчётность-pa', 10, 1, 10);
-INSERT INTO report_aspect_links (aspect_id, link) SELECT id, 'https://discord.com/channels/1382609371510607923/1507850086716018780/1512451421293777087' FROM report_aspects WHERE report_id = 'r17809040589776gps' AND act_id = 'a4' ORDER BY id DESC LIMIT 1;
-INSERT INTO report_aspects (report_id, act_id, code, name, points, count, total_pts) VALUES ('r17809040589776gps', 'a5', 'GV', 'Отчётность по гос. волнам', 30, 1, 30);
-INSERT INTO report_aspect_links (aspect_id, link) SELECT id, 'https://discord.com/channels/1382609371510607923/1507850086716018780/1512451421293777087' FROM report_aspects WHERE report_id = 'r17809040589776gps' AND act_id = 'a5' ORDER BY id DESC LIMIT 1;
-INSERT INTO report_aspects (report_id, act_id, code, name, points, count, total_pts) VALUES ('r17809040589776gps', 'a6', 'CK', 'Проверка трудоустройство', 10, 0, 0);
-INSERT INTO report_aspects (report_id, act_id, code, name, points, count, total_pts) VALUES ('r17809040589776gps', 'a7', 'UP', 'Запрос-на-повышение', 5, 0, 0);
-INSERT INTO report_aspects (report_id, act_id, code, name, points, count, total_pts) VALUES ('r17809040589776gps', 'a8', 'AC', 'Перевод из академии', 10, 0, 0);
-INSERT INTO report_aspects (report_id, act_id, code, name, points, count, total_pts) VALUES ('r17809040589776gps', 'a9', 'AG', 'Агитация в канал', 5, 0, 0);
-INSERT INTO report_aspects (report_id, act_id, code, name, points, count, total_pts) VALUES ('r17809040589776gps', 'a10', 'CL', 'Обзвон в отдел PAI', 30, 1, 30);
-INSERT INTO report_aspect_links (aspect_id, link) SELECT id, 'https://discord.com/channels/1382609371510607923/1507850086716018780/1512451421293777087' FROM report_aspects WHERE report_id = 'r17809040589776gps' AND act_id = 'a10' ORDER BY id DESC LIMIT 1;
-INSERT INTO report_aspects (report_id, act_id, code, name, points, count, total_pts) VALUES ('r17809040589776gps', 'a11', 'DS', 'Рапорт-на-увольнение', 5, 1, 5);
-INSERT INTO report_aspect_links (aspect_id, link) SELECT id, 'https://discord.com/channels/1382609371510607923/1507850086716018780/1512451421293777087' FROM report_aspects WHERE report_id = 'r17809040589776gps' AND act_id = 'a11' ORDER BY id DESC LIMIT 1;
-INSERT INTO reports (id, week_key, week_label, submitted_at, name, first_name, last_name, game_id, status, total_pts, mod_note, reviewed_at) VALUES ('r1780916363593ece1', '2026-06-07', '08.06.2026 — 14.06.2026', '2026-06-08T10:59:23.593Z', 'Richi Londo', 'Richi', 'Londo', '155604', 'rejected', 75, 'мало баллов', '2026-06-08T10:59:51.354Z');
-INSERT INTO report_aspects (report_id, act_id, code, name, points, count, total_pts) VALUES ('r1780916363593ece1', 'a1', 'LC', 'Выдача лицензии', 15, 1, 15);
-INSERT INTO report_aspect_links (aspect_id, link) SELECT id, 'https://discord.com/channels/1382609371510607923/1507850086716018780/1512449453553090621' FROM report_aspects WHERE report_id = 'r1780916363593ece1' AND act_id = 'a1' ORDER BY id DESC LIMIT 1;
-INSERT INTO report_aspects (report_id, act_id, code, name, points, count, total_pts) VALUES ('r1780916363593ece1', 'a2', 'EM', 'Трудоустройство (кадр. аудит)', 30, 1, 30);
-INSERT INTO report_aspect_links (aspect_id, link) SELECT id, 'https://discord.com/channels/1382609371510607923/1507850086716018780/1512449453553090621' FROM report_aspects WHERE report_id = 'r1780916363593ece1' AND act_id = 'a2' ORDER BY id DESC LIMIT 1;
-INSERT INTO report_aspects (report_id, act_id, code, name, points, count, total_pts) VALUES ('r1780916363593ece1', 'a3', 'EX', 'Практический экзамен', 20, 1, 20);
-INSERT INTO report_aspect_links (aspect_id, link) SELECT id, 'https://discord.com/channels/1382609371510607923/1507850086716018780/1512449453553090621' FROM report_aspects WHERE report_id = 'r1780916363593ece1' AND act_id = 'a3' ORDER BY id DESC LIMIT 1;
-INSERT INTO report_aspects (report_id, act_id, code, name, points, count, total_pts) VALUES ('r1780916363593ece1', 'a4', 'RP', 'Проверка отчётность-pa', 10, 1, 10);
-INSERT INTO report_aspect_links (aspect_id, link) SELECT id, 'https://discord.com/channels/1382609371510607923/1507850086716018780/1512449453553090621' FROM report_aspects WHERE report_id = 'r1780916363593ece1' AND act_id = 'a4' ORDER BY id DESC LIMIT 1;
-INSERT INTO report_aspects (report_id, act_id, code, name, points, count, total_pts) VALUES ('r1780916363593ece1', 'a5', 'GV', 'Отчётность по гос. волнам', 30, 0, 0);
-INSERT INTO report_aspects (report_id, act_id, code, name, points, count, total_pts) VALUES ('r1780916363593ece1', 'a6', 'CK', 'Проверка трудоустройство', 10, 0, 0);
-INSERT INTO report_aspects (report_id, act_id, code, name, points, count, total_pts) VALUES ('r1780916363593ece1', 'a7', 'UP', 'Запрос-на-повышение', 5, 0, 0);
-INSERT INTO report_aspects (report_id, act_id, code, name, points, count, total_pts) VALUES ('r1780916363593ece1', 'a8', 'AC', 'Перевод из академии', 10, 0, 0);
-INSERT INTO report_aspects (report_id, act_id, code, name, points, count, total_pts) VALUES ('r1780916363593ece1', 'a9', 'AG', 'Агитация в канал', 5, 0, 0);
-INSERT INTO report_aspects (report_id, act_id, code, name, points, count, total_pts) VALUES ('r1780916363593ece1', 'a10', 'CL', 'Обзвон в отдел PAI', 30, 0, 0);
-INSERT INTO report_aspects (report_id, act_id, code, name, points, count, total_pts) VALUES ('r1780916363593ece1', 'a11', 'DS', 'Рапорт-на-увольнение', 5, 0, 0);
+INSERT INTO members (id, first_name, last_name, name, game_id, rank, ooc, phone, bank) VALUES ('m1','Richi','Londo','Richi Londo','232430','Curator of Department','ООС Отпуск (22.06.26-25.06.26)','','');
+INSERT INTO members (id, first_name, last_name, name, game_id, rank, ooc, phone, bank) VALUES ('m4','Logan','Brooks','Logan Brooks','159733','Curator of Department','-','','');
+INSERT INTO members (id, first_name, last_name, name, game_id, rank, ooc, phone, bank) VALUES ('m15','Daryana','Londo','Daryana Londo','30514','Head of Department','-','','');
+INSERT INTO members (id, first_name, last_name, name, game_id, rank, ooc, phone, bank) VALUES ('m19','Anthony','Wilson','Anthony Wilson','292488','Instructor of Department','-','','');
+INSERT INTO members (id, first_name, last_name, name, game_id, rank, ooc, phone, bank) VALUES ('i17808319413133ci4','Kyka','Londo','Kyka Londo','186776','Head of Department','-','','');
+INSERT INTO members (id, first_name, last_name, name, game_id, rank, ooc, phone, bank) VALUES ('i1780833670884jza4','Ryker','Moonlight','Ryker Moonlight','305966','Instructor of Department','-','','');
+INSERT INTO members (id, first_name, last_name, name, game_id, rank, ooc, phone, bank) VALUES ('i1781452361976vitd','Cornelio','Londo','Cornelio Londo','101475','Deputy Head of Department','-','','');
+INSERT INTO members (id, first_name, last_name, name, game_id, rank, ooc, phone, bank) VALUES ('i1781452383425yq1w','Chaobi','Yuwi','Chaobi Yuwi','156750','Deputy Head of Department','-','','');
+INSERT INTO members (id, first_name, last_name, name, game_id, rank, ooc, phone, bank) VALUES ('i1781452448187t94n','Sato','Horikawa','Sato Horikawa','158390','Deputy Head of Department','-','','');
+INSERT INTO members (id, first_name, last_name, name, game_id, rank, ooc, phone, bank) VALUES ('i1781452469848uojk','Abdullah','Londo','Abdullah Londo','207759','Instructor of Department','-','','');
+INSERT INTO members (id, first_name, last_name, name, game_id, rank, ooc, phone, bank) VALUES ('i1782058246001zypf','Cheef','ForSainttez','Cheef ForSainttez','267268','Deputy Head of Department','-','','');
+INSERT INTO members (id, first_name, last_name, name, game_id, rank, ooc, phone, bank) VALUES ('i1782662593743xinc','John','Whou','John Whou','227136','Instructor of Department','-','','');
+INSERT INTO members (id, first_name, last_name, name, game_id, rank, ooc, phone, bank) VALUES ('i1782662618505udak','Violetta','Hive','Violetta Hive','280427','Instructor of Department','-','','');
+INSERT INTO members (id, first_name, last_name, name, game_id, rank, ooc, phone, bank) VALUES ('i1782662634913t0fm','Likki','Cartel','Likki Cartel','71985','Instructor of Department','-','','');
+INSERT INTO members (id, first_name, last_name, name, game_id, rank, ooc, phone, bank) VALUES ('i1782662666929rv1h','Hayden','Londo','Hayden Londo','304891','Instructor of Department','-','','');
+INSERT INTO members (id, first_name, last_name, name, game_id, rank, ooc, phone, bank) VALUES ('i1782662691351xpca','Jordan','Londo','Jordan Londo','317616','Instructor of Department','-','','');
+INSERT INTO members (id, first_name, last_name, name, game_id, rank, ooc, phone, bank) VALUES ('i1782662924519f0zw','Kento','Londo','Kento Londo','118230','Instructor of Department','-','','');
+INSERT INTO activities (id, code, name, points, high_staff, note) VALUES ('a1','LC','Выдача лицензии',15,false,'Заполнить количество выданных лицензий');
+INSERT INTO activities (id, code, name, points, high_staff, note) VALUES ('a2','EM','Трудоустройство (кадр. аудит)',30,false,'Оформление нового сотрудника');
+INSERT INTO activities (id, code, name, points, high_staff, note) VALUES ('a3','EX','Практический экзамен',20,false,'Проведение практического экзамена');
+INSERT INTO activities (id, code, name, points, high_staff, note) VALUES ('a4','RP','Проверка отчётность-pa',10,false,'Проверка отчётности в канале');
+INSERT INTO activities (id, code, name, points, high_staff, note) VALUES ('a5','GV','Отчётность по гос. волнам',30,false,'3 скриншота = 1 запись');
+INSERT INTO activities (id, code, name, points, high_staff, note) VALUES ('a6','CK','Проверка трудоустройство',10,false,'Проверка документов трудоустройства');
+INSERT INTO activities (id, code, name, points, high_staff, note) VALUES ('a7','UP','Запрос-на-повышение',5,false,'Рассмотрение запроса на повышение');
+INSERT INTO activities (id, code, name, points, high_staff, note) VALUES ('a8','AC','Перевод из академии',10,false,'Перевод курсанта в полноценный состав');
+INSERT INTO activities (id, code, name, points, high_staff, note) VALUES ('a9','AG','Агитация в канал',5,true,'Только для High Staff (Head+)');
+INSERT INTO activities (id, code, name, points, high_staff, note) VALUES ('a10','CL','Обзвон в отдел PAI',30,true,'Только для High Staff (Head+)');
+INSERT INTO activities (id, code, name, points, high_staff, note) VALUES ('a11','DS','Рапорт-на-увольнение',5,true,'Только для High Staff (Head+)');
+INSERT INTO weekly_scores (member_id, activity_id, count) VALUES ('m19','a1',47);
+INSERT INTO weekly_scores (member_id, activity_id, count) VALUES ('m19','a2',15);
+INSERT INTO weekly_scores (member_id, activity_id, count) VALUES ('m19','a3',0);
+INSERT INTO weekly_scores (member_id, activity_id, count) VALUES ('m19','a4',40);
+INSERT INTO weekly_scores (member_id, activity_id, count) VALUES ('m19','a5',3);
+INSERT INTO weekly_scores (member_id, activity_id, count) VALUES ('m19','a6',0);
+INSERT INTO weekly_scores (member_id, activity_id, count) VALUES ('m19','a7',0);
+INSERT INTO weekly_scores (member_id, activity_id, count) VALUES ('m19','a8',0);
+INSERT INTO weekly_scores (member_id, activity_id, count) VALUES ('m19','a9',0);
+INSERT INTO weekly_scores (member_id, activity_id, count) VALUES ('m19','a10',1);
+INSERT INTO weekly_scores (member_id, activity_id, count) VALUES ('m19','a11',1);
+INSERT INTO weekly_scores (member_id, activity_id, count) VALUES ('m1','a1',0);
+INSERT INTO weekly_scores (member_id, activity_id, count) VALUES ('m4','a1',33);
+INSERT INTO weekly_scores (member_id, activity_id, count) VALUES ('m4','a2',65);
+INSERT INTO weekly_scores (member_id, activity_id, count) VALUES ('i1781452448187t94n','a1',18);
+INSERT INTO weekly_scores (member_id, activity_id, count) VALUES ('i1781452448187t94n','a10',1);
+INSERT INTO weekly_scores (member_id, activity_id, count) VALUES ('i1781452448187t94n','a7',17);
+INSERT INTO weekly_scores (member_id, activity_id, count) VALUES ('i1781452448187t94n','a5',2);
+INSERT INTO weekly_scores (member_id, activity_id, count) VALUES ('i1781452448187t94n','a3',1);
+INSERT INTO weekly_scores (member_id, activity_id, count) VALUES ('i1781452448187t94n','a4',31);
+INSERT INTO weekly_scores (member_id, activity_id, count) VALUES ('i1781452448187t94n','a2',9);
+INSERT INTO weekly_scores (member_id, activity_id, count) VALUES ('i1781452448187t94n','a8',6);
+INSERT INTO weekly_scores (member_id, activity_id, count) VALUES ('i1781452361976vitd','a8',12);
+INSERT INTO weekly_scores (member_id, activity_id, count) VALUES ('i1781452361976vitd','a2',24);
+INSERT INTO weekly_scores (member_id, activity_id, count) VALUES ('i1781452361976vitd','a4',28);
+INSERT INTO weekly_scores (member_id, activity_id, count) VALUES ('i1781452361976vitd','a3',5);
+INSERT INTO weekly_scores (member_id, activity_id, count) VALUES ('i1781452361976vitd','a5',2);
+INSERT INTO weekly_scores (member_id, activity_id, count) VALUES ('i1781452383425yq1w','a4',78);
+INSERT INTO weekly_scores (member_id, activity_id, count) VALUES ('i1781452383425yq1w','a8',6);
+INSERT INTO weekly_scores (member_id, activity_id, count) VALUES ('i1781452383425yq1w','a2',35);
+INSERT INTO weekly_scores (member_id, activity_id, count) VALUES ('i1781452383425yq1w','a5',12);
+INSERT INTO weekly_scores (member_id, activity_id, count) VALUES ('i1781452383425yq1w','a1',80);
+INSERT INTO weekly_scores (member_id, activity_id, count) VALUES ('i1781452383425yq1w','a3',5);
+INSERT INTO reprimands (member_id, verbal, strict) VALUES ('m1',0,0);
+INSERT INTO reprimands (member_id, verbal, strict) VALUES ('m4',0,0);
+INSERT INTO reprimands (member_id, verbal, strict) VALUES ('m15',0,0);
+INSERT INTO reprimands (member_id, verbal, strict) VALUES ('m19',0,0);
+INSERT INTO reprimands (member_id, verbal, strict) VALUES ('i17808319413133ci4',0,0);
+INSERT INTO reprimands (member_id, verbal, strict) VALUES ('i1780833670884jza4',0,0);
+INSERT INTO reprimands (member_id, verbal, strict) VALUES ('i1781452361976vitd',0,0);
+INSERT INTO reprimands (member_id, verbal, strict) VALUES ('i1781452383425yq1w',0,0);
+INSERT INTO reprimands (member_id, verbal, strict) VALUES ('i1781452448187t94n',0,0);
+INSERT INTO reprimands (member_id, verbal, strict) VALUES ('i1781452469848uojk',0,0);
+INSERT INTO reprimands (member_id, verbal, strict) VALUES ('i1782058246001zypf',0,0);
+INSERT INTO reprimands (member_id, verbal, strict) VALUES ('i1782662593743xinc',0,0);
+INSERT INTO reprimands (member_id, verbal, strict) VALUES ('i1782662618505udak',0,0);
+INSERT INTO reprimands (member_id, verbal, strict) VALUES ('i1782662634913t0fm',0,0);
+INSERT INTO reprimands (member_id, verbal, strict) VALUES ('i1782662666929rv1h',0,0);
+INSERT INTO reprimands (member_id, verbal, strict) VALUES ('i1782662691351xpca',0,0);
+INSERT INTO reprimands (member_id, verbal, strict) VALUES ('i1782662924519f0zw',0,0);
+INSERT INTO questions (id, q, a) VALUES ('q1','Кто является старшим составом?','От Dep.H и выше');
+INSERT INTO questions (id, q, a) VALUES ('q2','Иерархия хай рангов?','Deputy Head → Head → Curator → Assistant → Advisor → Deputy Chief → Chief');
+INSERT INTO questions (id, q, a) VALUES ('q3','Какой отдел отвечает за внутренний контроль и надзор за сотрудниками?','IAD');
+INSERT INTO questions (id, q, a) VALUES ('q4','Кто выдаёт спецуху?','Storekeeper');
+INSERT INTO questions (id, q, a) VALUES ('q5','Что нужно сделать после получения спецухи?','Составить отчёт о получении. Рабочее время 14:00–22:00');
+INSERT INTO questions (id, q, a) VALUES ('q6','Правила IC и OOC отпуска?','IC: перерыв не более 5 ч, 1 раз в день, не освобождает от строёв. OOC: не более 7 дней, нельзя заходить в игру');
+INSERT INTO questions (id, q, a) VALUES ('q7','Кто может стоять в холле?','IAD и PAI');
+INSERT INTO questions (id, q, a) VALUES ('q8','Как принимать человека во фракцию?','Проверить заявку, провести собеседование, оформить кадровый аудит');
+INSERT INTO questions (id, q, a) VALUES ('q9','Что самое важное при проверке отчёта?','1. Имя/фамилия/статик вручную и совпадают. 2. Не повышался сегодня. 3. Есть бодик. 4. Нет варнов');
+INSERT INTO questions (id, q, a) VALUES ('q10','Что делаем после проверки отчёта?','СОЗДАТЬ ВЕТКУ. Если ДА — отправить в канал запроса на повышение. Если НЕТ — объяснить причину отказа');
+INSERT INTO questions (id, q, a) VALUES ('q11','Почему нельзя проверять отчёты не по порядку?','Есть вероятность, что те, кто выше, останутся непроверенными');
+INSERT INTO questions (id, q, a) VALUES ('q12','Правила агитаций?','Агитация подаётся с 10:00 до 22:00 МСК. Пауза между агитациями отделов — 1 час (60 минут)');
+INSERT INTO questions (id, q, a) VALUES ('q13','Правила выдачи лицензий?','Проверить документы, выдать лицензию, зафиксировать в журнале');
+INSERT INTO questions (id, q, a) VALUES ('q14','Как повышать человека по восстановлению или переводу?','Проверить одобренный запрос, одобренный ранг (реакцией), в кадровом указать ссылку на одобренный запрос');
+INSERT INTO questions (id, q, a) VALUES ('q15','Что делать, если написал кадровый неправильно?','Удалить или поставить реакцию крестика');
+INSERT INTO questions (id, q, a) VALUES ('q16','Разрешено ли младшему составу (PA Cadet, Officer) проводить задержание?','Нет. Исключение: обездвижить и надеть наручники для передачи агентам');
+INSERT INTO questions (id, q, a) VALUES ('q17','Может ли отдел PAI выдавать наказания (ВУ) отделу PA?','Да, может');
+INSERT INTO questions (id, q, a) VALUES ('q18','Обязан ли сотрудник вызвать прока по запросу адвоката?','Да, если аргументированно и с перечислением статей');
+INSERT INTO questions (id, q, a) VALUES ('q19','Почему обязательно проверять человека с розыском по базе данных?','Проверить — функциональный розыск или нет');
+INSERT INTO questions (id, q, a) VALUES ('q20','Можно ли дать больше 5 лет срока?','Только по решению суда с постановлением');
+INSERT INTO questions (id, q, a) VALUES ('q21','Послать на хуй — какая статья?','15.8 Провокация');
+INSERT INTO questions (id, q, a) VALUES ('q22','Отличие 12.8 от 12.8.1?','Гос. и негос. оружие');
+INSERT INTO meetings (id, title, date, time, type, note, reprimands_issued, created_at) VALUES ('i1781689724611cjua','123','2026-06-17','20:00','weekly','',false,'2026-06-17');
+INSERT INTO meeting_attendance (meeting_id, member_id, status, note) VALUES ('i1781689724611cjua','m1','none','');
+INSERT INTO meeting_attendance (meeting_id, member_id, status, note) VALUES ('i1781689724611cjua','m4','none','');
+INSERT INTO meeting_attendance (meeting_id, member_id, status, note) VALUES ('i1781689724611cjua','m15','none','');
+INSERT INTO meeting_attendance (meeting_id, member_id, status, note) VALUES ('i1781689724611cjua','m19','none','');
+INSERT INTO meeting_attendance (meeting_id, member_id, status, note) VALUES ('i1781689724611cjua','i17808319413133ci4','none','');
+INSERT INTO meeting_attendance (meeting_id, member_id, status, note) VALUES ('i1781689724611cjua','i1780833670884jza4','none','');
+INSERT INTO meeting_attendance (meeting_id, member_id, status, note) VALUES ('i1781689724611cjua','i1781452361976vitd','none','');
+INSERT INTO meeting_attendance (meeting_id, member_id, status, note) VALUES ('i1781689724611cjua','i1781452383425yq1w','none','');
+INSERT INTO meeting_attendance (meeting_id, member_id, status, note) VALUES ('i1781689724611cjua','i1781452448187t94n','none','');
+INSERT INTO meeting_attendance (meeting_id, member_id, status, note) VALUES ('i1781689724611cjua','i1781452469848uojk','none','');
+INSERT INTO meetings (id, title, date, time, type, note, reprimands_issued, created_at) VALUES ('i1782058178259p0hr','Еженеделька состава','2026-06-21','19:00','weekly','',false,'2026-06-21');
+INSERT INTO meeting_attendance (meeting_id, member_id, status, note) VALUES ('i1782058178259p0hr','m1','present','');
+INSERT INTO meeting_attendance (meeting_id, member_id, status, note) VALUES ('i1782058178259p0hr','m4','present','');
+INSERT INTO meeting_attendance (meeting_id, member_id, status, note) VALUES ('i1782058178259p0hr','m15','absent','Илюша напишет');
+INSERT INTO meeting_attendance (meeting_id, member_id, status, note) VALUES ('i1782058178259p0hr','m19','absent','Помилован');
+INSERT INTO meeting_attendance (meeting_id, member_id, status, note) VALUES ('i1782058178259p0hr','i17808319413133ci4','absent','Илюша напишет');
+INSERT INTO meeting_attendance (meeting_id, member_id, status, note) VALUES ('i1782058178259p0hr','i1780833670884jza4','absent','Вопросики');
+INSERT INTO meeting_attendance (meeting_id, member_id, status, note) VALUES ('i1782058178259p0hr','i1781452361976vitd','warned','');
+INSERT INTO meeting_attendance (meeting_id, member_id, status, note) VALUES ('i1782058178259p0hr','i1781452383425yq1w','present','');
+INSERT INTO meeting_attendance (meeting_id, member_id, status, note) VALUES ('i1782058178259p0hr','i1781452448187t94n','present','');
+INSERT INTO meeting_attendance (meeting_id, member_id, status, note) VALUES ('i1782058178259p0hr','i1781452469848uojk','warned','');
+INSERT INTO meeting_attendance (meeting_id, member_id, status, note) VALUES ('i1782058178259p0hr','i1782058246001zypf','present','');
+INSERT INTO meetings (id, title, date, time, type, note, reprimands_issued, created_at) VALUES ('i17826627186838vf3','Собрание отдела','2026-06-28','20:00','weekly','',false,'2026-06-28');
+INSERT INTO meeting_attendance (meeting_id, member_id, status, note) VALUES ('i17826627186838vf3','m1','warned','');
+INSERT INTO meeting_attendance (meeting_id, member_id, status, note) VALUES ('i17826627186838vf3','m4','present','');
+INSERT INTO meeting_attendance (meeting_id, member_id, status, note) VALUES ('i17826627186838vf3','m15','present','');
+INSERT INTO meeting_attendance (meeting_id, member_id, status, note) VALUES ('i17826627186838vf3','m19','present','');
+INSERT INTO meeting_attendance (meeting_id, member_id, status, note) VALUES ('i17826627186838vf3','i17808319413133ci4','warned','');
+INSERT INTO meeting_attendance (meeting_id, member_id, status, note) VALUES ('i17826627186838vf3','i1780833670884jza4','warned','');
+INSERT INTO meeting_attendance (meeting_id, member_id, status, note) VALUES ('i17826627186838vf3','i1781452361976vitd','absent','');
+INSERT INTO meeting_attendance (meeting_id, member_id, status, note) VALUES ('i17826627186838vf3','i1781452383425yq1w','warned','');
+INSERT INTO meeting_attendance (meeting_id, member_id, status, note) VALUES ('i17826627186838vf3','i1781452448187t94n','warned','');
+INSERT INTO meeting_attendance (meeting_id, member_id, status, note) VALUES ('i17826627186838vf3','i1781452469848uojk','absent','');
+INSERT INTO meeting_attendance (meeting_id, member_id, status, note) VALUES ('i17826627186838vf3','i1782058246001zypf','absent','');
+INSERT INTO meeting_attendance (meeting_id, member_id, status, note) VALUES ('i17826627186838vf3','i1782662593743xinc','warned','');
+INSERT INTO meeting_attendance (meeting_id, member_id, status, note) VALUES ('i17826627186838vf3','i1782662618505udak','present','');
+INSERT INTO meeting_attendance (meeting_id, member_id, status, note) VALUES ('i17826627186838vf3','i1782662634913t0fm','absent','');
+INSERT INTO meeting_attendance (meeting_id, member_id, status, note) VALUES ('i17826627186838vf3','i1782662666929rv1h','present','');
+INSERT INTO meeting_attendance (meeting_id, member_id, status, note) VALUES ('i17826627186838vf3','i1782662691351xpca','present','');
+INSERT INTO weekly_history (id, date, archived_at, date_from, date_to, week_num) VALUES ('i1780820050136dm69','2026-06-07','07.06.2026','01.06.2026','07.06.2026',23);
+INSERT INTO weekly_history_scores (history_id, member_id, activity_id, count) VALUES ('i1780820050136dm69','m1','a1',24);
+INSERT INTO weekly_history_scores (history_id, member_id, activity_id, count) VALUES ('i1780820050136dm69','m1','a2',16);
+INSERT INTO weekly_history_scores (history_id, member_id, activity_id, count) VALUES ('i1780820050136dm69','m1','a3',7);
+INSERT INTO weekly_history_scores (history_id, member_id, activity_id, count) VALUES ('i1780820050136dm69','m1','a4',14);
+INSERT INTO weekly_history_scores (history_id, member_id, activity_id, count) VALUES ('i1780820050136dm69','m1','a7',13);
+INSERT INTO weekly_history_scores (history_id, member_id, activity_id, count) VALUES ('i1780820050136dm69','m1','a10',2);
+INSERT INTO weekly_history_scores (history_id, member_id, activity_id, count) VALUES ('i1780820050136dm69','m1','a8',7);
+INSERT INTO weekly_history_scores (history_id, member_id, activity_id, count) VALUES ('i1780820050136dm69','m2','a9',0);
+INSERT INTO weekly_history_scores (history_id, member_id, activity_id, count) VALUES ('i1780820050136dm69','m6','a1',46);
+INSERT INTO weekly_history_scores (history_id, member_id, activity_id, count) VALUES ('i1780820050136dm69','m6','a2',35);
+INSERT INTO weekly_history_scores (history_id, member_id, activity_id, count) VALUES ('i1780820050136dm69','m6','a4',19);
+INSERT INTO weekly_history_scores (history_id, member_id, activity_id, count) VALUES ('i1780820050136dm69','m10','a1',17);
+INSERT INTO weekly_history_scores (history_id, member_id, activity_id, count) VALUES ('i1780820050136dm69','m10','a2',3);
+INSERT INTO weekly_history_scores (history_id, member_id, activity_id, count) VALUES ('i1780820050136dm69','m10','a3',5);
+INSERT INTO weekly_history_scores (history_id, member_id, activity_id, count) VALUES ('i1780820050136dm69','m10','a4',11);
+INSERT INTO weekly_history_scores (history_id, member_id, activity_id, count) VALUES ('i1780820050136dm69','m10','a6',14);
+INSERT INTO weekly_history_scores (history_id, member_id, activity_id, count) VALUES ('i1780820050136dm69','m10','a7',14);
+INSERT INTO weekly_history_scores (history_id, member_id, activity_id, count) VALUES ('i1780820050136dm69','m15','a1',29);
+INSERT INTO weekly_history_scores (history_id, member_id, activity_id, count) VALUES ('i1780820050136dm69','m15','a4',1);
+INSERT INTO weekly_history_scores (history_id, member_id, activity_id, count) VALUES ('i1780820050136dm69','m15','a2',30);
+INSERT INTO weekly_history_scores (history_id, member_id, activity_id, count) VALUES ('i1780820050136dm69','m15','a3',19);
+INSERT INTO weekly_history_scores (history_id, member_id, activity_id, count) VALUES ('i1780820050136dm69','m16','a2',9);
+INSERT INTO weekly_history_scores (history_id, member_id, activity_id, count) VALUES ('i1780820050136dm69','m16','a1',16);
+INSERT INTO weekly_history_scores (history_id, member_id, activity_id, count) VALUES ('i1780820050136dm69','m16','a3',5);
+INSERT INTO weekly_history_scores (history_id, member_id, activity_id, count) VALUES ('i1780820050136dm69','m16','a4',6);
+INSERT INTO weekly_history_scores (history_id, member_id, activity_id, count) VALUES ('i1780820050136dm69','m17','a2',9);
+INSERT INTO weekly_history_scores (history_id, member_id, activity_id, count) VALUES ('i1780820050136dm69','m17','a3',27);
+INSERT INTO weekly_history_scores (history_id, member_id, activity_id, count) VALUES ('i1780820050136dm69','m17','a6',0);
+INSERT INTO weekly_history_scores (history_id, member_id, activity_id, count) VALUES ('i1780820050136dm69','m17','a7',1);
+INSERT INTO weekly_history_scores (history_id, member_id, activity_id, count) VALUES ('i1780820050136dm69','m19','a1',9);
+INSERT INTO weekly_history_scores (history_id, member_id, activity_id, count) VALUES ('i1780820050136dm69','m19','a2',6);
+INSERT INTO weekly_history_scores (history_id, member_id, activity_id, count) VALUES ('i1780820050136dm69','m19','a3',5);
+INSERT INTO weekly_history_scores (history_id, member_id, activity_id, count) VALUES ('i1780820050136dm69','m19','a4',51);
+INSERT INTO weekly_history_scores (history_id, member_id, activity_id, count) VALUES ('i1780820050136dm69','m20','a1',3);
+INSERT INTO weekly_history_scores (history_id, member_id, activity_id, count) VALUES ('i1780820050136dm69','m20','a2',2);
+INSERT INTO weekly_history_scores (history_id, member_id, activity_id, count) VALUES ('i1780820050136dm69','m20','a3',6);
+INSERT INTO weekly_history_scores (history_id, member_id, activity_id, count) VALUES ('i1780820050136dm69','m20','a4',4);
+INSERT INTO weekly_history_scores (history_id, member_id, activity_id, count) VALUES ('i1780820050136dm69','m22','a2',3);
+INSERT INTO weekly_history_scores (history_id, member_id, activity_id, count) VALUES ('i1780820050136dm69','m22','a4',3);
+INSERT INTO weekly_history_scores (history_id, member_id, activity_id, count) VALUES ('i1780820050136dm69','m22','a7',2);
+INSERT INTO weekly_history (id, date, archived_at, date_from, date_to, week_num) VALUES ('i1780869559188lsvl','2026-06-07','08.06.2026','08.06.2026','14.06.2026',24);
+INSERT INTO weekly_history_scores (history_id, member_id, activity_id, count) VALUES ('i1780869559188lsvl','m1','a1',0);
+INSERT INTO weekly_history_scores (history_id, member_id, activity_id, count) VALUES ('i1780869559188lsvl','m1','a2',0);
+INSERT INTO weekly_history_scores (history_id, member_id, activity_id, count) VALUES ('i1780869559188lsvl','m16','a1',45);
+INSERT INTO weekly_history_scores (history_id, member_id, activity_id, count) VALUES ('i1780869559188lsvl','m16','a2',30);
+INSERT INTO weekly_history_scores (history_id, member_id, activity_id, count) VALUES ('i1780869559188lsvl','m16','a7',10);
+INSERT INTO weekly_history_scores (history_id, member_id, activity_id, count) VALUES ('i1780869559188lsvl','m16','a8',4);
+INSERT INTO weekly_history_scores (history_id, member_id, activity_id, count) VALUES ('i1780869559188lsvl','m16','a3',6);
+INSERT INTO weekly_history_scores (history_id, member_id, activity_id, count) VALUES ('i1780869559188lsvl','m20','a2',10);
+INSERT INTO weekly_history_scores (history_id, member_id, activity_id, count) VALUES ('i1780869559188lsvl','m20','a5',3);
+INSERT INTO weekly_history_scores (history_id, member_id, activity_id, count) VALUES ('i1780869559188lsvl','m20','a4',33);
+INSERT INTO weekly_history_scores (history_id, member_id, activity_id, count) VALUES ('i1780869559188lsvl','m20','a1',16);
+INSERT INTO weekly_history_scores (history_id, member_id, activity_id, count) VALUES ('i1780869559188lsvl','id_1780246795993_72yjh7t9f7d','a2',10);
+INSERT INTO weekly_history_scores (history_id, member_id, activity_id, count) VALUES ('i1780869559188lsvl','id_1780246795993_72yjh7t9f7d','a4',10);
+INSERT INTO weekly_history_scores (history_id, member_id, activity_id, count) VALUES ('i1780869559188lsvl','id_1780246795993_72yjh7t9f7d','a3',6);
+INSERT INTO weekly_history_scores (history_id, member_id, activity_id, count) VALUES ('i1780869559188lsvl','id_1780246795993_72yjh7t9f7d','a1',5);
+INSERT INTO weekly_history_scores (history_id, member_id, activity_id, count) VALUES ('i1780869559188lsvl','m15','a4',22);
+INSERT INTO weekly_history_scores (history_id, member_id, activity_id, count) VALUES ('i1780869559188lsvl','m15','a3',10);
+INSERT INTO weekly_history_scores (history_id, member_id, activity_id, count) VALUES ('i1780869559188lsvl','m15','a2',27);
+INSERT INTO weekly_history_scores (history_id, member_id, activity_id, count) VALUES ('i1780869559188lsvl','m15','a1',12);
+INSERT INTO weekly_history_scores (history_id, member_id, activity_id, count) VALUES ('i1780869559188lsvl','m15','a5',2);
+INSERT INTO weekly_history_scores (history_id, member_id, activity_id, count) VALUES ('i1780869559188lsvl','id_1780246783483_wj5t4ndl8j','a4',39);
+INSERT INTO weekly_history_scores (history_id, member_id, activity_id, count) VALUES ('i1780869559188lsvl','id_1780246783483_wj5t4ndl8j','a3',44);
+INSERT INTO weekly_history_scores (history_id, member_id, activity_id, count) VALUES ('i1780869559188lsvl','id_1780246783483_wj5t4ndl8j','a2',1);
+INSERT INTO weekly_history_scores (history_id, member_id, activity_id, count) VALUES ('i1780869559188lsvl','i17808319413133ci4','a4',32);
+INSERT INTO weekly_history_scores (history_id, member_id, activity_id, count) VALUES ('i1780869559188lsvl','i17808319413133ci4','a3',10);
+INSERT INTO weekly_history_scores (history_id, member_id, activity_id, count) VALUES ('i1780869559188lsvl','i17808319413133ci4','a7',13);
+INSERT INTO weekly_history_scores (history_id, member_id, activity_id, count) VALUES ('i1780869559188lsvl','m19','a4',50);
+INSERT INTO weekly_history_scores (history_id, member_id, activity_id, count) VALUES ('i1780869559188lsvl','m19','a3',6);
+INSERT INTO weekly_history_scores (history_id, member_id, activity_id, count) VALUES ('i1780869559188lsvl','m19','a1',91);
+INSERT INTO weekly_history_scores (history_id, member_id, activity_id, count) VALUES ('i1780869559188lsvl','m19','a5',1);
+INSERT INTO weekly_history_scores (history_id, member_id, activity_id, count) VALUES ('i1780869559188lsvl','m19','a2',37);
+INSERT INTO weekly_history_scores (history_id, member_id, activity_id, count) VALUES ('i1780869559188lsvl','m19','a8',24);
+INSERT INTO weekly_history_scores (history_id, member_id, activity_id, count) VALUES ('i1780869559188lsvl','i1780832354801ym38','a1',37);
+INSERT INTO weekly_history_scores (history_id, member_id, activity_id, count) VALUES ('i1780869559188lsvl','i1780832354801ym38','a2',5);
+INSERT INTO weekly_history_scores (history_id, member_id, activity_id, count) VALUES ('i1780869559188lsvl','i1780832354801ym38','a3',6);
+INSERT INTO weekly_history_scores (history_id, member_id, activity_id, count) VALUES ('i1780869559188lsvl','id_1780246701085_rt4ppx33i1','a3',18);
+INSERT INTO weekly_history_scores (history_id, member_id, activity_id, count) VALUES ('i1780869559188lsvl','id_1780246701085_rt4ppx33i1','a4',17);
+INSERT INTO weekly_history_scores (history_id, member_id, activity_id, count) VALUES ('i1780869559188lsvl','m2','a2',8);
+INSERT INTO weekly_history_scores (history_id, member_id, activity_id, count) VALUES ('i1780869559188lsvl','m2','a11',8);
+INSERT INTO weekly_history_scores (history_id, member_id, activity_id, count) VALUES ('i1780869559188lsvl','m2','a3',12);
+INSERT INTO weekly_history_scores (history_id, member_id, activity_id, count) VALUES ('i1780869559188lsvl','m2','a1',33);
+INSERT INTO weekly_history_scores (history_id, member_id, activity_id, count) VALUES ('i1780869559188lsvl','m4','a2',29);
+INSERT INTO weekly_history_scores (history_id, member_id, activity_id, count) VALUES ('i1780869559188lsvl','m4','a4',61);
+INSERT INTO weekly_history_scores (history_id, member_id, activity_id, count) VALUES ('i1780869559188lsvl','m4','a5',10);
+INSERT INTO weekly_history_scores (history_id, member_id, activity_id, count) VALUES ('i1780869559188lsvl','m4','a8',18);
+INSERT INTO weekly_history_scores (history_id, member_id, activity_id, count) VALUES ('i1780869559188lsvl','m4','a1',33);
+INSERT INTO monthly_log (id, type, date, data) VALUES ('i1780776501143xm2k','reprimand','2026-06-06','{"mid":"m1","memberName":"Richi Londo","repType":"verbal","val":1}'::jsonb);
+INSERT INTO monthly_log (id, type, date, data) VALUES ('i1780776501761mg0t','reprimand','2026-06-06','{"mid":"m1","memberName":"Richi Londo","repType":"strict","val":1}'::jsonb);
+INSERT INTO monthly_log (id, type, date, data) VALUES ('i1780776502253158s','reprimand','2026-06-06','{"mid":"m1","memberName":"Richi Londo","repType":"verbal","val":0}'::jsonb);
+INSERT INTO monthly_log (id, type, date, data) VALUES ('i1780776502642dqnf','reprimand','2026-06-06','{"mid":"m1","memberName":"Richi Londo","repType":"strict","val":0}'::jsonb);
+INSERT INTO monthly_log (id, type, date, data) VALUES ('i1780820050136w2p3','scores-reset','2026-06-07','{"scores":{"m1":{"a1":24,"a2":16,"a3":7,"a4":14,"a7":13,"a10":2,"a8":7},"m2":{"a9":0},"m6":{"a1":46,"a2":35,"a4":19},"m10":{"a1":17,"a2":3,"a3":5,"a4":11,"a6":14,"a7":14},"m15":{"a1":29,"a4":1,"a2":30,"a3":19},"m16":{"a2":9,"a1":16,"a3":5,"a4":6},"m17":{"a2":9,"a3":27,"a6":0,"a7":1},"m19":{"a1":9,"a2":6,"a3":5,"a4":51},"m20":{"a1":3,"a2":2,"a3":6,"a4":4},"m22":{"a2":3,"a4":3,"a7":2}}}'::jsonb);
+INSERT INTO monthly_log (id, type, date, data) VALUES ('i1780869559189a4m8','scores-reset','2026-06-07','{"scores":{"m1":{"a1":0,"a2":0},"m16":{"a1":45,"a2":30,"a7":10,"a8":4,"a3":6},"m20":{"a2":10,"a5":3,"a4":33,"a1":16},"id_1780246795993_72yjh7t9f7d":{"a2":10,"a4":10,"a3":6,"a1":5},"m15":{"a4":22,"a3":10,"a2":27,"a1":12,"a5":2},"id_1780246783483_wj5t4ndl8j":{"a4":39,"a3":44,"a2":1},"i17808319413133ci4":{"a4":32,"a3":10,"a7":13},"m19":{"a4":50,"a3":6,"a1":91,"a5":1,"a2":37,"a8":24},"i1780832354801ym38":{"a1":37,"a2":5,"a3":6},"id_1780246701085_rt4ppx33i1":{"a3":18,"a4":17},"m2":{"a2":8,"a11":8,"a3":12,"a1":33},"m4":{"a2":29,"a4":61,"a5":10,"a8":18,"a1":33}}}'::jsonb);
+INSERT INTO monthly_log (id, type, date, data) VALUES ('i1780902765717b7bl','meeting','2026-06-08','{"title":"Собрание отдела","present":12,"warned":3,"absent":3,"total":18,"detail":[{"id":"m1","name":"Richi Londo","status":"present","note":""},{"id":"m2","name":"Mir Li","status":"present","note":""},{"id":"m3","name":"Francesco IceTwice","status":"present","note":""},{"id":"m4","name":"Logan Brooks","status":"present","note":""},{"id":"m10","name":"Miran Zekari","status":"present","note":""},{"id":"m15","name":"Daryana Londo","status":"present","note":""},{"id":"m16","name":"Neko Toujou","status":"present","note":""},{"id":"m19","name":"Anthony Wilson","status":"present","note":""},{"id":"m20","name":"Aomine Londo","status":"present","note":""},{"id":"id_1780246654453_gkl6e4m2ewo","name":"Shaggy Furia","status":"present","note":""},{"id":"id_1780246701085_rt4ppx33i1","name":"Kalyaka Mart","status":"present","note":""},{"id":"id_1780246783483_wj5t4ndl8j","name":"Vex Londo","status":"warned","note":""},{"id":"id_1780246795993_72yjh7t9f7d","name":"Egor Blazer","status":"warned","note":""},{"id":"i17808319413133ci4","name":"Kyka Londo","status":"present","note":""},{"id":"i1780832354801ym38","name":"Doshy Unfairz","status":"warned","note":""},{"id":"i1780833670884jza4","name":"Ryker Moonlight","status":"absent","note":""},{"id":"i1780833688077woux","name":"Wiski IceTwice","status":"absent","note":""},{"id":"i17808337037678l8f","name":"Vanco Londo","status":"absent","note":""}]}'::jsonb);
+INSERT INTO monthly_log (id, type, date, data) VALUES ('i1780902771205rpso','reprimand','2026-06-08','{"mid":"i1780833670884jza4","memberName":"Ryker Moonlight","repType":"verbal","val":1,"reason":"Отсутствие на собрании"}'::jsonb);
+INSERT INTO monthly_log (id, type, date, data) VALUES ('i178090277120512jt','reprimand','2026-06-08','{"mid":"i1780833688077woux","memberName":"Wiski IceTwice","repType":"verbal","val":1,"reason":"Отсутствие на собрании"}'::jsonb);
+INSERT INTO monthly_log (id, type, date, data) VALUES ('i1780902771205j70k','reprimand','2026-06-08','{"mid":"i17808337037678l8f","memberName":"Vanco Londo","repType":"verbal","val":1,"reason":"Отсутствие на собрании"}'::jsonb);
+INSERT INTO monthly_log (id, type, date, data) VALUES ('i17809027789193l7q','reprimand','2026-06-08','{"mid":"i1780833670884jza4","memberName":"Ryker Moonlight","repType":"verbal","val":0}'::jsonb);
+INSERT INTO monthly_log (id, type, date, data) VALUES ('i17809027797809s41','reprimand','2026-06-08','{"mid":"i1780833688077woux","memberName":"Wiski IceTwice","repType":"verbal","val":0}'::jsonb);
+INSERT INTO monthly_log (id, type, date, data) VALUES ('i1780902780571fzj1','reprimand','2026-06-08','{"mid":"i17808337037678l8f","memberName":"Vanco Londo","repType":"verbal","val":0}'::jsonb);
+INSERT INTO monthly_log (id, type, date, data) VALUES ('i1780902780850eusw','reprimand','2026-06-08','{"mid":"i17808337037678l8f","memberName":"Vanco Londo","repType":"verbal","val":1}'::jsonb);
+INSERT INTO monthly_log (id, type, date, data) VALUES ('i1780902781360wufp','reprimand','2026-06-08','{"mid":"i17808337037678l8f","memberName":"Vanco Londo","repType":"verbal","val":0}'::jsonb);
+INSERT INTO monthly_log (id, type, date, data) VALUES ('i1780902781752366v','reprimand','2026-06-08','{"mid":"i17808337037678l8f","memberName":"Vanco Londo","repType":"strict","val":1}'::jsonb);
+INSERT INTO monthly_log (id, type, date, data) VALUES ('i17809027822355tx3','reprimand','2026-06-08','{"mid":"i17808337037678l8f","memberName":"Vanco Londo","repType":"strict","val":0}'::jsonb);
+INSERT INTO monthly_log (id, type, date, data) VALUES ('i1781689565443vc8a','reprimand','2026-06-17','{"mid":"m1","memberName":"Richi Londo","repType":"verbal","val":1}'::jsonb);
+INSERT INTO monthly_log (id, type, date, data) VALUES ('i1781689567710zomf','reprimand','2026-06-17','{"mid":"m1","memberName":"Richi Londo","repType":"verbal","val":0}'::jsonb);
+INSERT INTO monthly_log (id, type, date, data) VALUES ('i178168974243290h9','meeting','2026-06-17','{"title":"123","present":0,"warned":0,"absent":0,"total":20,"detail":[{"id":"m1","name":"Richi Londo","status":"none","note":""},{"id":"m2","name":"Mir Li","status":"none","note":""},{"id":"m4","name":"Logan Brooks","status":"none","note":""},{"id":"m10","name":"Miran Londo","status":"none","note":""},{"id":"m15","name":"Daryana Londo","status":"none","note":""},{"id":"m19","name":"Anthony Wilson","status":"none","note":""},{"id":"m20","name":"Aomine Londo","status":"none","note":""},{"id":"id_1780246701085_rt4ppx33i1","name":"Kalyaka Mart","status":"none","note":""},{"id":"id_1780246783483_wj5t4ndl8j","name":"Vex Londo","status":"none","note":""},{"id":"i17808319413133ci4","name":"Kyka Londo","status":"none","note":""},{"id":"i1780833670884jza4","name":"Ryker Moonlight","status":"none","note":""},{"id":"i1781452270089wt0y","name":"Ruan Yuwi","status":"none","note":""},{"id":"i1781452361976vitd","name":"Cornelio Londo","status":"none","note":""},{"id":"i1781452383425yq1w","name":"Chaobi Yuwi","status":"none","note":""},{"id":"i1781452418839dj58","name":"Qwelst Phoenix","status":"none","note":""},{"id":"i1781452448187t94n","name":"Sato Horikawa","status":"none","note":""},{"id":"i1781452469848uojk","name":"Abdullah Londo","status":"none","note":""},{"id":"i1781452485118xbs7","name":"John Whou","status":"none","note":""},{"id":"i1781452502651sag1","name":"Jannik Londo","status":"none","note":""},{"id":"i1781452513490qgz4","name":"Alexandr Mirror","status":"none","note":""}]}'::jsonb);
+INSERT INTO monthly_log (id, type, date, data) VALUES ('i17820583436085yv9','meeting','2026-06-21','{"title":"Еженеделька состава","present":6,"warned":7,"absent":11,"total":24,"detail":[{"id":"m1","name":"Richi Londo","status":"present","note":""},{"id":"m2","name":"Mir Li","status":"absent","note":"Рыбка поговорит"},{"id":"m4","name":"Logan Brooks","status":"present","note":""},{"id":"m10","name":"Miran Londo","status":"warned","note":"Отпуск"},{"id":"m15","name":"Daryana Londo","status":"absent","note":"Илюша напишет"},{"id":"m19","name":"Anthony Wilson","status":"absent","note":"Помилован"},{"id":"id_1780246783483_wj5t4ndl8j","name":"Vex Londo","status":"warned","note":""},{"id":"i17808319413133ci4","name":"Kyka Londo","status":"absent","note":"Илюша напишет"},{"id":"i1780833670884jza4","name":"Ryker Moonlight","status":"absent","note":"Вопросики"},{"id":"i1781452361976vitd","name":"Cornelio Londo","status":"warned","note":""},{"id":"i1781452383425yq1w","name":"Chaobi Yuwi","status":"present","note":""},{"id":"i1781452448187t94n","name":"Sato Horikawa","status":"present","note":""},{"id":"i1781452469848uojk","name":"Abdullah Londo","status":"warned","note":""},{"id":"i1781452485118xbs7","name":"John Whou","status":"absent","note":"Вопросики"},{"id":"i1781452502651sag1","name":"Jannik Londo","status":"absent","note":"Уволился"},{"id":"i1781452513490qgz4","name":"Alexandr Mirror","status":"warned","note":"Отпуск"},{"id":"i1781995977319mgic","name":"Jojo Krager","status":"warned","note":""},{"id":"i1781996307063wsmr","name":"Raze Zubovich","status":"warned","note":""},{"id":"i1782058023687ba1x","name":"Abduhalim Faze","status":"present","note":""},{"id":"i1782058046189shs4","name":"Twix London","status":"absent","note":"Не дома"},{"id":"i1782058104607nue4","name":"Vladislav Bumaga","status":"absent","note":"Новый"},{"id":"i1782058153934ll20","name":"Kate Staffary","status":"absent","note":"Какого хуя"},{"id":"i1782058171999elgo","name":"Denis Armstrong","status":"absent","note":"Какого хуя"},{"id":"i1782058246001zypf","name":"Cheef ForSainttez","status":"present","note":""}]}'::jsonb);
+INSERT INTO monthly_log (id, type, date, data) VALUES ('i1782662903891j12u','meeting','2026-06-28','{"title":"Собрание отдела","present":6,"warned":6,"absent":4,"total":16,"detail":[{"id":"m1","name":"Richi Londo","status":"warned","note":""},{"id":"m4","name":"Logan Brooks","status":"present","note":""},{"id":"m15","name":"Daryana Londo","status":"present","note":""},{"id":"m19","name":"Anthony Wilson","status":"present","note":""},{"id":"i17808319413133ci4","name":"Kyka Londo","status":"warned","note":""},{"id":"i1780833670884jza4","name":"Ryker Moonlight","status":"warned","note":""},{"id":"i1781452361976vitd","name":"Cornelio Londo","status":"absent","note":""},{"id":"i1781452383425yq1w","name":"Chaobi Yuwi","status":"warned","note":""},{"id":"i1781452448187t94n","name":"Sato Horikawa","status":"warned","note":""},{"id":"i1781452469848uojk","name":"Abdullah Londo","status":"absent","note":""},{"id":"i1782058246001zypf","name":"Cheef ForSainttez","status":"absent","note":""},{"id":"i1782662593743xinc","name":"John Whou","status":"warned","note":""},{"id":"i1782662618505udak","name":"Violetta Hive","status":"present","note":""},{"id":"i1782662634913t0fm","name":"Likki Cartel","status":"absent","note":""},{"id":"i1782662666929rv1h","name":"Hayden Londo","status":"present","note":""},{"id":"i1782662691351xpca","name":"Jordan Londo","status":"present","note":""}]}'::jsonb);
+INSERT INTO settings (key, value) VALUES ('meeting', '{"date":"2026-05-29","attendance":{"m1":{"status":"none","note":""},"m4":{"status":"none","note":""},"m15":{"status":"none","note":""},"m19":{"status":"none","note":""},"i17808319413133ci4":{"status":"none","note":""},"i1780833670884jza4":{"status":"none","note":""},"i1781452361976vitd":{"status":"none","note":""},"i1781452383425yq1w":{"status":"none","note":""},"i1781452448187t94n":{"status":"none","note":""},"i1781452469848uojk":{"status":"none","note":""},"i1782058246001zypf":{"status":"none","note":""},"i1782662593743xinc":{"status":"none","note":""},"i1782662618505udak":{"status":"none","note":""},"i1782662634913t0fm":{"status":"none","note":""},"i1782662666929rv1h":{"status":"none","note":""},"i1782662691351xpca":{"status":"none","note":""},"i1782662924519f0zw":{"status":"none","note":""}}}'::jsonb) ON CONFLICT (key) DO UPDATE SET value = EXCLUDED.value;
+INSERT INTO settings (key, value) VALUES ('call_date', '{"date":"2026-05-29"}'::jsonb) ON CONFLICT (key) DO UPDATE SET value = EXCLUDED.value;
+INSERT INTO reports (id, week_key, week_label, submitted_at, name, first_name, last_name, game_id, status, total_pts, mod_note, reviewed_at) VALUES ('r1780903547522glh6','2026-06-07','08.06.2026 — 14.06.2026','2026-06-08T07:25:47.522Z','Okuname Londo','Okuname','Londo','155604','rejected',2055,'','2026-06-08T07:31:37.802Z');
+INSERT INTO report_aspects (report_id, act_id, code, name, points, count, total_pts) VALUES ('r1780903547522glh6','a1','LC','Выдача лицензии',15,1,15);
+INSERT INTO report_aspect_links (aspect_id, link) SELECT id, 'https://fotora.ru/uploaded/?ID=ROCVQ06062026110641' FROM report_aspects WHERE report_id='r1780903547522glh6' AND act_id='a1' ORDER BY id DESC LIMIT 1;
+INSERT INTO report_aspects (report_id, act_id, code, name, points, count, total_pts) VALUES ('r1780903547522glh6','a2','EM','Трудоустройство (кадр. аудит)',30,37,1110);
+INSERT INTO report_aspect_links (aspect_id, link) SELECT id, '1.https://discord.com/channels/1382609371510607923/1382609372957376594/1510782567471779850' FROM report_aspects WHERE report_id='r1780903547522glh6' AND act_id='a2' ORDER BY id DESC LIMIT 1;
+INSERT INTO report_aspect_links (aspect_id, link) SELECT id, '2.https://discord.com/channels/1382609371510607923/1382609372957376594/1510782882505949215' FROM report_aspects WHERE report_id='r1780903547522glh6' AND act_id='a2' ORDER BY id DESC LIMIT 1;
+INSERT INTO report_aspect_links (aspect_id, link) SELECT id, '3.https://discord.com/channels/1382609371510607923/1382609372957376594/1510785534883266671' FROM report_aspects WHERE report_id='r1780903547522glh6' AND act_id='a2' ORDER BY id DESC LIMIT 1;
+INSERT INTO report_aspect_links (aspect_id, link) SELECT id, '4.https://discord.com/channels/1382609371510607923/1382609372957376594/1510863760183660686' FROM report_aspects WHERE report_id='r1780903547522glh6' AND act_id='a2' ORDER BY id DESC LIMIT 1;
+INSERT INTO report_aspect_links (aspect_id, link) SELECT id, '5.https://discord.com/channels/1382609371510607923/1382609372957376594/1510933091722465341' FROM report_aspects WHERE report_id='r1780903547522glh6' AND act_id='a2' ORDER BY id DESC LIMIT 1;
+INSERT INTO report_aspect_links (aspect_id, link) SELECT id, '6.https://discord.com/channels/1382609371510607923/1382609372957376594/1510933453506609162' FROM report_aspects WHERE report_id='r1780903547522glh6' AND act_id='a2' ORDER BY id DESC LIMIT 1;
+INSERT INTO report_aspect_links (aspect_id, link) SELECT id, '7.https://discord.com/channels/1382609371510607923/1382609372957376594/1510948735532667010' FROM report_aspects WHERE report_id='r1780903547522glh6' AND act_id='a2' ORDER BY id DESC LIMIT 1;
+INSERT INTO report_aspect_links (aspect_id, link) SELECT id, '8.https://discord.com/channels/1382609371510607923/1382609372957376594/1510970379894657075' FROM report_aspects WHERE report_id='r1780903547522glh6' AND act_id='a2' ORDER BY id DESC LIMIT 1;
+INSERT INTO report_aspect_links (aspect_id, link) SELECT id, '9.https://discord.com/channels/1382609371510607923/1382609372957376594/1511163703427465307' FROM report_aspects WHERE report_id='r1780903547522glh6' AND act_id='a2' ORDER BY id DESC LIMIT 1;
+INSERT INTO report_aspect_links (aspect_id, link) SELECT id, '10.https://discord.com/channels/1382609371510607923/1382609372957376594/1511279812633825431' FROM report_aspects WHERE report_id='r1780903547522glh6' AND act_id='a2' ORDER BY id DESC LIMIT 1;
+INSERT INTO report_aspect_links (aspect_id, link) SELECT id, '11.https://discord.com/channels/1382609371510607923/1382609372957376594/1511281136339259432' FROM report_aspects WHERE report_id='r1780903547522glh6' AND act_id='a2' ORDER BY id DESC LIMIT 1;
+INSERT INTO report_aspect_links (aspect_id, link) SELECT id, '12.https://discord.com/channels/1382609371510607923/1382609372957376594/1511281487373406239' FROM report_aspects WHERE report_id='r1780903547522glh6' AND act_id='a2' ORDER BY id DESC LIMIT 1;
+INSERT INTO report_aspect_links (aspect_id, link) SELECT id, '13.https://discord.com/channels/1382609371510607923/1382609372957376594/1511314023742967841' FROM report_aspects WHERE report_id='r1780903547522glh6' AND act_id='a2' ORDER BY id DESC LIMIT 1;
+INSERT INTO report_aspect_links (aspect_id, link) SELECT id, '14.https://discord.com/channels/1382609371510607923/1382609372957376594/1511325080200679466' FROM report_aspects WHERE report_id='r1780903547522glh6' AND act_id='a2' ORDER BY id DESC LIMIT 1;
+INSERT INTO report_aspect_links (aspect_id, link) SELECT id, '15.https://discord.com/channels/1382609371510607923/1382609372957376594/1511327088463056928' FROM report_aspects WHERE report_id='r1780903547522glh6' AND act_id='a2' ORDER BY id DESC LIMIT 1;
+INSERT INTO report_aspect_links (aspect_id, link) SELECT id, '16.https://discord.com/channels/1382609371510607923/1382609372957376594/1511327496123973765' FROM report_aspects WHERE report_id='r1780903547522glh6' AND act_id='a2' ORDER BY id DESC LIMIT 1;
+INSERT INTO report_aspect_links (aspect_id, link) SELECT id, '17.https://discord.com/channels/1382609371510607923/1382609372957376594/1511327895535226950' FROM report_aspects WHERE report_id='r1780903547522glh6' AND act_id='a2' ORDER BY id DESC LIMIT 1;
+INSERT INTO report_aspect_links (aspect_id, link) SELECT id, '18.https://discord.com/channels/1382609371510607923/1382609372957376594/1511625545589194814' FROM report_aspects WHERE report_id='r1780903547522glh6' AND act_id='a2' ORDER BY id DESC LIMIT 1;
+INSERT INTO report_aspect_links (aspect_id, link) SELECT id, '19.https://discord.com/channels/1382609371510607923/1382609372957376594/1511650380650643577' FROM report_aspects WHERE report_id='r1780903547522glh6' AND act_id='a2' ORDER BY id DESC LIMIT 1;
+INSERT INTO report_aspect_links (aspect_id, link) SELECT id, '20.https://discord.com/channels/1382609371510607923/1382609372957376594/1511652980170948669' FROM report_aspects WHERE report_id='r1780903547522glh6' AND act_id='a2' ORDER BY id DESC LIMIT 1;
+INSERT INTO report_aspect_links (aspect_id, link) SELECT id, '21.https://discord.com/channels/1382609371510607923/1382609372957376594/1511707101389656094' FROM report_aspects WHERE report_id='r1780903547522glh6' AND act_id='a2' ORDER BY id DESC LIMIT 1;
+INSERT INTO report_aspect_links (aspect_id, link) SELECT id, '22.https://discord.com/channels/1382609371510607923/1382609372957376594/1511708509551595633' FROM report_aspects WHERE report_id='r1780903547522glh6' AND act_id='a2' ORDER BY id DESC LIMIT 1;
+INSERT INTO report_aspect_links (aspect_id, link) SELECT id, '23.https://discord.com/channels/1382609371510607923/1382609372957376594/1511711929352192121' FROM report_aspects WHERE report_id='r1780903547522glh6' AND act_id='a2' ORDER BY id DESC LIMIT 1;
+INSERT INTO report_aspect_links (aspect_id, link) SELECT id, '24.https://discord.com/channels/1382609371510607923/1382609372957376594/1512031032537252106' FROM report_aspects WHERE report_id='r1780903547522glh6' AND act_id='a2' ORDER BY id DESC LIMIT 1;
+INSERT INTO report_aspect_links (aspect_id, link) SELECT id, '25.https://discord.com/channels/1382609371510607923/1382609372957376594/1512031662999867512' FROM report_aspects WHERE report_id='r1780903547522glh6' AND act_id='a2' ORDER BY id DESC LIMIT 1;
+INSERT INTO report_aspect_links (aspect_id, link) SELECT id, '26.https://discord.com/channels/1382609371510607923/1382609372957376594/1512037341479436340' FROM report_aspects WHERE report_id='r1780903547522glh6' AND act_id='a2' ORDER BY id DESC LIMIT 1;
+INSERT INTO report_aspect_links (aspect_id, link) SELECT id, '27.https://discord.com/channels/1382609371510607923/1382609372957376594/1512362533653184612' FROM report_aspects WHERE report_id='r1780903547522glh6' AND act_id='a2' ORDER BY id DESC LIMIT 1;
+INSERT INTO report_aspect_links (aspect_id, link) SELECT id, '28.https://discord.com/channels/1382609371510607923/1382609372957376594/1512377107416879174' FROM report_aspects WHERE report_id='r1780903547522glh6' AND act_id='a2' ORDER BY id DESC LIMIT 1;
+INSERT INTO report_aspect_links (aspect_id, link) SELECT id, '29.https://discord.com/channels/1382609371510607923/1382609372957376594/1512394949860003971' FROM report_aspects WHERE report_id='r1780903547522glh6' AND act_id='a2' ORDER BY id DESC LIMIT 1;
+INSERT INTO report_aspect_links (aspect_id, link) SELECT id, '30.https://discord.com/channels/1382609371510607923/1382609372957376594/1512453019613134888' FROM report_aspects WHERE report_id='r1780903547522glh6' AND act_id='a2' ORDER BY id DESC LIMIT 1;
+INSERT INTO report_aspect_links (aspect_id, link) SELECT id, '31.https://discord.com/channels/1382609371510607923/1382609372957376594/1512456554933260318' FROM report_aspects WHERE report_id='r1780903547522glh6' AND act_id='a2' ORDER BY id DESC LIMIT 1;
+INSERT INTO report_aspect_links (aspect_id, link) SELECT id, '32.https://discord.com/channels/1382609371510607923/1382609372957376594/1512457459544096809' FROM report_aspects WHERE report_id='r1780903547522glh6' AND act_id='a2' ORDER BY id DESC LIMIT 1;
+INSERT INTO report_aspect_links (aspect_id, link) SELECT id, '33.https://discord.com/channels/1382609371510607923/1382609372957376594/1512458218117267588' FROM report_aspects WHERE report_id='r1780903547522glh6' AND act_id='a2' ORDER BY id DESC LIMIT 1;
+INSERT INTO report_aspect_links (aspect_id, link) SELECT id, '34.https://discord.com/channels/1382609371510607923/1382609372957376594/1512480516589223957' FROM report_aspects WHERE report_id='r1780903547522glh6' AND act_id='a2' ORDER BY id DESC LIMIT 1;
+INSERT INTO report_aspect_links (aspect_id, link) SELECT id, '35.https://discord.com/channels/1382609371510607923/1382609372957376594/1512482044272312452' FROM report_aspects WHERE report_id='r1780903547522glh6' AND act_id='a2' ORDER BY id DESC LIMIT 1;
+INSERT INTO report_aspect_links (aspect_id, link) SELECT id, '36.https://discord.com/channels/1382609371510607923/1382609372957376594/1512482465841811630' FROM report_aspects WHERE report_id='r1780903547522glh6' AND act_id='a2' ORDER BY id DESC LIMIT 1;
+INSERT INTO report_aspect_links (aspect_id, link) SELECT id, '37.https://discord.com/channels/1382609371510607923/1382609372957376594/1512483938533245120' FROM report_aspects WHERE report_id='r1780903547522glh6' AND act_id='a2' ORDER BY id DESC LIMIT 1;
+INSERT INTO report_aspects (report_id, act_id, code, name, points, count, total_pts) VALUES ('r1780903547522glh6','a3','EX','Практический экзамен',20,6,120);
+INSERT INTO report_aspect_links (aspect_id, link) SELECT id, '1.https://discord.com/channels/1382609371510607923/1510730225263050782/1510824257591185408' FROM report_aspects WHERE report_id='r1780903547522glh6' AND act_id='a3' ORDER BY id DESC LIMIT 1;
+INSERT INTO report_aspect_links (aspect_id, link) SELECT id, '2.https://discord.com/channels/1382609371510607923/1510730225263050782/1510961206473523311' FROM report_aspects WHERE report_id='r1780903547522glh6' AND act_id='a3' ORDER BY id DESC LIMIT 1;
+INSERT INTO report_aspect_links (aspect_id, link) SELECT id, '3.https://discord.com/channels/1382609371510607923/1510730225263050782/1511151280293417001' FROM report_aspects WHERE report_id='r1780903547522glh6' AND act_id='a3' ORDER BY id DESC LIMIT 1;
+INSERT INTO report_aspect_links (aspect_id, link) SELECT id, '4.https://discord.com/channels/1382609371510607923/1510730225263050782/1511161598889426944' FROM report_aspects WHERE report_id='r1780903547522glh6' AND act_id='a3' ORDER BY id DESC LIMIT 1;
+INSERT INTO report_aspect_links (aspect_id, link) SELECT id, '5.https://discord.com/channels/1382609371510607923/1510730225263050782/1511665711775485952' FROM report_aspects WHERE report_id='r1780903547522glh6' AND act_id='a3' ORDER BY id DESC LIMIT 1;
+INSERT INTO report_aspect_links (aspect_id, link) SELECT id, '6.https://discord.com/channels/1382609371510607923/1510730225263050782/1511668251602583612' FROM report_aspects WHERE report_id='r1780903547522glh6' AND act_id='a3' ORDER BY id DESC LIMIT 1;
+INSERT INTO report_aspects (report_id, act_id, code, name, points, count, total_pts) VALUES ('r1780903547522glh6','a4','RP','Проверка отчётность-pa',10,50,500);
+INSERT INTO report_aspect_links (aspect_id, link) SELECT id, '1.https://discord.com/channels/1382609371510607923/1507850086716018780/1510764245774635138' FROM report_aspects WHERE report_id='r1780903547522glh6' AND act_id='a4' ORDER BY id DESC LIMIT 1;
+INSERT INTO report_aspect_links (aspect_id, link) SELECT id, '2.https://discord.com/channels/1382609371510607923/1507850086716018780/1510765131179757652' FROM report_aspects WHERE report_id='r1780903547522glh6' AND act_id='a4' ORDER BY id DESC LIMIT 1;
+INSERT INTO report_aspect_links (aspect_id, link) SELECT id, '3.https://discord.com/channels/1382609371510607923/1507850086716018780/1510766669369315558' FROM report_aspects WHERE report_id='r1780903547522glh6' AND act_id='a4' ORDER BY id DESC LIMIT 1;
+INSERT INTO report_aspect_links (aspect_id, link) SELECT id, '4.https://discord.com/channels/1382609371510607923/1507850086716018780/1510769139843600435' FROM report_aspects WHERE report_id='r1780903547522glh6' AND act_id='a4' ORDER BY id DESC LIMIT 1;
+INSERT INTO report_aspect_links (aspect_id, link) SELECT id, '5.https://discord.com/channels/1382609371510607923/1507850086716018780/1510770114549780511' FROM report_aspects WHERE report_id='r1780903547522glh6' AND act_id='a4' ORDER BY id DESC LIMIT 1;
+INSERT INTO report_aspect_links (aspect_id, link) SELECT id, '6.https://discord.com/channels/1382609371510607923/1507850086716018780/1510772886573420765' FROM report_aspects WHERE report_id='r1780903547522glh6' AND act_id='a4' ORDER BY id DESC LIMIT 1;
+INSERT INTO report_aspect_links (aspect_id, link) SELECT id, '7.https://discord.com/channels/1382609371510607923/1507850086716018780/1510855669308461140' FROM report_aspects WHERE report_id='r1780903547522glh6' AND act_id='a4' ORDER BY id DESC LIMIT 1;
+INSERT INTO report_aspect_links (aspect_id, link) SELECT id, '8.https://discord.com/channels/1382609371510607923/1507850086716018780/1510919223919116388' FROM report_aspects WHERE report_id='r1780903547522glh6' AND act_id='a4' ORDER BY id DESC LIMIT 1;
+INSERT INTO report_aspect_links (aspect_id, link) SELECT id, '9.https://discord.com/channels/1382609371510607923/1507850086716018780/1510940670469083221' FROM report_aspects WHERE report_id='r1780903547522glh6' AND act_id='a4' ORDER BY id DESC LIMIT 1;
+INSERT INTO report_aspect_links (aspect_id, link) SELECT id, '10.https://discord.com/channels/1382609371510607923/1507850086716018780/1510944016655712317' FROM report_aspects WHERE report_id='r1780903547522glh6' AND act_id='a4' ORDER BY id DESC LIMIT 1;
+INSERT INTO report_aspect_links (aspect_id, link) SELECT id, '11.https://discord.com/channels/1382609371510607923/1507850086716018780/1510945124761206795' FROM report_aspects WHERE report_id='r1780903547522glh6' AND act_id='a4' ORDER BY id DESC LIMIT 1;
+INSERT INTO report_aspect_links (aspect_id, link) SELECT id, '12.https://discord.com/channels/1382609371510607923/1507850086716018780/1510946857646293082' FROM report_aspects WHERE report_id='r1780903547522glh6' AND act_id='a4' ORDER BY id DESC LIMIT 1;
+INSERT INTO report_aspect_links (aspect_id, link) SELECT id, '13.https://discord.com/channels/1382609371510607923/1507850086716018780/1510947792950923435' FROM report_aspects WHERE report_id='r1780903547522glh6' AND act_id='a4' ORDER BY id DESC LIMIT 1;
+INSERT INTO report_aspect_links (aspect_id, link) SELECT id, '14.https://discord.com/channels/1382609371510607923/1507850086716018780/1510948042436775997' FROM report_aspects WHERE report_id='r1780903547522glh6' AND act_id='a4' ORDER BY id DESC LIMIT 1;
+INSERT INTO report_aspect_links (aspect_id, link) SELECT id, '15.https://discord.com/channels/1382609371510607923/1507850086716018780/1511269145075777586' FROM report_aspects WHERE report_id='r1780903547522glh6' AND act_id='a4' ORDER BY id DESC LIMIT 1;
+INSERT INTO report_aspect_links (aspect_id, link) SELECT id, '16.https://discord.com/channels/1382609371510607923/1507850086716018780/1511272749169901588' FROM report_aspects WHERE report_id='r1780903547522glh6' AND act_id='a4' ORDER BY id DESC LIMIT 1;
+INSERT INTO report_aspect_links (aspect_id, link) SELECT id, '17.https://discord.com/channels/1382609371510607923/1507850086716018780/1511298351922938027' FROM report_aspects WHERE report_id='r1780903547522glh6' AND act_id='a4' ORDER BY id DESC LIMIT 1;
+INSERT INTO report_aspect_links (aspect_id, link) SELECT id, '18.https://discord.com/channels/1382609371510607923/1507850086716018780/1511298957035176057' FROM report_aspects WHERE report_id='r1780903547522glh6' AND act_id='a4' ORDER BY id DESC LIMIT 1;
+INSERT INTO report_aspect_links (aspect_id, link) SELECT id, '19.https://discord.com/channels/1382609371510607923/1507850086716018780/1511299240301694976' FROM report_aspects WHERE report_id='r1780903547522glh6' AND act_id='a4' ORDER BY id DESC LIMIT 1;
+INSERT INTO report_aspect_links (aspect_id, link) SELECT id, '20.https://discord.com/channels/1382609371510607923/1507850086716018780/1511301898207105095' FROM report_aspects WHERE report_id='r1780903547522glh6' AND act_id='a4' ORDER BY id DESC LIMIT 1;
+INSERT INTO report_aspect_links (aspect_id, link) SELECT id, '21.https://discord.com/channels/1382609371510607923/1507850086716018780/1511317070233604228' FROM report_aspects WHERE report_id='r1780903547522glh6' AND act_id='a4' ORDER BY id DESC LIMIT 1;
+INSERT INTO report_aspect_links (aspect_id, link) SELECT id, '22.https://discord.com/channels/1382609371510607923/1507850086716018780/1511320692543586354' FROM report_aspects WHERE report_id='r1780903547522glh6' AND act_id='a4' ORDER BY id DESC LIMIT 1;
+INSERT INTO report_aspect_links (aspect_id, link) SELECT id, '23.https://discord.com/channels/1382609371510607923/1507850086716018780/1511321199844790302' FROM report_aspects WHERE report_id='r1780903547522glh6' AND act_id='a4' ORDER BY id DESC LIMIT 1;
+INSERT INTO report_aspect_links (aspect_id, link) SELECT id, '24.https://discord.com/channels/1382609371510607923/1507850086716018780/1511322801863393290' FROM report_aspects WHERE report_id='r1780903547522glh6' AND act_id='a4' ORDER BY id DESC LIMIT 1;
+INSERT INTO report_aspect_links (aspect_id, link) SELECT id, '25.https://discord.com/channels/1382609371510607923/1507850086716018780/1511332001674821683' FROM report_aspects WHERE report_id='r1780903547522glh6' AND act_id='a4' ORDER BY id DESC LIMIT 1;
+INSERT INTO report_aspect_links (aspect_id, link) SELECT id, '26.https://discord.com/channels/1382609371510607923/1507850086716018780/1511332241085567028' FROM report_aspects WHERE report_id='r1780903547522glh6' AND act_id='a4' ORDER BY id DESC LIMIT 1;
+INSERT INTO report_aspect_links (aspect_id, link) SELECT id, '27.https://discord.com/channels/1382609371510607923/1507850086716018780/1511607069587935293' FROM report_aspects WHERE report_id='r1780903547522glh6' AND act_id='a4' ORDER BY id DESC LIMIT 1;
+INSERT INTO report_aspect_links (aspect_id, link) SELECT id, '28.https://discord.com/channels/1382609371510607923/1507850086716018780/1511609329990500543' FROM report_aspects WHERE report_id='r1780903547522glh6' AND act_id='a4' ORDER BY id DESC LIMIT 1;
+INSERT INTO report_aspect_links (aspect_id, link) SELECT id, '29.https://discord.com/channels/1382609371510607923/1507850086716018780/1511621592487039167' FROM report_aspects WHERE report_id='r1780903547522glh6' AND act_id='a4' ORDER BY id DESC LIMIT 1;
+INSERT INTO report_aspect_links (aspect_id, link) SELECT id, '30.https://discord.com/channels/1382609371510607923/1507850086716018780/1511623224356638830' FROM report_aspects WHERE report_id='r1780903547522glh6' AND act_id='a4' ORDER BY id DESC LIMIT 1;
+INSERT INTO report_aspect_links (aspect_id, link) SELECT id, '31.https://discord.com/channels/1382609371510607923/1507850086716018780/1511995333650022442' FROM report_aspects WHERE report_id='r1780903547522glh6' AND act_id='a4' ORDER BY id DESC LIMIT 1;
+INSERT INTO report_aspect_links (aspect_id, link) SELECT id, '32.https://discord.com/channels/1382609371510607923/1507850086716018780/1512011386581024898' FROM report_aspects WHERE report_id='r1780903547522glh6' AND act_id='a4' ORDER BY id DESC LIMIT 1;
+INSERT INTO report_aspect_links (aspect_id, link) SELECT id, '33.https://discord.com/channels/1382609371510607923/1507850086716018780/1512012171264000041' FROM report_aspects WHERE report_id='r1780903547522glh6' AND act_id='a4' ORDER BY id DESC LIMIT 1;
+INSERT INTO report_aspect_links (aspect_id, link) SELECT id, '34.https://discord.com/channels/1382609371510607923/1507850086716018780/1512091244661182544' FROM report_aspects WHERE report_id='r1780903547522glh6' AND act_id='a4' ORDER BY id DESC LIMIT 1;
+INSERT INTO report_aspect_links (aspect_id, link) SELECT id, '35.https://discord.com/channels/1382609371510607923/1507850086716018780/1512449175495639092' FROM report_aspects WHERE report_id='r1780903547522glh6' AND act_id='a4' ORDER BY id DESC LIMIT 1;
+INSERT INTO report_aspect_links (aspect_id, link) SELECT id, '36.https://discord.com/channels/1382609371510607923/1507850086716018780/1512449453553090621' FROM report_aspects WHERE report_id='r1780903547522glh6' AND act_id='a4' ORDER BY id DESC LIMIT 1;
+INSERT INTO report_aspect_links (aspect_id, link) SELECT id, '37.https://discord.com/channels/1382609371510607923/1507850086716018780/1512450672434479257' FROM report_aspects WHERE report_id='r1780903547522glh6' AND act_id='a4' ORDER BY id DESC LIMIT 1;
+INSERT INTO report_aspect_links (aspect_id, link) SELECT id, '38.https://discord.com/channels/1382609371510607923/1507850086716018780/1512451421293777087' FROM report_aspects WHERE report_id='r1780903547522glh6' AND act_id='a4' ORDER BY id DESC LIMIT 1;
+INSERT INTO report_aspect_links (aspect_id, link) SELECT id, '39.https://discord.com/channels/1382609371510607923/1507850086716018780/1512453523915276399' FROM report_aspects WHERE report_id='r1780903547522glh6' AND act_id='a4' ORDER BY id DESC LIMIT 1;
+INSERT INTO report_aspect_links (aspect_id, link) SELECT id, '40.https://discord.com/channels/1382609371510607923/1507850086716018780/1512457216119275722' FROM report_aspects WHERE report_id='r1780903547522glh6' AND act_id='a4' ORDER BY id DESC LIMIT 1;
+INSERT INTO report_aspect_links (aspect_id, link) SELECT id, '41.https://discord.com/channels/1382609371510607923/1507850086716018780/1512464867120906461' FROM report_aspects WHERE report_id='r1780903547522glh6' AND act_id='a4' ORDER BY id DESC LIMIT 1;
+INSERT INTO report_aspect_links (aspect_id, link) SELECT id, '42.https://discord.com/channels/1382609371510607923/1507850086716018780/1512466067266601073' FROM report_aspects WHERE report_id='r1780903547522glh6' AND act_id='a4' ORDER BY id DESC LIMIT 1;
+INSERT INTO report_aspect_links (aspect_id, link) SELECT id, '43.https://discord.com/channels/1382609371510607923/1507850086716018780/1512466531303297234' FROM report_aspects WHERE report_id='r1780903547522glh6' AND act_id='a4' ORDER BY id DESC LIMIT 1;
+INSERT INTO report_aspect_links (aspect_id, link) SELECT id, '44.https://discord.com/channels/1382609371510607923/1507850086716018780/1512734444929286185' FROM report_aspects WHERE report_id='r1780903547522glh6' AND act_id='a4' ORDER BY id DESC LIMIT 1;
+INSERT INTO report_aspect_links (aspect_id, link) SELECT id, '45.https://discord.com/channels/1382609371510607923/1507850086716018780/1512739482716078083' FROM report_aspects WHERE report_id='r1780903547522glh6' AND act_id='a4' ORDER BY id DESC LIMIT 1;
+INSERT INTO report_aspect_links (aspect_id, link) SELECT id, '46.https://discord.com/channels/1382609371510607923/1507850086716018780/1512750756288139354' FROM report_aspects WHERE report_id='r1780903547522glh6' AND act_id='a4' ORDER BY id DESC LIMIT 1;
+INSERT INTO report_aspect_links (aspect_id, link) SELECT id, '47.https://discord.com/channels/1382609371510607923/1507850086716018780/1512752938496425994' FROM report_aspects WHERE report_id='r1780903547522glh6' AND act_id='a4' ORDER BY id DESC LIMIT 1;
+INSERT INTO report_aspect_links (aspect_id, link) SELECT id, '48.https://discord.com/channels/1382609371510607923/1507850086716018780/1512767688810696796' FROM report_aspects WHERE report_id='r1780903547522glh6' AND act_id='a4' ORDER BY id DESC LIMIT 1;
+INSERT INTO report_aspect_links (aspect_id, link) SELECT id, '49.https://discord.com/channels/1382609371510607923/1507850086716018780/1512768424047280140' FROM report_aspects WHERE report_id='r1780903547522glh6' AND act_id='a4' ORDER BY id DESC LIMIT 1;
+INSERT INTO report_aspect_links (aspect_id, link) SELECT id, '50.https://discord.com/channels/1382609371510607923/1507850086716018780/1512769715880071268' FROM report_aspects WHERE report_id='r1780903547522glh6' AND act_id='a4' ORDER BY id DESC LIMIT 1;
+INSERT INTO report_aspects (report_id, act_id, code, name, points, count, total_pts) VALUES ('r1780903547522glh6','a5','GV','Отчётность по гос. волнам',30,2,60);
+INSERT INTO report_aspect_links (aspect_id, link) SELECT id, '1.https://discord.com/channels/1382609371510607923/1507703544361259068/1512478313992421426' FROM report_aspects WHERE report_id='r1780903547522glh6' AND act_id='a5' ORDER BY id DESC LIMIT 1;
+INSERT INTO report_aspect_links (aspect_id, link) SELECT id, '2.https://discord.com/channels/1382609371510607923/1507703544361259068/1512478313992421426' FROM report_aspects WHERE report_id='r1780903547522glh6' AND act_id='a5' ORDER BY id DESC LIMIT 1;
+INSERT INTO report_aspects (report_id, act_id, code, name, points, count, total_pts) VALUES ('r1780903547522glh6','a6','CK','Проверка трудоустройство',10,0,0);
+INSERT INTO report_aspects (report_id, act_id, code, name, points, count, total_pts) VALUES ('r1780903547522glh6','a7','UP','Запрос-на-повышение',5,0,0);
+INSERT INTO report_aspects (report_id, act_id, code, name, points, count, total_pts) VALUES ('r1780903547522glh6','a8','AC','Перевод из академии',10,24,240);
+INSERT INTO report_aspect_links (aspect_id, link) SELECT id, '1.https://discord.com/channels/1382609371510607923/1382609372957376594/1510757014127775955' FROM report_aspects WHERE report_id='r1780903547522glh6' AND act_id='a8' ORDER BY id DESC LIMIT 1;
+INSERT INTO report_aspect_links (aspect_id, link) SELECT id, '2.https://discord.com/channels/1382609371510607923/1382609372957376594/1510760468204093674' FROM report_aspects WHERE report_id='r1780903547522glh6' AND act_id='a8' ORDER BY id DESC LIMIT 1;
+INSERT INTO report_aspect_links (aspect_id, link) SELECT id, '3.https://discord.com/channels/1382609371510607923/1382609372957376594/1510769763347988690' FROM report_aspects WHERE report_id='r1780903547522glh6' AND act_id='a8' ORDER BY id DESC LIMIT 1;
+INSERT INTO report_aspect_links (aspect_id, link) SELECT id, '4.https://discord.com/channels/1382609371510607923/1382609372957376594/1510770269764190333' FROM report_aspects WHERE report_id='r1780903547522glh6' AND act_id='a8' ORDER BY id DESC LIMIT 1;
+INSERT INTO report_aspect_links (aspect_id, link) SELECT id, '5.https://discord.com/channels/1382609371510607923/1382609372957376594/1510770703505293483' FROM report_aspects WHERE report_id='r1780903547522glh6' AND act_id='a8' ORDER BY id DESC LIMIT 1;
+INSERT INTO report_aspect_links (aspect_id, link) SELECT id, '6.https://discord.com/channels/1382609371510607923/1382609372957376594/1510771026043080735' FROM report_aspects WHERE report_id='r1780903547522glh6' AND act_id='a8' ORDER BY id DESC LIMIT 1;
+INSERT INTO report_aspect_links (aspect_id, link) SELECT id, '7.https://discord.com/channels/1382609371510607923/1382609372957376594/1510771575669133413' FROM report_aspects WHERE report_id='r1780903547522glh6' AND act_id='a8' ORDER BY id DESC LIMIT 1;
+INSERT INTO report_aspect_links (aspect_id, link) SELECT id, '8.https://discord.com/channels/1382609371510607923/1382609372957376594/1510921226997071922' FROM report_aspects WHERE report_id='r1780903547522glh6' AND act_id='a8' ORDER BY id DESC LIMIT 1;
+INSERT INTO report_aspect_links (aspect_id, link) SELECT id, '9.https://discord.com/channels/1382609371510607923/1382609372957376594/1511159516928933979' FROM report_aspects WHERE report_id='r1780903547522glh6' AND act_id='a8' ORDER BY id DESC LIMIT 1;
+INSERT INTO report_aspect_links (aspect_id, link) SELECT id, '10.https://discord.com/channels/1382609371510607923/1382609372957376594/1511269120463736892' FROM report_aspects WHERE report_id='r1780903547522glh6' AND act_id='a8' ORDER BY id DESC LIMIT 1;
+INSERT INTO report_aspect_links (aspect_id, link) SELECT id, '11.https://discord.com/channels/1382609371510607923/1382609372957376594/1511269828940267590' FROM report_aspects WHERE report_id='r1780903547522glh6' AND act_id='a8' ORDER BY id DESC LIMIT 1;
+INSERT INTO report_aspect_links (aspect_id, link) SELECT id, '12.https://discord.com/channels/1382609371510607923/1382609372957376594/1511321561217634375' FROM report_aspects WHERE report_id='r1780903547522glh6' AND act_id='a8' ORDER BY id DESC LIMIT 1;
+INSERT INTO report_aspect_links (aspect_id, link) SELECT id, '13.https://discord.com/channels/1382609371510607923/1382609372957376594/1511332956461863002' FROM report_aspects WHERE report_id='r1780903547522glh6' AND act_id='a8' ORDER BY id DESC LIMIT 1;
+INSERT INTO report_aspect_links (aspect_id, link) SELECT id, '14.https://discord.com/channels/1382609371510607923/1382609372957376594/1511333436445425764' FROM report_aspects WHERE report_id='r1780903547522glh6' AND act_id='a8' ORDER BY id DESC LIMIT 1;
+INSERT INTO report_aspect_links (aspect_id, link) SELECT id, '15.https://discord.com/channels/1382609371510607923/1382609372957376594/1511616398252707870' FROM report_aspects WHERE report_id='r1780903547522glh6' AND act_id='a8' ORDER BY id DESC LIMIT 1;
+INSERT INTO report_aspect_links (aspect_id, link) SELECT id, '16.https://discord.com/channels/1382609371510607923/1382609372957376594/1511616969508388907' FROM report_aspects WHERE report_id='r1780903547522glh6' AND act_id='a8' ORDER BY id DESC LIMIT 1;
+INSERT INTO report_aspect_links (aspect_id, link) SELECT id, '17.https://discord.com/channels/1382609371510607923/1382609372957376594/1511622828728913941' FROM report_aspects WHERE report_id='r1780903547522glh6' AND act_id='a8' ORDER BY id DESC LIMIT 1;
+INSERT INTO report_aspect_links (aspect_id, link) SELECT id, '18.https://discord.com/channels/1382609371510607923/1382609372957376594/1511624064974979184' FROM report_aspects WHERE report_id='r1780903547522glh6' AND act_id='a8' ORDER BY id DESC LIMIT 1;
+INSERT INTO report_aspect_links (aspect_id, link) SELECT id, '19.https://discord.com/channels/1382609371510607923/1382609372957376594/1511624342218211468' FROM report_aspects WHERE report_id='r1780903547522glh6' AND act_id='a8' ORDER BY id DESC LIMIT 1;
+INSERT INTO report_aspect_links (aspect_id, link) SELECT id, '20.https://discord.com/channels/1382609371510607923/1382609372957376594/1512008664062365786' FROM report_aspects WHERE report_id='r1780903547522glh6' AND act_id='a8' ORDER BY id DESC LIMIT 1;
+INSERT INTO report_aspect_links (aspect_id, link) SELECT id, '21.https://discord.com/channels/1382609371510607923/1382609372957376594/1512765537489387731' FROM report_aspects WHERE report_id='r1780903547522glh6' AND act_id='a8' ORDER BY id DESC LIMIT 1;
+INSERT INTO report_aspect_links (aspect_id, link) SELECT id, '22.https://discord.com/channels/1382609371510607923/1382609372957376594/1512766118115151933' FROM report_aspects WHERE report_id='r1780903547522glh6' AND act_id='a8' ORDER BY id DESC LIMIT 1;
+INSERT INTO report_aspect_links (aspect_id, link) SELECT id, '23.https://discord.com/channels/1382609371510607923/1382609372957376594/1512769292838633493' FROM report_aspects WHERE report_id='r1780903547522glh6' AND act_id='a8' ORDER BY id DESC LIMIT 1;
+INSERT INTO report_aspect_links (aspect_id, link) SELECT id, '24.https://discord.com/channels/1382609371510607923/1382609372957376594/1512771002713767936' FROM report_aspects WHERE report_id='r1780903547522glh6' AND act_id='a8' ORDER BY id DESC LIMIT 1;
+INSERT INTO report_aspects (report_id, act_id, code, name, points, count, total_pts) VALUES ('r1780903547522glh6','a9','AG','Агитация в канал',5,2,10);
+INSERT INTO report_aspect_links (aspect_id, link) SELECT id, '1.https://discord.com/channels/1382609371510607923/1382609374744150017/1512498443950489862' FROM report_aspects WHERE report_id='r1780903547522glh6' AND act_id='a9' ORDER BY id DESC LIMIT 1;
+INSERT INTO report_aspect_links (aspect_id, link) SELECT id, '2.https://discord.com/channels/1382609371510607923/1382609374744150017/1512064257133645834' FROM report_aspects WHERE report_id='r1780903547522glh6' AND act_id='a9' ORDER BY id DESC LIMIT 1;
+INSERT INTO report_aspects (report_id, act_id, code, name, points, count, total_pts) VALUES ('r1780903547522glh6','a10','CL','Обзвон в отдел PAI',30,0,0);
+INSERT INTO report_aspects (report_id, act_id, code, name, points, count, total_pts) VALUES ('r1780903547522glh6','a11','DS','Рапорт-на-увольнение',5,0,0);
+INSERT INTO reports (id, week_key, week_label, submitted_at, name, first_name, last_name, game_id, status, total_pts, mod_note, reviewed_at) VALUES ('r1780903993264mr6n','2026-06-07','08.06.2026 — 14.06.2026','2026-06-08T07:33:13.264Z','Okuname Londo','Okuname','Londo','155604','rejected',245,'','2026-06-08T07:40:57.863Z');
+INSERT INTO report_aspects (report_id, act_id, code, name, points, count, total_pts) VALUES ('r1780903993264mr6n','a1','LC','Выдача лицензии',15,6,90);
+INSERT INTO report_aspect_links (aspect_id, link) SELECT id, 'https://discord.com/channels/1382609371510607923/1507850086716018780/1510764245774635138' FROM report_aspects WHERE report_id='r1780903993264mr6n' AND act_id='a1' ORDER BY id DESC LIMIT 1;
+INSERT INTO report_aspect_links (aspect_id, link) SELECT id, 'https://discord.com/channels/1382609371510607923/1507850086716018780/1510764245774635138' FROM report_aspects WHERE report_id='r1780903993264mr6n' AND act_id='a1' ORDER BY id DESC LIMIT 1;
+INSERT INTO report_aspect_links (aspect_id, link) SELECT id, 'https://discord.com/channels/1382609371510607923/1507850086716018780/1510764245774635138' FROM report_aspects WHERE report_id='r1780903993264mr6n' AND act_id='a1' ORDER BY id DESC LIMIT 1;
+INSERT INTO report_aspect_links (aspect_id, link) SELECT id, 'https://discord.com/channels/1382609371510607923/1507850086716018780/1510764245774635138' FROM report_aspects WHERE report_id='r1780903993264mr6n' AND act_id='a1' ORDER BY id DESC LIMIT 1;
+INSERT INTO report_aspect_links (aspect_id, link) SELECT id, 'https://discord.com/channels/1382609371510607923/1507850086716018780/1510764245774635138' FROM report_aspects WHERE report_id='r1780903993264mr6n' AND act_id='a1' ORDER BY id DESC LIMIT 1;
+INSERT INTO report_aspect_links (aspect_id, link) SELECT id, 'https://discord.com/channels/1382609371510607923/1507850086716018780/1510764245774635138' FROM report_aspects WHERE report_id='r1780903993264mr6n' AND act_id='a1' ORDER BY id DESC LIMIT 1;
+INSERT INTO report_aspects (report_id, act_id, code, name, points, count, total_pts) VALUES ('r1780903993264mr6n','a2','EM','Трудоустройство (кадр. аудит)',30,1,30);
+INSERT INTO report_aspect_links (aspect_id, link) SELECT id, 'https://discord.com/channels/1382609371510607923/1507850086716018780/1510764245774635138' FROM report_aspects WHERE report_id='r1780903993264mr6n' AND act_id='a2' ORDER BY id DESC LIMIT 1;
+INSERT INTO report_aspects (report_id, act_id, code, name, points, count, total_pts) VALUES ('r1780903993264mr6n','a3','EX','Практический экзамен',20,1,20);
+INSERT INTO report_aspect_links (aspect_id, link) SELECT id, 'https://discord.com/channels/1382609371510607923/1507850086716018780/1510764245774635138' FROM report_aspects WHERE report_id='r1780903993264mr6n' AND act_id='a3' ORDER BY id DESC LIMIT 1;
+INSERT INTO report_aspects (report_id, act_id, code, name, points, count, total_pts) VALUES ('r1780903993264mr6n','a4','RP','Проверка отчётность-pa',10,1,10);
+INSERT INTO report_aspect_links (aspect_id, link) SELECT id, 'https://discord.com/channels/1382609371510607923/1507850086716018780/1510764245774635138' FROM report_aspects WHERE report_id='r1780903993264mr6n' AND act_id='a4' ORDER BY id DESC LIMIT 1;
+INSERT INTO report_aspects (report_id, act_id, code, name, points, count, total_pts) VALUES ('r1780903993264mr6n','a5','GV','Отчётность по гос. волнам',30,1,30);
+INSERT INTO report_aspect_links (aspect_id, link) SELECT id, 'https://discord.com/channels/1382609371510607923/1507850086716018780/1510764245774635138' FROM report_aspects WHERE report_id='r1780903993264mr6n' AND act_id='a5' ORDER BY id DESC LIMIT 1;
+INSERT INTO report_aspects (report_id, act_id, code, name, points, count, total_pts) VALUES ('r1780903993264mr6n','a6','CK','Проверка трудоустройство',10,1,10);
+INSERT INTO report_aspect_links (aspect_id, link) SELECT id, 'https://discord.com/channels/1382609371510607923/1507850086716018780/1510764245774635138' FROM report_aspects WHERE report_id='r1780903993264mr6n' AND act_id='a6' ORDER BY id DESC LIMIT 1;
+INSERT INTO report_aspects (report_id, act_id, code, name, points, count, total_pts) VALUES ('r1780903993264mr6n','a7','UP','Запрос-на-повышение',5,1,5);
+INSERT INTO report_aspect_links (aspect_id, link) SELECT id, 'https://discord.com/channels/1382609371510607923/1507850086716018780/1510764245774635138' FROM report_aspects WHERE report_id='r1780903993264mr6n' AND act_id='a7' ORDER BY id DESC LIMIT 1;
+INSERT INTO report_aspects (report_id, act_id, code, name, points, count, total_pts) VALUES ('r1780903993264mr6n','a8','AC','Перевод из академии',10,1,10);
+INSERT INTO report_aspect_links (aspect_id, link) SELECT id, 'https://discord.com/channels/1382609371510607923/1507850086716018780/1510764245774635138' FROM report_aspects WHERE report_id='r1780903993264mr6n' AND act_id='a8' ORDER BY id DESC LIMIT 1;
+INSERT INTO report_aspects (report_id, act_id, code, name, points, count, total_pts) VALUES ('r1780903993264mr6n','a9','AG','Агитация в канал',5,1,5);
+INSERT INTO report_aspect_links (aspect_id, link) SELECT id, 'https://discord.com/channels/1382609371510607923/1507850086716018780/1510764245774635138' FROM report_aspects WHERE report_id='r1780903993264mr6n' AND act_id='a9' ORDER BY id DESC LIMIT 1;
+INSERT INTO report_aspects (report_id, act_id, code, name, points, count, total_pts) VALUES ('r1780903993264mr6n','a10','CL','Обзвон в отдел PAI',30,1,30);
+INSERT INTO report_aspect_links (aspect_id, link) SELECT id, 'https://discord.com/channels/1382609371510607923/1507850086716018780/1510764245774635138' FROM report_aspects WHERE report_id='r1780903993264mr6n' AND act_id='a10' ORDER BY id DESC LIMIT 1;
+INSERT INTO report_aspects (report_id, act_id, code, name, points, count, total_pts) VALUES ('r1780903993264mr6n','a11','DS','Рапорт-на-увольнение',5,1,5);
+INSERT INTO report_aspect_links (aspect_id, link) SELECT id, 'https://discord.com/channels/1382609371510607923/1507850086716018780/1510764245774635138' FROM report_aspects WHERE report_id='r1780903993264mr6n' AND act_id='a11' ORDER BY id DESC LIMIT 1;
+INSERT INTO reports (id, week_key, week_label, submitted_at, name, first_name, last_name, game_id, status, total_pts, mod_note, reviewed_at) VALUES ('r17809040589776gps','2026-06-07','08.06.2026 — 14.06.2026','2026-06-08T07:34:18.977Z','Anthony Wilson','Anthony','Wilson','292488','approved',170,'','2026-06-08T07:34:32.146Z');
+INSERT INTO report_aspects (report_id, act_id, code, name, points, count, total_pts) VALUES ('r17809040589776gps','a1','LC','Выдача лицензии',15,3,45);
+INSERT INTO report_aspect_links (aspect_id, link) SELECT id, 'https://discord.com/channels/1382609371510607923/1507850086716018780/1512451421293777087' FROM report_aspects WHERE report_id='r17809040589776gps' AND act_id='a1' ORDER BY id DESC LIMIT 1;
+INSERT INTO report_aspect_links (aspect_id, link) SELECT id, 'https://discord.com/channels/1382609371510607923/1507850086716018780/1512451421293777087' FROM report_aspects WHERE report_id='r17809040589776gps' AND act_id='a1' ORDER BY id DESC LIMIT 1;
+INSERT INTO report_aspect_links (aspect_id, link) SELECT id, 'https://discord.com/channels/1382609371510607923/1507850086716018780/1512451421293777087' FROM report_aspects WHERE report_id='r17809040589776gps' AND act_id='a1' ORDER BY id DESC LIMIT 1;
+INSERT INTO report_aspects (report_id, act_id, code, name, points, count, total_pts) VALUES ('r17809040589776gps','a2','EM','Трудоустройство (кадр. аудит)',30,1,30);
+INSERT INTO report_aspect_links (aspect_id, link) SELECT id, 'https://discord.com/channels/1382609371510607923/1507850086716018780/1512451421293777087' FROM report_aspects WHERE report_id='r17809040589776gps' AND act_id='a2' ORDER BY id DESC LIMIT 1;
+INSERT INTO report_aspects (report_id, act_id, code, name, points, count, total_pts) VALUES ('r17809040589776gps','a3','EX','Практический экзамен',20,1,20);
+INSERT INTO report_aspect_links (aspect_id, link) SELECT id, 'https://discord.com/channels/1382609371510607923/1507850086716018780/1512451421293777087' FROM report_aspects WHERE report_id='r17809040589776gps' AND act_id='a3' ORDER BY id DESC LIMIT 1;
+INSERT INTO report_aspects (report_id, act_id, code, name, points, count, total_pts) VALUES ('r17809040589776gps','a4','RP','Проверка отчётность-pa',10,1,10);
+INSERT INTO report_aspect_links (aspect_id, link) SELECT id, 'https://discord.com/channels/1382609371510607923/1507850086716018780/1512451421293777087' FROM report_aspects WHERE report_id='r17809040589776gps' AND act_id='a4' ORDER BY id DESC LIMIT 1;
+INSERT INTO report_aspects (report_id, act_id, code, name, points, count, total_pts) VALUES ('r17809040589776gps','a5','GV','Отчётность по гос. волнам',30,1,30);
+INSERT INTO report_aspect_links (aspect_id, link) SELECT id, 'https://discord.com/channels/1382609371510607923/1507850086716018780/1512451421293777087' FROM report_aspects WHERE report_id='r17809040589776gps' AND act_id='a5' ORDER BY id DESC LIMIT 1;
+INSERT INTO report_aspects (report_id, act_id, code, name, points, count, total_pts) VALUES ('r17809040589776gps','a6','CK','Проверка трудоустройство',10,0,0);
+INSERT INTO report_aspects (report_id, act_id, code, name, points, count, total_pts) VALUES ('r17809040589776gps','a7','UP','Запрос-на-повышение',5,0,0);
+INSERT INTO report_aspects (report_id, act_id, code, name, points, count, total_pts) VALUES ('r17809040589776gps','a8','AC','Перевод из академии',10,0,0);
+INSERT INTO report_aspects (report_id, act_id, code, name, points, count, total_pts) VALUES ('r17809040589776gps','a9','AG','Агитация в канал',5,0,0);
+INSERT INTO report_aspects (report_id, act_id, code, name, points, count, total_pts) VALUES ('r17809040589776gps','a10','CL','Обзвон в отдел PAI',30,1,30);
+INSERT INTO report_aspect_links (aspect_id, link) SELECT id, 'https://discord.com/channels/1382609371510607923/1507850086716018780/1512451421293777087' FROM report_aspects WHERE report_id='r17809040589776gps' AND act_id='a10' ORDER BY id DESC LIMIT 1;
+INSERT INTO report_aspects (report_id, act_id, code, name, points, count, total_pts) VALUES ('r17809040589776gps','a11','DS','Рапорт-на-увольнение',5,1,5);
+INSERT INTO report_aspect_links (aspect_id, link) SELECT id, 'https://discord.com/channels/1382609371510607923/1507850086716018780/1512451421293777087' FROM report_aspects WHERE report_id='r17809040589776gps' AND act_id='a11' ORDER BY id DESC LIMIT 1;
+INSERT INTO reports (id, week_key, week_label, submitted_at, name, first_name, last_name, game_id, status, total_pts, mod_note, reviewed_at) VALUES ('r1780916363593ece1','2026-06-07','08.06.2026 — 14.06.2026','2026-06-08T10:59:23.593Z','Richi Londo','Richi','Londo','155604','rejected',75,'мало баллов','2026-06-08T10:59:51.354Z');
+INSERT INTO report_aspects (report_id, act_id, code, name, points, count, total_pts) VALUES ('r1780916363593ece1','a1','LC','Выдача лицензии',15,1,15);
+INSERT INTO report_aspect_links (aspect_id, link) SELECT id, 'https://discord.com/channels/1382609371510607923/1507850086716018780/1512449453553090621' FROM report_aspects WHERE report_id='r1780916363593ece1' AND act_id='a1' ORDER BY id DESC LIMIT 1;
+INSERT INTO report_aspects (report_id, act_id, code, name, points, count, total_pts) VALUES ('r1780916363593ece1','a2','EM','Трудоустройство (кадр. аудит)',30,1,30);
+INSERT INTO report_aspect_links (aspect_id, link) SELECT id, 'https://discord.com/channels/1382609371510607923/1507850086716018780/1512449453553090621' FROM report_aspects WHERE report_id='r1780916363593ece1' AND act_id='a2' ORDER BY id DESC LIMIT 1;
+INSERT INTO report_aspects (report_id, act_id, code, name, points, count, total_pts) VALUES ('r1780916363593ece1','a3','EX','Практический экзамен',20,1,20);
+INSERT INTO report_aspect_links (aspect_id, link) SELECT id, 'https://discord.com/channels/1382609371510607923/1507850086716018780/1512449453553090621' FROM report_aspects WHERE report_id='r1780916363593ece1' AND act_id='a3' ORDER BY id DESC LIMIT 1;
+INSERT INTO report_aspects (report_id, act_id, code, name, points, count, total_pts) VALUES ('r1780916363593ece1','a4','RP','Проверка отчётность-pa',10,1,10);
+INSERT INTO report_aspect_links (aspect_id, link) SELECT id, 'https://discord.com/channels/1382609371510607923/1507850086716018780/1512449453553090621' FROM report_aspects WHERE report_id='r1780916363593ece1' AND act_id='a4' ORDER BY id DESC LIMIT 1;
+INSERT INTO report_aspects (report_id, act_id, code, name, points, count, total_pts) VALUES ('r1780916363593ece1','a5','GV','Отчётность по гос. волнам',30,0,0);
+INSERT INTO report_aspects (report_id, act_id, code, name, points, count, total_pts) VALUES ('r1780916363593ece1','a6','CK','Проверка трудоустройство',10,0,0);
+INSERT INTO report_aspects (report_id, act_id, code, name, points, count, total_pts) VALUES ('r1780916363593ece1','a7','UP','Запрос-на-повышение',5,0,0);
+INSERT INTO report_aspects (report_id, act_id, code, name, points, count, total_pts) VALUES ('r1780916363593ece1','a8','AC','Перевод из академии',10,0,0);
+INSERT INTO report_aspects (report_id, act_id, code, name, points, count, total_pts) VALUES ('r1780916363593ece1','a9','AG','Агитация в канал',5,0,0);
+INSERT INTO report_aspects (report_id, act_id, code, name, points, count, total_pts) VALUES ('r1780916363593ece1','a10','CL','Обзвон в отдел PAI',30,0,0);
+INSERT INTO report_aspects (report_id, act_id, code, name, points, count, total_pts) VALUES ('r1780916363593ece1','a11','DS','Рапорт-на-увольнение',5,0,0);
