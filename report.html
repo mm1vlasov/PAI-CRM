@@ -426,6 +426,34 @@ body {
   line-height: 1.8;
 }
 
+.instruction-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  z-index: 250;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  background: rgba(0,0,0,.78);
+  backdrop-filter: blur(5px);
+}
+.instruction-overlay.open { display: flex; }
+.instruction-box {
+  width: 100%;
+  max-width: 560px;
+  max-height: min(720px, calc(100vh - 48px));
+  overflow-y: auto;
+  padding: 28px;
+  background: var(--bg2);
+  border: 1px solid var(--line2);
+  border-radius: var(--rad);
+}
+.instruction-title { font-size: 20px; font-weight: 600; margin-bottom: 8px; }
+.instruction-sub { color: var(--t2); font-size: 13px; margin-bottom: 20px; }
+.instruction-list { display: grid; gap: 12px; padding-left: 20px; color: var(--t2); font-size: 13px; line-height: 1.65; }
+.instruction-list strong { color: var(--t1); font-weight: 500; }
+.instruction-actions { display: flex; justify-content: flex-end; margin-top: 24px; }
+
 /* ── SYNC STATUS ── */
 .sync-bar {
   position: fixed;
@@ -530,7 +558,7 @@ body {
   <p class="hero-sub">Заполни форму и отправь на модерацию.<br>Каждая ссылка — одно выполнение аспекта.</p>
   <button class="btn-hero" onclick="startForm()">
     <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M8 2v12M2 8h12" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
-    Оставить отчёт
+    Подать отчёт
   </button>
   <div class="hero-footer-note" id="heroWeekNote">Загрузка...</div>
   <div style="margin-top:16px;display:flex;gap:12px;justify-content:center">
@@ -598,6 +626,23 @@ body {
     </div>
   </div>
 </section>
+
+<div class="instruction-overlay" id="instructionOverlay" role="dialog" aria-modal="true" aria-labelledby="instructionTitle">
+  <div class="instruction-box">
+    <div class="instruction-title" id="instructionTitle">Как заполнить отчёт</div>
+    <div class="instruction-sub">Чтобы баллы засчитали без уточнений, проверь эти пункты перед отправкой.</div>
+    <ol class="instruction-list">
+      <li><strong>Укажи свои имя, фамилию и статик.</strong> Данные должны точно совпадать с игровыми.</li>
+      <li><strong>Для каждого выполненного пункта добавь ссылку на подтверждение.</strong> Одно выполнение = одна отдельная ссылка.</li>
+      <li><strong>Вставляй ссылки по одной на строку.</strong> Не смешивай несколько ссылок в одной строке.</li>
+      <li><strong>Проверь ссылки перед отправкой.</strong> Они должны открываться и показывать результат работы за эту неделю.</li>
+      <li><strong>Отправь отчёт на модерацию.</strong> Баллы появятся только после проверки и одобрения.</li>
+    </ol>
+    <div class="instruction-actions">
+      <button class="btn btn-primary" onclick="confirmInstructions()">Понял</button>
+    </div>
+  </div>
+</div>
 
 <!-- ── SUCCESS / ERROR OVERLAY ── -->
 <div class="status-overlay" id="statusOverlay">
@@ -759,6 +804,11 @@ function parseLinks(raw) {
 }
 
 function startForm() {
+  document.getElementById('instructionOverlay').classList.add('open');
+}
+
+function confirmInstructions() {
+  document.getElementById('instructionOverlay').classList.remove('open');
   document.getElementById('heroSection').style.display = 'none';
   document.getElementById('formSection').classList.add('visible');
 }

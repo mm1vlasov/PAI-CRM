@@ -1191,73 +1191,6 @@ canvas.monthly-chart { width: 100%; height: 100%; display: block; }
 
 <div class="toast-wrap" id="toasts"></div>
 
-<!-- ═══════════════════════════════ EMBEDDED DATA ═══════════════════════════════ -->
-<script type="application/json" id="embedded-state">
-{
-  "members": [
-    {"id":"m1","firstName":"Richi","lastName":"Londo","gameId":"232430","rank":"Curator of Department","ooc":"-","phone":"","bank":""},
-    {"id":"m2","firstName":"Mir","lastName":"Li","gameId":"45430","rank":"Head of Department","ooc":"-","phone":"","bank":""},
-    {"id":"m3","firstName":"Francesco","lastName":"DeLondo","gameId":"99108","rank":"Head of Department","ooc":"-","phone":"","bank":""},
-    {"id":"m4","firstName":"Logan","lastName":"Brooks","gameId":"159733","rank":"Head of Department","ooc":"-","phone":"","bank":""},
-    {"id":"m5","firstName":"Kamilla","lastName":"Initial","gameId":"159945","rank":"Deputy Head of Department","ooc":"-","phone":"","bank":""},
-    {"id":"m6","firstName":"Edwin","lastName":"Milton","gameId":"218240","rank":"Deputy Head of Department","ooc":"OOC Отпуск 16.06.26-30.06.26","phone":"","bank":""},
-    {"id":"m7","firstName":"Zakura","lastName":"Londo","gameId":"273383","rank":"Instructor of Department","ooc":"-","phone":"","bank":""},
-    {"id":"m8","firstName":"Princess","lastName":"Londo","gameId":"256278","rank":"Instructor of Department","ooc":"-","phone":"","bank":""},
-    {"id":"m9","firstName":"Molly","lastName":"Londo","gameId":"58309","rank":"Instructor of Department","ooc":"-","phone":"","bank":""},
-    {"id":"m10","firstName":"Miran","lastName":"Zekari","gameId":"34987","rank":"Instructor of Department","ooc":"-","phone":"","bank":""},
-    {"id":"m11","firstName":"Archangel","lastName":"Londo","gameId":"239308","rank":"Instructor of Department","ooc":"-","phone":"","bank":""},
-    {"id":"m12","firstName":"Satoru","lastName":"Initial","gameId":"201700","rank":"Instructor of Department","ooc":"-","phone":"","bank":""},
-    {"id":"m13","firstName":"Naylor","lastName":"Stella","gameId":"96776","rank":"Instructor of Department","ooc":"OOC Отпуск","phone":"","bank":""},
-    {"id":"m14","firstName":"Roma","lastName":"Londovich","gameId":"258012","rank":"Instructor of Department","ooc":"-","phone":"","bank":""},
-    {"id":"m15","firstName":"Daryana","lastName":"Londo","gameId":"30514","rank":"Instructor of Department","ooc":"-","phone":"","bank":""},
-    {"id":"m16","firstName":"Neko","lastName":"Toujou","gameId":"24300","rank":"Instructor of Department","ooc":"-","phone":"","bank":""},
-    {"id":"m17","firstName":"Mack","lastName":"Nightez","gameId":"289844","rank":"Instructor of Department","ooc":"-","phone":"","bank":""},
-    {"id":"m18","firstName":"Vanco","lastName":"Londo","gameId":"288208","rank":"Instructor of Department","ooc":"-","phone":"","bank":""},
-    {"id":"m19","firstName":"Anthony","lastName":"Wilson","gameId":"292488","rank":"Instructor of Department","ooc":"-","phone":"","bank":""},
-    {"id":"m20","firstName":"Aomine","lastName":"Londo","gameId":"116222","rank":"Instructor of Department","ooc":"-","phone":"","bank":""},
-    {"id":"m21","firstName":"Tom","lastName":"Zerg","gameId":"226491","rank":"Instructor of Department","ooc":"-","phone":"","bank":""},
-    {"id":"m22","firstName":"Lana","lastName":"Westcoast","gameId":"267626","rank":"Instructor of Department","ooc":"-","phone":"","bank":""}
-  ],
-  "ranks": ["Advisor Chief","Assistant Chief","Curator of Department","Head of Department","Deputy Head of Department","Instructor of Department"],
-  "activities": [
-    {"id":"a1","code":"LC","name":"Кол-во лицензий","points":15,"highStaff":false,"note":"Скриншот выдачи лицензии"},
-    {"id":"a2","code":"EM","name":"Трудоустройство","points":30,"highStaff":false,"note":"Скриншот трудоустройства"},
-    {"id":"a3","code":"EX","name":"Проведено экзаменов","points":20,"highStaff":false,"note":"Скриншот экзамена"},
-    {"id":"a4","code":"RP","name":"Проверка отчётность PA","points":10,"highStaff":false,"note":""},
-    {"id":"a5","code":"GN","name":"Отправлено гос. волн (набор)","points":45,"highStaff":false,"note":"Одобренный отчёт, 3 скриншота"},
-    {"id":"a6","code":"GL","name":"Отправлено гос. волн (лицензии)","points":10,"highStaff":false,"note":"Одобренный отчёт, 1 скриншот лицензии"},
-    {"id":"a7","code":"UP","name":"Проверено запросов на повышение","points":5,"highStaff":false,"note":""},
-    {"id":"a8","code":"AC","name":"Перевод человека из академии","points":10,"highStaff":false,"note":""},
-    {"id":"a9","code":"AG","name":"Отправлено агитаций","points":5,"highStaff":false,"note":""},
-    {"id":"a10","code":"CL","name":"Обзвон в отдел","points":40,"highStaff":true,"note":""},
-    {"id":"a11","code":"DS","name":"Проверено рапортов на увал","points":5,"highStaff":true,"note":""}
-  ],
-  "weeklyScores": {},
-  "weeklyHistory": [],
-  "meeting": {"date":"","attendance":{}},
-  "call": {"date":"","candidates":[],"scores":{}},
-  "reprimands": {},
-  "questions": [
-    {"id":"q1","q":"Кто является старшим составом?","a":"От Dep.H и выше"},
-    {"id":"q2","q":"Иерархия хай рангов?","a":"Deputy Head → Head → Curator → Assistant → Advisor → Deputy Chief → Chief"},
-    {"id":"q3","q":"Какой отдел отвечает за внутренний контроль?","a":"IAD"},
-    {"id":"q4","q":"Кто выдаёт спецуху?","a":"Storekeeper"},
-    {"id":"q5","q":"Что нужно сделать после получения спецухи?","a":"Составить отчёт. Рабочее время 14:00–22:00"},
-    {"id":"q6","q":"Правила IC и OOC отпуска?","a":"IC: перерыв не более 5 ч. OOC: не более 7 дней"},
-    {"id":"q7","q":"Кто может стоять в холле?","a":"IAD и PAI"},
-    {"id":"q8","q":"Как принимать человека во фракцию?","a":"Проверить заявку, провести собеседование, оформить кадровый аудит"},
-    {"id":"q9","q":"Что самое важное при проверке отчёта?","a":"Имя/фамилия/статик вручную совпадают, не повышался сегодня, есть бодик, нет варнов"},
-    {"id":"q10","q":"Что делаем после проверки отчёта?","a":"СОЗДАТЬ ВЕТКУ. ДА — отправить в канал запроса. НЕТ — объяснить причину"},
-    {"id":"q11","q":"Почему нельзя проверять отчёты не по порядку?","a":"Есть вероятность, что те, кто выше, останутся непроверенными"},
-    {"id":"q12","q":"Правила агитаций?","a":"С 10:00 до 22:00 МСК. Пауза между агитациями отделов — 60 минут"},
-    {"id":"q13","q":"Правила выдачи лицензий?","a":"Проверить документы, выдать лицензию, зафиксировать в журнале"},
-    {"id":"q14","q":"Как повышать человека по восстановлению или переводу?","a":"Проверить одобренный запрос и ранг, в кадровом указать ссылку"},
-    {"id":"q15","q":"Что делать, если написал кадровый неправильно?","a":"Удалить или поставить реакцию крестика"}
-  ],
-  "monthlyLog": []
-}
-</script>
-
 <!-- ═══════════════════════════════ JAVASCRIPT ═══════════════════════════════ -->
 <script src="api-client.js"></script>
 <script>
@@ -1355,10 +1288,6 @@ function normalizeMember(m) {
   return m;
 }
 
-function getEmbedded() {
-  try { return JSON.parse(document.getElementById('embedded-state').textContent); } catch { return null; }
-}
-
 function getMemberTotal(mid) {
   const sc = S.weeklyScores[mid] || {};
   return Object.entries(sc).reduce((sum, [aid, cnt]) => {
@@ -1442,20 +1371,19 @@ async function pushRemote() {
 
 // ── STATE MIGRATION ──────────────────────────────────────────────────────────
 function migrateState(raw) {
-  const base = getEmbedded() || {};
   const s = {
-    ...base, ...raw,
-    members:     (raw.members?.length     ? raw.members     : base.members    || []).map(normalizeMember),
-    activities:  raw.activities?.length   ? raw.activities   : base.activities || [],
-    questions:   raw.questions?.length    ? raw.questions    : base.questions  || [],
-    ranks:       raw.ranks?.length        ? raw.ranks        : base.ranks      || [],
-    weeklyScores: raw.weeklyScores || base.weeklyScores || {},
-    weeklyHistory: raw.weeklyHistory || base.weeklyHistory || [],
-    meeting:     raw.meeting     || base.meeting     || { date:'', attendance:{} },
-    call:        raw.call        || base.call        || { date:'', candidates:[], scores:{} },
-    meetings:    raw.meetings    || base.meetings    || [],
-    reprimands:  raw.reprimands  || base.reprimands  || {},
-    monthlyLog:  raw.monthlyLog  || base.monthlyLog  || []
+    ...raw,
+    members: (raw.members || []).map(normalizeMember),
+    activities: raw.activities || [],
+    questions: raw.questions || [],
+    ranks: raw.ranks || [],
+    weeklyScores: raw.weeklyScores || {},
+    weeklyHistory: raw.weeklyHistory || [],
+    meeting: raw.meeting || { date:'', attendance:{} },
+    call: raw.call || { date:'', candidates:[], scores:{} },
+    meetings: raw.meetings || [],
+    reprimands: raw.reprimands || {},
+    monthlyLog: raw.monthlyLog || []
   };
   if (!s.call.candidates) s.call.candidates = [];
   s.call.candidates = s.call.candidates.filter(c => c && (c.name||c.gameId));
@@ -1463,7 +1391,13 @@ function migrateState(raw) {
   return s;
 }
 
-function defaultState() { return migrateState(JSON.parse(JSON.stringify(getEmbedded()||{}))); }
+function defaultState() {
+  return migrateState({
+    members: [], ranks: [], activities: [], weeklyScores: {}, weeklyHistory: [],
+    meeting: { date:'', attendance:{} }, call: { date:'', candidates:[], scores:{} },
+    reprimands: {}, questions: [], meetings: [], monthlyLog: []
+  });
+}
 
 function ensureAll() {
   if (!S) S = defaultState();
@@ -3197,7 +3131,7 @@ async function init() {
     await pullRemote();
     await loadReports();
   } catch {
-    setSyncUI('ok', 'Встроенные данные · ' + S.members.length + ' чел.');
+    setSyncUI('err', 'Нет соединения с БД');
   }
 }
 
