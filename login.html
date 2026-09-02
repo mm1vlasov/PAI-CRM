@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PAI Department — Вход</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #060606; --bg2: #0c0c0c; --bg3: #121212;
+  --line: rgba(255,255,255,0.06); --t1: #efefef; --t2: #7a7a7a; --t3: #404040;
+  --font: 'IBM Plex Sans', system-ui, sans-serif; --mono: 'IBM Plex Mono', monospace;
+  --rad: 9px;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  font-family: var(--font); background: var(--bg); color: var(--t1);
+  min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 24px;
+}
+.card {
+  width: 100%; max-width: 400px; background: var(--bg2);
+  border: 1px solid var(--line); border-radius: var(--rad); padding: 32px;
+}
+.logo { font-size: 18px; font-weight: 600; margin-bottom: 4px; }
+.sub { font-family: var(--mono); font-size: 10px; color: var(--t3); letter-spacing: .1em; text-transform: uppercase; margin-bottom: 28px; }
+.tabs { display: flex; gap: 4px; margin-bottom: 24px; background: var(--bg3); border-radius: 6px; padding: 3px; }
+.tab {
+  flex: 1; padding: 8px; border: none; background: none; color: var(--t3);
+  font-family: var(--font); font-size: 13px; cursor: pointer; border-radius: 4px;
+}
+.tab.active { background: rgba(255,255,255,.08); color: var(--t1); }
+.form-group { margin-bottom: 14px; }
+label { display: block; font-family: var(--mono); font-size: 9.5px; letter-spacing: .1em; text-transform: uppercase; color: var(--t3); margin-bottom: 6px; }
+input {
+  width: 100%; padding: 10px 12px; background: var(--bg3); border: 1px solid var(--line);
+  border-radius: 6px; color: var(--t1); font-family: var(--font); font-size: 13px;
+}
+input:focus { outline: none; border-color: rgba(255,255,255,.2); }
+.btn {
+  width: 100%; padding: 11px; border: none; border-radius: 6px; cursor: pointer;
+  font-family: var(--font); font-size: 13px; font-weight: 500; margin-top: 8px;
+}
+.btn-primary { background: var(--t1); color: var(--bg); }
+.btn-primary:hover { opacity: .9; }
+.btn-primary:disabled { opacity: .4; cursor: not-allowed; }
+.error { color: #f0c8c8; font-size: 12px; margin-top: 12px; min-height: 18px; }
+.hidden { display: none; }
+.row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+</style>
+</head>
+<body>
+<div class="card">
+  <div class="logo">PAI Department</div>
+  <div class="sub">MAJESTIC RP · CRM</div>
+
+  <div class="tabs">
+    <button class="tab active" id="tabLogin" onclick="switchTab('login')">Вход</button>
+    <button class="tab" id="tabRegister" onclick="switchTab('register')">Регистрация</button>
+  </div>
+
+  <form id="formLogin" onsubmit="doLogin(event)">
+    <div class="form-group"><label>Логин</label><input type="text" id="loginUser" autocomplete="username" required></div>
+    <div class="form-group"><label>Пароль</label><input type="password" id="loginPass" autocomplete="current-password" required></div>
+    <button class="btn btn-primary" type="submit" id="loginBtn">Войти</button>
+  </form>
+
+  <form id="formRegister" class="hidden" onsubmit="doRegister(event)">
+    <div class="row">
+      <div class="form-group"><label>Имя</label><input type="text" id="regFirst"></div>
+      <div class="form-group"><label>Фамилия</label><input type="text" id="regLast"></div>
+    </div>
+    <div class="form-group"><label>Статик</label><input type="text" id="regGameId" placeholder="123456"></div>
+    <div class="form-group"><label>Логин</label><input type="text" id="regUser" autocomplete="username" required pattern="[a-zA-Z0-9_-]{3,}" title="3+ символа, латиница/цифры/_-"></div>
+    <div class="form-group"><label>Пароль</label><input type="password" id="regPass" autocomplete="new-password" required minlength="6"></div>
+    <button class="btn btn-primary" type="submit" id="regBtn">Зарегистрироваться</button>
+  </form>
+
+  <div class="error" id="errorMsg"></div>
+</div>
+
+<script src="api-client.js"></script>
+<script>
+let mode = 'login';
+
+function switchTab(m) {
+  mode = m;
+  document.getElementById('tabLogin').classList.toggle('active', m === 'login');
+  document.getElementById('tabRegister').classList.toggle('active', m === 'register');
+  document.getElementById('formLogin').classList.toggle('hidden', m !== 'login');
+  document.getElementById('formRegister').classList.toggle('hidden', m !== 'register');
+  document.getElementById('errorMsg').textContent = '';
+}
+
+function redirectByRole(user) {
+  const next = new URLSearchParams(location.search).get('next');
+  if (next && next !== '/login') { location.href = next; return; }
+  if (user.role === 'verification') location.href = '/profile';
+  else if (user.role === 'pai_employee') location.href = '/report';
+  else location.href = '/';
+}
+
+async function doLogin(e) {
+  e.preventDefault();
+  const btn = document.getElementById('loginBtn');
+  btn.disabled = true;
+  document.getElementById('errorMsg').textContent = '';
+  try {
+    const data = await PAI_API.apiFetch('/api/auth/login', {
+      method: 'POST',
+      body: JSON.stringify({
+        username: document.getElementById('loginUser').value,
+        password: document.getElementById('loginPass').value,
+      }),
+    });
+    redirectByRole(data.user);
+  } catch (err) {
+    document.getElementById('errorMsg').textContent = err.message;
+    btn.disabled = false;
+  }
+}
+
+async function doRegister(e) {
+  e.preventDefault();
+  const btn = document.getElementById('regBtn');
+  btn.disabled = true;
+  document.getElementById('errorMsg').textContent = '';
+  try {
+    const data = await PAI_API.apiFetch('/api/auth/register', {
+      method: 'POST',
+      body: JSON.stringify({
+        username: document.getElementById('regUser').value,
+        password: document.getElementById('regPass').value,
+        firstName: document.getElementById('regFirst').value,
+        lastName: document.getElementById('regLast').value,
+        gameId: document.getElementById('regGameId').value,
+      }),
+    });
+    redirectByRole(data.user);
+  } catch (err) {
+    document.getElementById('errorMsg').textContent = err.message;
+    btn.disabled = false;
+  }
+}
+
+(async () => {
+  const user = await PAI_API.getMe();
+  if (user) redirectByRole(user);
+})();
+</script>
+</body>
+</html>

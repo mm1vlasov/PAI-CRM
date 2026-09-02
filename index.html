@@ -1,0 +1,3196 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PAI Department — Admin Panel</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@300;400;500&family=IBM+Plex+Sans:ital,wght@0,300;0,400;0,500;0,600;1,300&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg:    #060606;
+  --bg2:   #0c0c0c;
+  --bg3:   #121212;
+  --bg4:   #1a1a1a;
+  --bg5:   #222222;
+  --line:  rgba(255,255,255,0.055);
+  --line2: rgba(255,255,255,0.10);
+  --t1:    #efefef;
+  --t2:    #7a7a7a;
+  --t3:    #404040;
+  --t4:    #282828;
+
+  /* Accent — white only, used sparingly */
+  --accent:      #ffffff;
+  --accent-dim:  rgba(255,255,255,0.12);
+  --accent-glow: 0 0 18px rgba(255,255,255,0.08);
+
+  /* Semantic — muted, near-mono */
+  --green:      #c8f0dc;
+  --green-bg:   rgba(200,240,220,0.05);
+  --green-line: rgba(200,240,220,0.15);
+  --red:        #f0c8c8;
+  --red-bg:     rgba(240,200,200,0.05);
+  --red-line:   rgba(240,200,200,0.15);
+  --amber:      #f0e0b0;
+  --amber-bg:   rgba(240,224,176,0.05);
+  --amber-line: rgba(240,224,176,0.15);
+  --blue:       #c8ddf0;
+  --blue-bg:    rgba(200,221,240,0.05);
+
+  --verbal:     #f0d8c0;
+  --verbal-bg:  rgba(240,216,192,0.06);
+  --verbal-ln:  rgba(240,216,192,0.18);
+  --strict:     #f0c8d8;
+  --strict-bg:  rgba(240,200,216,0.06);
+  --strict-ln:  rgba(240,200,216,0.18);
+
+  /* Ranks — all white-scale, differentiated by brightness */
+  --r0: #ffffff;   /* Curator */
+  --r1: #d4d4d4;   /* Head */
+  --r2: #b0b0b0;   /* Dep Head */
+  --r3: #8c8c8c;   /* Instructor */
+  --r4: #606060;   /* Staff */
+
+  --font:  'IBM Plex Sans', system-ui, sans-serif;
+  --mono:  'IBM Plex Mono', monospace;
+  --rad:   9px;
+  --rad-s: 6px;
+  --sidebar: 220px;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  font-family: var(--font);
+  background: var(--bg);
+  color: var(--t1);
+  font-size: 13.5px;
+  line-height: 1.55;
+  display: flex;
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+/* ── SIDEBAR ── */
+.sidebar {
+  width: var(--sidebar); min-height: 100vh;
+  background: var(--bg2);
+  border-right: 1px solid var(--line);
+  position: fixed; top: 0; left: 0; z-index: 100;
+  display: flex; flex-direction: column;
+}
+.sb-logo { padding: 22px 18px 18px; border-bottom: 1px solid var(--line); }
+.sb-live {
+  display: flex; align-items: center; gap: 6px;
+  font-family: var(--mono); font-size: 10px; letter-spacing: .1em;
+  color: var(--t3); text-transform: uppercase; margin-bottom: 10px;
+}
+.sb-live-dot {
+  width: 6px; height: 6px; border-radius: 50%;
+  background: var(--t1);
+  box-shadow: 0 0 10px rgba(255,255,255,0.6), 0 0 20px rgba(255,255,255,0.2);
+  animation: blink 2.8s ease-in-out infinite;
+}
+@keyframes blink { 0%,100%{opacity:1} 50%{opacity:.25} }
+.sb-name { font-size: 16px; font-weight: 600; letter-spacing: -.025em; color: var(--t1); }
+.sb-sub  { font-family: var(--mono); font-size: 10px; color: var(--t3); letter-spacing: .08em; text-transform: uppercase; margin-top: 3px; }
+
+.sb-nav { flex: 1; padding: 10px 8px; display: flex; flex-direction: column; gap: 1px; overflow-y: auto; }
+.sb-section {
+  font-family: var(--mono); font-size: 9px; letter-spacing: .16em;
+  text-transform: uppercase; color: var(--t3); padding: 16px 10px 5px;
+}
+.sb-item {
+  display: flex; align-items: center; gap: 9px;
+  padding: 8px 10px; border-radius: var(--rad-s);
+  cursor: pointer; color: var(--t3); font-size: 13px;
+  border: none; background: none; width: 100%; text-align: left;
+  transition: background .15s, color .15s;
+  position: relative;
+}
+.sb-item:hover { background: rgba(255,255,255,.03); color: var(--t2); }
+.sb-item.active {
+  background: rgba(255,255,255,.06);
+  color: var(--t1);
+  font-weight: 500;
+  box-shadow: inset 0 0 0 1px rgba(255,255,255,0.07);
+}
+.sb-item.active::before {
+  content: '';
+  position: absolute; left: 0; top: 50%; transform: translateY(-50%);
+  width: 2px; height: 14px;
+  background: var(--t1);
+  border-radius: 2px;
+  box-shadow: 0 0 8px rgba(255,255,255,0.5);
+}
+.sb-icon { width: 15px; text-align: center; font-size: 12px; flex-shrink: 0; opacity: .5; }
+.sb-item.active .sb-icon { opacity: .9; }
+.sb-footer {
+  padding: 14px 18px; border-top: 1px solid var(--line);
+  font-family: var(--mono); font-size: 10px; color: var(--t3); line-height: 1.8;
+}
+
+/* ── MAIN ── */
+.main { margin-left: var(--sidebar); flex: 1; min-height: 100vh; display: flex; flex-direction: column; }
+.topbar {
+  height: 50px; background: var(--bg2);
+  border-bottom: 1px solid var(--line);
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 0 24px; position: sticky; top: 0; z-index: 50;
+  backdrop-filter: blur(8px);
+}
+.topbar-title { font-size: 13.5px; font-weight: 500; color: var(--t1); letter-spacing: -.01em; }
+.topbar-right { display: flex; align-items: center; gap: 8px; }
+.sync-status { font-family: var(--mono); font-size: 10px; color: var(--t3); display: flex; align-items: center; gap: 5px; }
+.sync-dot { width: 5px; height: 5px; border-radius: 50%; background: var(--t3); flex-shrink: 0; }
+.sync-dot.ok    { background: var(--t1); box-shadow: 0 0 8px rgba(255,255,255,0.5); }
+.sync-dot.err   { background: var(--red); box-shadow: 0 0 6px rgba(240,200,200,0.4); }
+.sync-dot.loading { background: var(--amber); animation: blink 1s infinite; }
+
+.page { padding: 26px; flex: 1; }
+.tab-content { animation: fadeIn .2s ease; }
+.tab-content.hidden { display: none !important; }
+@keyframes fadeIn { from{opacity:0;transform:translateY(6px)} to{opacity:1;transform:none} }
+
+/* ── TYPOGRAPHY ── */
+.page-title { font-size: 18px; font-weight: 500; letter-spacing: -.03em; color: var(--t1); }
+.page-sub   { font-size: 12px; color: var(--t3); margin-top: 3px; }
+.section-hd { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; margin-bottom: 22px; flex-wrap: wrap; }
+
+/* ── CARDS ── */
+.card {
+  background: var(--bg2);
+  border: 1px solid var(--line);
+  border-radius: var(--rad);
+  overflow: hidden;
+  transition: border-color .2s;
+}
+.card:hover { border-color: rgba(255,255,255,0.09); }
+.card-hd {
+  padding: 13px 18px;
+  border-bottom: 1px solid var(--line);
+  display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap;
+}
+.card-title { font-size: 12px; font-weight: 500; color: var(--t2); letter-spacing: .005em; }
+.card-body  { padding: 18px; }
+
+/* ── STAT CARDS ── */
+.stats-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 10px; margin-bottom: 22px; }
+.sc {
+  background: var(--bg2);
+  border: 1px solid var(--line);
+  border-radius: var(--rad);
+  padding: 16px 18px;
+  transition: border-color .2s, box-shadow .2s;
+  cursor: default;
+}
+.sc:hover {
+  border-color: rgba(255,255,255,0.12);
+  box-shadow: 0 0 20px rgba(255,255,255,0.03);
+}
+.sc-label { font-family: var(--mono); font-size: 9px; letter-spacing: .12em; text-transform: uppercase; color: var(--t3); margin-bottom: 9px; }
+.sc-val   { font-family: var(--mono); font-size: 28px; font-weight: 300; letter-spacing: -.04em; line-height: 1; color: var(--t1); }
+.sc-sub   { font-size: 11px; color: var(--t3); margin-top: 6px; }
+
+/* ── TABLES ── */
+.tbl-wrap { overflow-x: auto; }
+table { width: 100%; border-collapse: collapse; font-size: 13px; }
+th {
+  text-align: left; padding: 9px 14px;
+  font-family: var(--mono); font-size: 9.5px; font-weight: 400;
+  letter-spacing: .09em; text-transform: uppercase; color: var(--t3);
+  border-bottom: 1px solid var(--line); white-space: nowrap;
+}
+td { padding: 10px 14px; border-bottom: 1px solid var(--line); color: var(--t2); vertical-align: middle; }
+tr:last-child td { border-bottom: none; }
+tr:hover td { background: rgba(255,255,255,.018); color: var(--t1); }
+td.mono { font-family: var(--mono); font-size: 11.5px; }
+
+/* ── BADGES ── */
+.badge {
+  display: inline-flex; align-items: center; gap: 3px;
+  padding: 2px 8px; border-radius: 100px;
+  font-family: var(--mono); font-size: 10px; font-weight: 400;
+  white-space: nowrap;
+  transition: box-shadow .2s;
+}
+.bg-green  { background: var(--green-bg);  color: var(--green);  border: 1px solid var(--green-line); }
+.bg-red    { background: var(--red-bg);    color: var(--red);    border: 1px solid var(--red-line); }
+.bg-amber  { background: var(--amber-bg);  color: var(--amber);  border: 1px solid var(--amber-line); }
+.bg-gray   { background: rgba(255,255,255,.04); color: var(--t2); border: 1px solid var(--line2); }
+.bg-verbal { background: var(--verbal-bg); color: var(--verbal); border: 1px solid var(--verbal-ln); }
+.bg-strict { background: var(--strict-bg); color: var(--strict); border: 1px solid var(--strict-ln); }
+
+/* Rank badges — monochrome hierarchy */
+.rank-badge {
+  display: inline-flex; align-items: center; padding: 2px 8px;
+  border-radius: 100px; font-family: var(--mono); font-size: 10px; white-space: nowrap;
+  background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08);
+}
+.rb-0 { color: var(--r0); border-color: rgba(255,255,255,0.2); background: rgba(255,255,255,0.06); }
+.rb-1 { color: var(--r1); border-color: rgba(255,255,255,0.12); }
+.rb-2 { color: var(--r2); border-color: rgba(255,255,255,0.10); }
+.rb-3 { color: var(--r3); border-color: rgba(255,255,255,0.07); }
+.rb-4 { color: var(--r4); border-color: rgba(255,255,255,0.05); }
+
+/* Rank name colors */
+.rn-0 { color: var(--r0); font-weight: 500; }
+.rn-1 { color: var(--r1); font-weight: 500; }
+.rn-2 { color: var(--r2); font-weight: 500; }
+.rn-3 { color: var(--r3); font-weight: 500; }
+.rn-4 { color: var(--r4); font-weight: 500; }
+
+/* ── BUTTONS ── */
+.btn {
+  display: inline-flex; align-items: center; gap: 5px;
+  padding: 6px 13px; border-radius: var(--rad-s);
+  font-size: 12px; font-weight: 500; cursor: pointer;
+  border: 1px solid transparent; font-family: var(--font);
+  transition: all .15s;
+}
+.btn-primary {
+  background: rgba(255,255,255,0.92); color: #000;
+  border-color: rgba(255,255,255,0.9);
+  box-shadow: 0 0 14px rgba(255,255,255,0.12);
+}
+.btn-primary:hover {
+  background: #fff;
+  box-shadow: 0 0 22px rgba(255,255,255,0.2);
+}
+.btn-ghost {
+  background: transparent; color: var(--t2);
+  border-color: var(--line2);
+}
+.btn-ghost:hover {
+  background: rgba(255,255,255,.05);
+  color: var(--t1);
+  border-color: rgba(255,255,255,0.14);
+}
+.btn-danger {
+  background: var(--red-bg); color: var(--red);
+  border-color: var(--red-line);
+}
+.btn-danger:hover { background: rgba(240,200,200,.1); }
+.btn-sm { padding: 5px 11px; font-size: 11.5px; }
+.btn-xs { padding: 3px 8px; font-size: 10.5px; }
+
+/* ── FORMS ── */
+.form-group { display: flex; flex-direction: column; gap: 5px; margin-bottom: 14px; }
+.form-row   { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+.form-row-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 14px; }
+label { font-family: var(--mono); font-size: 9.5px; letter-spacing: .1em; text-transform: uppercase; color: var(--t3); }
+input, select, textarea {
+  background: var(--bg3);
+  border: 1px solid var(--line2);
+  border-radius: var(--rad-s);
+  color: var(--t1); font-size: 13px; padding: 8px 11px;
+  font-family: var(--font); outline: none; width: 100%;
+  transition: border-color .15s, box-shadow .15s;
+}
+input:focus, select:focus, textarea:focus {
+  border-color: rgba(255,255,255,.22);
+  box-shadow: 0 0 0 3px rgba(255,255,255,0.04);
+}
+input::placeholder { color: var(--t3); }
+select option { background: var(--bg3); }
+
+/* ── MODALS ── */
+.modal-overlay {
+  display: none; position: fixed; inset: 0;
+  background: rgba(0,0,0,.75); z-index: 200;
+  align-items: center; justify-content: center;
+  backdrop-filter: blur(8px);
+}
+.modal-overlay.open { display: flex; }
+.modal {
+  background: var(--bg2);
+  border: 1px solid rgba(255,255,255,0.09);
+  border-radius: var(--rad);
+  width: 100%; max-width: 500px; max-height: 88vh; overflow-y: auto;
+  box-shadow: 0 0 60px rgba(0,0,0,0.8), 0 0 0 1px rgba(255,255,255,0.05);
+}
+.modal-hd { padding: 16px 20px; border-bottom: 1px solid var(--line); display: flex; align-items: center; justify-content: space-between; }
+.modal-title { font-size: 13.5px; font-weight: 500; }
+.modal-close { background: none; border: none; color: var(--t3); cursor: pointer; font-size: 18px; padding: 2px 6px; transition: color .12s; }
+.modal-close:hover { color: var(--t1); }
+.modal-body { padding: 20px; }
+.modal-foot { padding: 14px 20px; border-top: 1px solid var(--line); display: flex; justify-content: flex-end; gap: 8px; }
+
+/* ── DIVIDER ── */
+.divider { height: 1px; background: var(--line); margin: 14px 0; }
+
+/* ── DASHBOARD ── */
+.dash-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 14px; }
+
+/* Activity chart bars */
+.act-chart { display: flex; flex-direction: column; gap: 9px; padding: 4px 0; }
+.act-row { display: grid; grid-template-columns: 96px 1fr 56px; align-items: center; gap: 10px; }
+.act-row-label { font-size: 11.5px; color: var(--t2); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.act-bar-track { background: var(--bg4); border-radius: 3px; height: 5px; overflow: hidden; }
+.act-bar-fill  { height: 100%; border-radius: 3px; background: rgba(255,255,255,.22); transition: width .45s cubic-bezier(.4,0,.2,1); }
+.act-bar-fill.top { background: rgba(255,255,255,.65); box-shadow: 0 0 8px rgba(255,255,255,0.25); }
+.act-row-val { font-family: var(--mono); font-size: 11px; color: var(--t3); text-align: right; }
+
+/* ── MEMBERS SORT BAR ── */
+.sort-bar { display: flex; gap: 5px; flex-wrap: wrap; align-items: center; }
+.sort-btn {
+  padding: 4px 10px; border-radius: 100px; font-size: 11px; font-family: var(--mono);
+  cursor: pointer; border: 1px solid var(--line2); background: transparent; color: var(--t3);
+  transition: all .15s;
+}
+.sort-btn:hover { color: var(--t2); background: rgba(255,255,255,.03); }
+.sort-btn.active { background: rgba(255,255,255,.07); color: var(--t1); border-color: rgba(255,255,255,.14); }
+
+/* ── SCORE CARDS ── */
+.scores-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(270px, 1fr)); gap: 12px; }
+.score-card {
+  background: var(--bg2); border: 1px solid var(--line);
+  border-radius: var(--rad); padding: 15px 17px;
+  transition: border-color .2s, box-shadow .2s;
+}
+.score-card:hover { border-color: rgba(255,255,255,0.09); }
+.score-card-name { font-size: 13.5px; font-weight: 500; }
+.score-card-rank { font-family: var(--mono); font-size: 10px; color: var(--t3); margin-top: 2px; margin-bottom: 13px; }
+.score-row { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-bottom: 7px; }
+.score-label { font-size: 12px; color: var(--t2); display: flex; align-items: center; gap: 5px; flex: 1; min-width: 0; }
+.score-label span { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.score-input {
+  width: 54px; text-align: center; padding: 4px 6px;
+  font-family: var(--mono); font-size: 12px;
+}
+.score-total {
+  margin-top: 11px; padding-top: 11px; border-top: 1px solid var(--line);
+  display: flex; justify-content: space-between; align-items: baseline;
+}
+.score-total-label { font-family: var(--mono); font-size: 9.5px; color: var(--t3); letter-spacing: .08em; text-transform: uppercase; }
+.score-total-val   { font-family: var(--mono); font-size: 22px; font-weight: 300; }
+
+/* ── ACT CODE CHIP ── */
+.act-code {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 20px; height: 20px; border-radius: 4px;
+  background: rgba(255,255,255,.06); font-family: var(--mono);
+  font-size: 8.5px; color: rgba(255,255,255,.45); flex-shrink: 0;
+  border: 1px solid rgba(255,255,255,0.06);
+}
+
+/* ── MEETING ── */
+.att-btn {
+  padding: 4px 11px; border-radius: var(--rad-s); border: 1px solid var(--line);
+  background: var(--bg3); color: var(--t3); font-size: 11.5px; cursor: pointer;
+  transition: all .15s; font-family: var(--font);
+}
+.att-btn:hover { border-color: var(--line2); color: var(--t2); }
+.att-present { background: var(--green-bg); border-color: var(--green-line); color: var(--green); box-shadow: 0 0 12px rgba(200,240,220,0.06); }
+.att-warned  { background: var(--amber-bg); border-color: var(--amber-line); color: var(--amber); }
+.att-absent  { background: var(--red-bg);   border-color: var(--red-line);   color: var(--red); }
+
+/* ── CALLS ── */
+.candidate-row {
+  display: flex; align-items: center; gap: 8px;
+  background: var(--bg3); border: 1px solid var(--line);
+  border-radius: var(--rad-s); padding: 9px 12px;
+}
+.candidate-row input { padding: 5px 8px; font-size: 12px; }
+.candidate-row .del-btn { background: none; border: none; color: var(--t3); cursor: pointer; font-size: 16px; padding: 2px 5px; flex-shrink: 0; transition: color .12s; }
+.candidate-row .del-btn:hover { color: var(--red); }
+.rating-select { width: 70px; padding: 4px 6px; font-size: 12px; font-family: var(--mono); }
+.rs-0  { color: var(--t3); }
+.rs-05 { color: var(--t2); background: rgba(255,255,255,.04); }
+.rs-07 { color: var(--amber); background: var(--amber-bg); }
+.rs-1  { color: var(--green); background: var(--green-bg); }
+.call-results { display: grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 10px; margin-top: 14px; }
+.call-card { background: var(--bg3); border: 1px solid var(--line); border-radius: var(--rad-s); padding: 12px; }
+.call-card.pass { border-color: var(--green-line); box-shadow: 0 0 14px rgba(200,240,220,0.04); }
+.call-card.fail { border-color: var(--red-line); }
+
+/* ── REPRIMANDS ── */
+.rep-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(290px, 1fr)); gap: 12px; }
+.rep-card { background: var(--bg2); border: 1px solid var(--line); border-radius: var(--rad); overflow: hidden; }
+.rep-card-hd { padding: 12px 16px; border-bottom: 1px solid var(--line); display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+.rep-card-body { padding: 12px 16px; display: flex; flex-direction: column; gap: 10px; }
+.rep-row { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+.rep-row-label { font-family: var(--mono); font-size: 9.5px; letter-spacing: .06em; text-transform: uppercase; color: var(--t3); }
+.rep-dots { display: flex; gap: 5px; }
+.rep-dot {
+  width: 20px; height: 20px; border-radius: 50%; border: 1.5px solid; cursor: pointer;
+  transition: all .15s; display: flex; align-items: center; justify-content: center;
+  font-size: 8px; font-weight: 700;
+}
+.rd-ve { border-color: rgba(240,216,192,.25); color: transparent; }
+.rd-ve:hover { background: var(--verbal-bg); border-color: var(--verbal-ln); }
+.rd-vf { border-color: var(--verbal); background: var(--verbal-bg); color: var(--verbal); box-shadow: 0 0 10px rgba(240,216,192,0.15); }
+.rd-se { border-color: rgba(240,200,216,.25); color: transparent; }
+.rd-se:hover { background: var(--strict-bg); border-color: var(--strict-ln); }
+.rd-sf { border-color: var(--strict); background: var(--strict-bg); color: var(--strict); box-shadow: 0 0 10px rgba(240,200,216,0.15); }
+
+/* ── STATISTICS ── */
+.stats-tabs { display: flex; gap: 2px; border-bottom: 1px solid var(--line); margin-bottom: 22px; }
+.stats-tab {
+  padding: 8px 16px; font-size: 12px; cursor: pointer; color: var(--t3);
+  border-bottom: 2px solid transparent; transition: all .15s;
+  background: none; border-top: none; border-left: none; border-right: none;
+  font-family: var(--font); letter-spacing: .005em;
+}
+.stats-tab:hover { color: var(--t2); }
+.stats-tab.active { color: var(--t1); border-bottom-color: rgba(255,255,255,0.5); }
+
+.month-selector { display: flex; align-items: center; gap: 10px; }
+.month-nav {
+  background: none; border: 1px solid var(--line2); border-radius: var(--rad-s);
+  color: var(--t3); cursor: pointer; padding: 5px 11px; font-size: 12px; transition: all .15s;
+}
+.month-nav:hover { color: var(--t1); border-color: rgba(255,255,255,0.14); background: rgba(255,255,255,.04); }
+.month-label { font-family: var(--mono); font-size: 12px; color: var(--t1); min-width: 100px; text-align: center; }
+
+/* Bar chart for stats */
+.bar-chart { display: flex; flex-direction: column; gap: 8px; }
+.bc-row { display: grid; grid-template-columns: 130px 1fr 50px; align-items: center; gap: 10px; }
+.bc-label { font-size: 12px; color: var(--t2); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.bc-track { background: var(--bg4); border-radius: 3px; height: 6px; overflow: hidden; }
+.bc-fill  { height: 100%; border-radius: 3px; transition: width .5s cubic-bezier(.4,0,.2,1); }
+.bc-val   { font-family: var(--mono); font-size: 11px; color: var(--t3); text-align: right; }
+
+.monthly-canvas-wrap { position: relative; width: 100%; height: 160px; }
+canvas.monthly-chart { width: 100%; height: 100%; display: block; }
+
+/* Monthly log */
+.log-entry { display: flex; align-items: flex-start; gap: 10px; padding: 9px 14px; border-bottom: 1px solid var(--line); }
+.log-entry:last-child { border-bottom: none; }
+.log-dot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; margin-top: 5px; }
+.log-content { flex: 1; }
+.log-date { font-family: var(--mono); font-size: 10px; color: var(--t3); }
+.log-text  { font-size: 12.5px; color: var(--t2); margin-top: 1px; }
+
+/* ── ADMIN ── */
+.admin-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 14px; }
+
+/* ── TOAST ── */
+.toast-wrap { position: fixed; bottom: 20px; right: 20px; z-index: 999; display: flex; flex-direction: column; gap: 7px; }
+.toast-item {
+  background: var(--bg3); border: 1px solid rgba(255,255,255,0.1); border-radius: var(--rad-s);
+  padding: 10px 15px; font-size: 12.5px; animation: toastIn .2s ease; max-width: 300px;
+  box-shadow: 0 4px 24px rgba(0,0,0,0.6), 0 0 0 1px rgba(255,255,255,0.04);
+}
+@keyframes toastIn { from{opacity:0;transform:translateX(16px)} to{opacity:1;transform:none} }
+
+/* ── EMPTY ── */
+.empty { text-align: center; padding: 32px; color: var(--t3); font-size: 12.5px; }
+
+/* ── SYNC MODAL ── */
+#modalSync .modal { max-width: 450px; }
+
+/* ── MEMBER PROFILE MODAL ── */
+#modalMember .modal { max-width: 520px; }
+
+::-webkit-scrollbar { width: 4px; height: 4px; }
+::-webkit-scrollbar-thumb { background: var(--bg5); border-radius: 4px; }
+::-webkit-scrollbar-track { background: transparent; }
+
+/* ── MEETING TILES ── */
+.mtg-tile {
+  background: var(--bg2); border: 1px solid var(--line); border-radius: var(--rad);
+  padding: 16px 18px; cursor: pointer; transition: border-color .2s, box-shadow .2s;
+  position: relative; overflow: hidden;
+}
+.mtg-tile:hover {
+  border-color: rgba(255,255,255,.12);
+  box-shadow: 0 0 20px rgba(255,255,255,.03);
+}
+.mtg-tile-status-bar {
+  position: absolute; top: 0; left: 0; right: 0; height: 2px;
+  background: var(--bg4);
+}
+.mtg-tile-status-fill {
+  height: 100%; border-radius: 0;
+  background: rgba(255,255,255,.4);
+  box-shadow: 0 0 8px rgba(255,255,255,0.2);
+  transition: width .4s ease;
+}
+.mtg-tile-title { font-size: 13.5px; font-weight: 500; margin-bottom: 3px; margin-top: 6px; }
+.mtg-tile-meta  { font-family: var(--mono); font-size: 10px; color: var(--t3); margin-bottom: 14px; }
+.mtg-tile-stats { display: flex; gap: 6px; flex-wrap: wrap; }
+.mtg-stat {
+  display: flex; align-items: center; gap: 5px;
+  font-family: var(--mono); font-size: 11px;
+  padding: 3px 8px; border-radius: 100px;
+  border: 1px solid var(--line2); color: var(--t3);
+}
+.mtg-stat.present { color: var(--t2); border-color: rgba(255,255,255,.12); }
+.mtg-stat.warned  { color: var(--amber); border-color: var(--amber-line); }
+.mtg-stat.absent  { color: var(--red);   border-color: var(--red-line); }
+.mtg-stat-dot { width: 5px; height: 5px; border-radius: 50%; background: currentColor; flex-shrink: 0; }
+
+/* Attendance list inside modal */
+.mAtt-row {
+  display: flex; align-items: center; gap: 12px;
+  padding: 10px 18px; border-bottom: 1px solid var(--line);
+  transition: background .12s;
+}
+.mAtt-row:last-child { border-bottom: none; }
+.mAtt-row:hover { background: rgba(255,255,255,.015); }
+.mAtt-name { flex: 1; min-width: 0; }
+.mAtt-name-text { font-size: 13px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.mAtt-rank-text { font-family: var(--mono); font-size: 10px; color: var(--t3); margin-top: 1px; }
+.mAtt-controls { display: flex; gap: 5px; align-items: center; flex-shrink: 0; }
+.mAtt-btn {
+  padding: 4px 10px; border-radius: 100px; font-size: 11px; font-family: var(--mono);
+  border: 1px solid var(--line2); background: transparent; color: var(--t3);
+  cursor: pointer; transition: all .13s; white-space: nowrap;
+}
+.mAtt-btn:hover { color: var(--t2); border-color: rgba(255,255,255,.15); }
+.mAtt-btn.active-present { background: rgba(255,255,255,.07); border-color: rgba(255,255,255,.2); color: var(--t1); box-shadow: 0 0 8px rgba(255,255,255,.06); }
+.mAtt-btn.active-warned  { background: var(--amber-bg); border-color: var(--amber-line); color: var(--amber); }
+.mAtt-btn.active-absent  { background: var(--red-bg);   border-color: var(--red-line);   color: var(--red); }
+.mAtt-note { width: 130px; padding: 4px 8px; font-size: 11.5px; flex-shrink: 0; }
+
+@media (max-width: 600px) {
+  .mAtt-note { display: none; }
+  .mAtt-controls { gap: 3px; }
+  .mAtt-btn { padding: 4px 7px; font-size: 10px; }
+}
+@media (max-width: 820px) {
+  :root { --sidebar: 0px; }
+  .sidebar { transform: translateX(-100%); }
+  .topbar { padding: 0 16px; }
+  .page { padding: 16px; }
+  .form-row, .form-row-3 { grid-template-columns: 1fr; }
+  .stats-row { grid-template-columns: repeat(2, 1fr); }
+  #activitySection { grid-template-columns: 1fr !important; }
+}
+</style>
+</head>
+<body>
+
+<!-- SIDEBAR -->
+<aside class="sidebar">
+  <div class="sb-logo">
+    <div class="sb-live"><span class="sb-live-dot"></span> Live</div>
+    <div class="sb-name">PAI Dept.</div>
+    <div class="sb-sub">Admin Panel v2</div>
+  </div>
+  <nav class="sb-nav">
+    <span class="sb-section">Обзор</span>
+    <button class="sb-item active" data-tab="dashboard"   onclick="showTab('dashboard',this)">  <span class="sb-icon">◈</span> Дашборд</button>
+    <button class="sb-item"        data-tab="members"     onclick="showTab('members',this)">    <span class="sb-icon">◉</span> Состав</button>
+    <span class="sb-section">Учёт</span>
+    <button class="sb-item"        data-tab="scores"      onclick="showTab('scores',this)">     <span class="sb-icon">◎</span> Еженеделька</button>
+    <button class="sb-item"        data-tab="reports"     onclick="showTab('reports',this)">    <span class="sb-icon">◑</span> Заявки <span id="pendingBadge" style="display:none;margin-left:auto;background:rgba(240,224,176,0.15);color:var(--amber);border:1px solid rgba(240,224,176,0.2);border-radius:100px;font-family:var(--mono);font-size:9px;padding:1px 6px"></span></button>
+    <button class="sb-item"        data-tab="meetings"    onclick="showTab('meetings',this)">   <span class="sb-icon">◷</span> Собрания</button>
+    <button class="sb-item"        data-tab="calls"       onclick="showTab('calls',this)">      <span class="sb-icon">◌</span> Обзвон</button>
+    <button class="sb-item"        data-tab="reprimands"  onclick="showTab('reprimands',this)"> <span class="sb-icon">⚠</span> Выговоры</button>
+    <span class="sb-section">Аналитика</span>
+    <button class="sb-item"        data-tab="statistics"  onclick="showTab('statistics',this)"> <span class="sb-icon">◬</span> Статистика</button>
+    <span class="sb-section">Система</span>
+    <button class="sb-item"        data-tab="admin"       onclick="showTab('admin',this)">      <span class="sb-icon">◆</span> Настройки</button>
+    <button class="sb-item"        data-tab="users"       onclick="showTab('users',this)" id="navUsers" style="display:none"> <span class="sb-icon">◇</span> Пользователи</button>
+  </nav>
+  <div class="sb-footer" id="sbUserInfo">PAI Department<br>MAJESTIC RP · 2026</div>
+</aside>
+
+<!-- MAIN -->
+<main class="main">
+  <div class="topbar">
+    <div class="topbar-title" id="topbarTitle">Дашборд</div>
+    <div class="topbar-right">
+      <div class="sync-status">
+        <span class="sync-dot" id="syncDot"></span>
+        <span id="syncText">—</span>
+      </div>
+      <button class="btn btn-ghost btn-sm" onclick="pullRemote()">↻</button>
+      <a class="btn btn-ghost btn-sm" href="/report" id="topReportLink" style="display:none">Еженеделька</a>
+      <a class="btn btn-ghost btn-sm" href="/profile" id="topProfileLink">Профиль</a>
+      <button class="btn btn-ghost btn-sm" id="exportBtn" onclick="exportData()">↑ Экспорт</button>
+      <button class="btn btn-ghost btn-sm" id="importBtn" onclick="document.getElementById('importFile').click()">↓ Импорт</button>
+      <input type="file" id="importFile" accept=".json" style="display:none" onchange="importData(this)">
+      <button class="btn btn-ghost btn-sm" onclick="doLogout()">Выйти</button>
+    </div>
+  </div>
+
+  <div class="page">
+
+    <!-- ══ DASHBOARD ══ -->
+    <div id="tab-dashboard" class="tab-content">
+      <div class="section-hd">
+        <div><div class="page-title">Обзор отдела</div><div class="page-sub">Актуальные показатели PAI Department</div></div>
+      </div>
+      <div class="stats-row" id="dashStats"></div>
+
+      <div class="dash-grid">
+        <!-- Top scores -->
+        <div class="card">
+          <div class="card-hd"><span class="card-title">Топ по баллам — текущая неделя</span></div>
+          <div class="tbl-wrap">
+            <table id="topScoresTable">
+              <thead><tr><th>#</th><th>Сотрудник</th><th>Должность</th><th>Баллы</th></tr></thead>
+              <tbody></tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- OOC -->
+        <div class="card">
+          <div class="card-hd"><span class="card-title">OOC Статусы</span></div>
+          <div class="tbl-wrap">
+            <table id="oocTable">
+              <thead><tr><th>Сотрудник</th><th>Статус</th></tr></thead>
+              <tbody></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- Activity analytics — redesigned -->
+      <div class="card" style="margin-top:14px">
+        <div class="card-hd">
+          <span class="card-title">Аналитика активности — текущая неделя</span>
+          <span style="font-family:var(--mono);font-size:10.5px;color:var(--t3)" id="actTotalLabel"></span>
+        </div>
+        <div class="card-body">
+          <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:20px" id="activitySection">
+            <!-- by activity — points -->
+            <div>
+              <div style="font-family:var(--mono);font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--t3);margin-bottom:10px">По аспектам — баллы</div>
+              <div class="act-chart" id="actByType"></div>
+            </div>
+            <!-- by activity — count -->
+            <div>
+              <div style="font-family:var(--mono);font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--t3);margin-bottom:10px">По аспектам — количество</div>
+              <div class="act-chart" id="actByCount"></div>
+            </div>
+            <!-- by person -->
+            <div>
+              <div style="font-family:var(--mono);font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--t3);margin-bottom:10px">По сотрудникам (топ-8)</div>
+              <div class="act-chart" id="actByPerson"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ MEMBERS ══ -->
+    <div id="tab-members" class="tab-content hidden">
+      <div class="section-hd">
+        <div>
+          <div class="page-title">Состав отдела</div>
+          <div class="page-sub" id="memberCount">—</div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-hd">
+          <span class="card-title">Все сотрудники</span>
+          <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+            <div class="sort-bar" id="sortBar">
+              <button class="sort-btn active" onclick="setSort('rank-asc',this)">↑ Должность</button>
+              <button class="sort-btn" onclick="setSort('rank-desc',this)">↓ Должность</button>
+              <button class="sort-btn" onclick="setSort('alpha',this)">А–Я</button>
+            </div>
+            <input type="text" placeholder="Поиск..." style="width:180px;padding:5px 10px;font-size:12px" oninput="filterMembers(this.value)">
+          </div>
+        </div>
+        <div class="tbl-wrap">
+          <table id="membersTable">
+            <thead><tr><th>#</th><th>Имя</th><th>Должность</th><th>Статик</th><th>Телефон</th><th>OOC</th></tr></thead>
+            <tbody></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ SCORES ══ -->
+    <div id="tab-scores" class="tab-content hidden">
+      <div class="section-hd">
+        <div><div class="page-title">Еженедельные баллы</div><div class="page-sub">Учёт выполненных активностей · мин. 500 б.</div></div>
+        <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+          <button class="btn btn-ghost btn-sm" id="weekPrevBtn" onclick="changeWeekView(-1)">‹</button>
+          <span class="mono" id="weekViewLabel" style="font-size:12px;color:var(--t1);min-width:160px;text-align:center">Текущая неделя</span>
+          <button class="btn btn-ghost btn-sm" id="weekNextBtn" onclick="changeWeekView(1)">›</button>
+          <button class="btn btn-ghost btn-sm" onclick="archiveWeek()">💾 Закрыть неделю</button>
+          <button class="btn btn-ghost btn-sm" onclick="resetWeeklyScores()">↺ Сбросить баллы</button>
+        </div>
+      </div>
+      <div class="card" style="margin-bottom:14px">
+        <div class="card-hd"><span class="card-title">Система баллов</span><span style="font-family:var(--mono);font-size:10px;color:var(--red)">★ High Staff</span></div>
+        <div class="card-body" style="padding:12px 18px"><div style="display:flex;flex-wrap:wrap;gap:7px" id="legendBadges"></div></div>
+      </div>
+      <div id="weekArchiveBanner" style="display:none;margin-bottom:14px"></div>
+      <div class="scores-grid" id="scoresGrid"></div>
+    </div>
+
+    <!-- ══ MEETINGS ══ -->
+    <div id="tab-meetings" class="tab-content hidden">
+      <div class="section-hd">
+        <div>
+          <div class="page-title">Собрания</div>
+          <div class="page-sub">Создавайте собрания, отмечайте явку, выдавайте выговоры</div>
+        </div>
+        <button class="btn btn-primary btn-sm" onclick="openCreateMeeting()">+ Создать собрание</button>
+      </div>
+
+      <!-- Week nav + summary bar -->
+      <div class="card" style="margin-bottom:18px">
+        <div class="card-body" style="padding:14px 18px">
+          <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+            <button class="btn btn-ghost btn-sm" onclick="changeMeetingWeek(-1)">‹</button>
+            <span style="font-family:var(--mono);font-size:12px;color:var(--t1);min-width:220px;text-align:center" id="mwLabel"></span>
+            <button class="btn btn-ghost btn-sm" onclick="changeMeetingWeek(1)">›</button>
+            <button class="btn btn-ghost btn-sm" onclick="meetingWeekOffset=0;renderMeetings()" style="font-size:11px">Текущая</button>
+            <span style="flex:1"></span>
+            <div style="display:flex;gap:6px;flex-wrap:wrap" id="mwWeekSummary"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Meeting tiles grid -->
+      <div id="meetingTilesGrid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:12px;margin-bottom:24px"></div>
+
+      <div id="meetingEmptyState" style="display:none;padding:60px 24px;text-align:center;color:var(--t3)">
+        <div style="font-size:32px;margin-bottom:14px;opacity:.2">◷</div>
+        <div style="font-size:13px;color:var(--t2)">Нет собраний за эту неделю</div>
+        <div style="font-size:11.5px;margin-top:5px">Нажмите «+ Создать собрание»</div>
+      </div>
+    </div>
+
+    <!-- Modal: создать/редактировать собрание -->
+    <div class="modal-overlay" id="modalCreateMeeting">
+      <div class="modal" style="max-width:460px">
+        <div class="modal-hd">
+          <span class="modal-title" id="modalCreateMeetingTitle">Новое собрание</span>
+          <button class="modal-close" onclick="closeModal('modalCreateMeeting')">×</button>
+        </div>
+        <div class="modal-body">
+          <div class="form-group">
+            <label>Название</label>
+            <input type="text" id="mtgTitle" placeholder="Еженедельное собрание" maxlength="60">
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label>Дата</label>
+              <input type="date" id="mtgDate">
+            </div>
+            <div class="form-group">
+              <label>Время начала</label>
+              <input type="time" id="mtgTime">
+            </div>
+          </div>
+          <div class="form-group">
+            <label>Тип собрания</label>
+            <select id="mtgType">
+              <option value="weekly">Еженедельное</option>
+              <option value="emergency">Экстренное</option>
+              <option value="briefing">Брифинг</option>
+              <option value="other">Другое</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Тема / повестка</label>
+            <textarea id="mtgNote" rows="3" placeholder="Описание, повестка, ссылки..." style="resize:vertical;min-height:60px"></textarea>
+          </div>
+        </div>
+        <div class="modal-foot">
+          <button class="btn btn-ghost btn-sm" onclick="closeModal('modalCreateMeeting')">Отмена</button>
+          <button class="btn btn-primary btn-sm" id="mtgSaveBtn" onclick="createMeeting()">Создать</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ REPORTS MODERATION ══ -->
+    <div id="tab-reports" class="tab-content hidden">
+      <div class="section-hd">
+        <div>
+          <div class="page-title">Заявки на еженедельку</div>
+          <div class="page-sub">Сотрудники сами подают отчёты — здесь модератор проверяет и засчитывает баллы</div>
+        </div>
+        <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+          <select id="reportWeekFilter" onchange="renderReports()" style="width:220px;font-size:12px;font-family:var(--mono)">
+            <option value="all">Все недели</option>
+          </select>
+          <select id="reportStatusFilter" onchange="renderReports()" style="width:140px;font-size:12px">
+            <option value="pending">Ожидают</option>
+            <option value="approved">Одобрено</option>
+            <option value="rejected">Отклонено</option>
+            <option value="all">Все статусы</option>
+          </select>
+          <button class="btn btn-ghost btn-sm" onclick="loadReports()">↻ Обновить</button>
+        </div>
+      </div>
+
+      <!-- Summary bar -->
+      <div id="reportsSummary" class="stats-row" style="margin-bottom:16px"></div>
+
+      <!-- Reports list -->
+      <div id="reportsList"></div>
+    </div>
+
+    <!-- Modal: просмотр заявки -->
+    <div class="modal-overlay" id="modalReport">
+      <div class="modal" style="max-width:680px">
+        <div class="modal-hd">
+          <span class="modal-title" id="modalReportTitle">Заявка</span>
+          <button class="modal-close" onclick="closeModal('modalReport')">×</button>
+        </div>
+        <div class="modal-body" id="modalReportBody"></div>
+        <div class="modal-foot" id="modalReportFoot"></div>
+      </div>
+    </div>
+    <div class="modal-overlay" id="modalMeetingAttendance">
+      <div class="modal" style="max-width:640px">
+        <div class="modal-hd" style="padding:16px 20px 14px">
+          <div style="flex:1;min-width:0">
+            <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+              <div class="modal-title" id="mAttTitle">Собрание</div>
+              <span id="mAttTypeBadge" class="badge bg-gray"></span>
+            </div>
+            <div style="font-family:var(--mono);font-size:10px;color:var(--t3);margin-top:4px" id="mAttMeta"></div>
+          </div>
+          <div style="display:flex;gap:6px;align-items:center;margin-left:12px;flex-shrink:0">
+            <button class="btn btn-ghost btn-sm" onclick="openEditMeeting()" title="Редактировать">✎</button>
+            <button class="modal-close" onclick="closeModal('modalMeetingAttendance')">×</button>
+          </div>
+        </div>
+
+        <!-- Summary + quick actions -->
+        <div style="padding:10px 18px;border-bottom:1px solid var(--line);display:flex;align-items:center;gap:8px;flex-wrap:wrap;background:var(--bg3)">
+          <div style="display:flex;gap:5px;flex:1;flex-wrap:wrap" id="mAttSummary"></div>
+          <div style="display:flex;gap:5px;flex-shrink:0">
+            <button class="btn btn-ghost btn-sm" onclick="mAttMarkAll('present')" title="Все присутствовали">✓ Все</button>
+            <button class="btn btn-ghost btn-sm" onclick="mAttReset()" title="Сбросить все отметки">↺</button>
+          </div>
+        </div>
+
+        <!-- Legend -->
+        <div style="padding:8px 18px;border-bottom:1px solid var(--line);display:flex;gap:14px;font-family:var(--mono);font-size:10px;color:var(--t3)">
+          <span style="display:flex;align-items:center;gap:5px"><span style="width:8px;height:8px;border-radius:50%;background:rgba(255,255,255,.5);display:inline-block"></span>Присутствовал</span>
+          <span style="display:flex;align-items:center;gap:5px"><span style="width:8px;height:8px;border-radius:50%;background:var(--amber);display:inline-block"></span>Предупредил</span>
+          <span style="display:flex;align-items:center;gap:5px"><span style="width:8px;height:8px;border-radius:50%;background:var(--red);display:inline-block"></span>Отсутствовал</span>
+        </div>
+
+        <!-- Member list -->
+        <div style="max-height:54vh;overflow-y:auto" id="mAttList"></div>
+
+        <!-- Footer -->
+        <div class="modal-foot" style="justify-content:space-between;flex-wrap:wrap;gap:8px;border-top:1px solid var(--line)">
+          <div style="display:flex;gap:6px;flex-wrap:wrap">
+            <button class="btn btn-danger btn-sm" id="mAttReprimandBtn" onclick="openReprimandPanel()" style="display:none">⚠ Выговоры отсутствующим</button>
+          </div>
+          <div style="display:flex;gap:6px">
+            <button class="btn btn-ghost btn-sm" onclick="deleteMeetingConfirm()">Удалить</button>
+            <button class="btn btn-primary btn-sm" onclick="saveMeetingAttendance()">Сохранить</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Modal: выдача выговоров -->
+    <div class="modal-overlay" id="modalReprimandPanel">
+      <div class="modal" style="max-width:500px">
+        <div class="modal-hd">
+          <span class="modal-title">Выдать выговоры</span>
+          <button class="modal-close" onclick="closeModal('modalReprimandPanel')">×</button>
+        </div>
+        <div class="modal-body" style="padding:0">
+          <div style="padding:14px 18px;border-bottom:1px solid var(--line);font-size:12px;color:var(--t2)">
+            Выберите тип выговора и сотрудников. Предупредившие об отсутствии исключены по умолчанию.
+          </div>
+          <div style="padding:14px 18px;border-bottom:1px solid var(--line);display:flex;align-items:center;gap:10px">
+            <span style="font-family:var(--mono);font-size:10px;color:var(--t3);text-transform:uppercase;letter-spacing:.1em">Тип:</span>
+            <button class="mAtt-btn active-present" id="repTypeVerbal" onclick="setRepType('verbal')" style="border-radius:var(--rad-s);padding:5px 14px;font-family:var(--font);font-size:12px">Устный</button>
+            <button class="mAtt-btn" id="repTypeStrict" onclick="setRepType('strict')" style="border-radius:var(--rad-s);padding:5px 14px;font-family:var(--font);font-size:12px">Строгий</button>
+          </div>
+          <div style="max-height:52vh;overflow-y:auto" id="repMemberList"></div>
+        </div>
+        <div class="modal-foot" style="justify-content:space-between">
+          <button class="btn btn-ghost btn-sm" onclick="closeModal('modalReprimandPanel')">Отмена</button>
+          <button class="btn btn-danger btn-sm" onclick="confirmIssueReprimands()">Выдать выговоры</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ CALLS ══ -->
+    <div id="tab-calls" class="tab-content hidden">
+      <div class="section-hd">
+        <div><div class="page-title">Обзвон в отдел</div><div class="page-sub">0 / 0.5 / 0.7 / 1.0 — проход от 70%</div></div>
+        <input type="date" id="callDate" onchange="setCallDate(this.value)" style="width:auto;max-width:155px">
+      </div>
+
+      <div class="card" style="margin-bottom:14px">
+        <div class="card-hd">
+          <span class="card-title">Кандидаты</span>
+          <button class="btn btn-ghost btn-sm" onclick="addCandidate()">+ Кандидат</button>
+        </div>
+        <div class="card-body"><div id="candidatesList" style="display:flex;flex-direction:column;gap:7px"></div></div>
+      </div>
+
+      <div class="card">
+        <div class="card-hd"><span class="card-title">Оценки по вопросам</span></div>
+        <div class="tbl-wrap">
+          <table id="callTable">
+            <thead><tr id="callHead"></tr></thead>
+            <tbody id="callBody"></tbody>
+          </table>
+        </div>
+        <div class="card-body" style="border-top:1px solid var(--line)">
+          <div style="font-family:var(--mono);font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--t3);margin-bottom:12px">Итоги</div>
+          <div class="call-results" id="callResults"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ REPRIMANDS ══ -->
+    <div id="tab-reprimands" class="tab-content hidden">
+      <div class="section-hd">
+        <div><div class="page-title">Выговоры</div><div class="page-sub">Макс. 2 устных и 2 строгих на сотрудника</div></div>
+        <div style="display:flex;gap:7px;align-items:center;flex-wrap:wrap">
+          <input type="text" id="repSearch" placeholder="Поиск..." style="width:160px;padding:5px 10px;font-size:12px" oninput="renderReprimands()">
+          <select id="repFilter" style="padding:5px 10px;font-size:12px;width:160px" onchange="renderReprimands()">
+            <option value="all">Все</option>
+            <option value="has-verbal">Есть устный</option>
+            <option value="has-strict">Есть строгий</option>
+            <option value="max-verbal">Макс. устных</option>
+            <option value="max-strict">Макс. строгих</option>
+          </select>
+        </div>
+      </div>
+      <div class="card" style="margin-bottom:14px">
+        <div class="card-hd">
+          <span class="card-title">Итоги по отделу</span>
+          <div id="repSummary" style="display:flex;gap:7px;flex-wrap:wrap"></div>
+        </div>
+      </div>
+      <div class="rep-grid" id="repGrid"></div>
+    </div>
+
+    <!-- ══ STATISTICS ══ -->
+    <div id="tab-statistics" class="tab-content hidden">
+      <div class="section-hd">
+        <div><div class="page-title">Месячная статистика</div><div class="page-sub">История собраний, выговоров и активности</div></div>
+        <div class="month-selector">
+          <button class="month-nav" onclick="changeMonth(-1)">‹</button>
+          <span class="month-label" id="monthLabel"></span>
+          <button class="month-nav" onclick="changeMonth(1)">›</button>
+        </div>
+      </div>
+
+      <div class="stats-tabs">
+        <button class="stats-tab active" data-stab="meetings" onclick="switchStatTab('meetings',this)">Собрания</button>
+        <button class="stats-tab" data-stab="reprimands" onclick="switchStatTab('reprimands',this)">Выговоры</button>
+        <button class="stats-tab" data-stab="scores" onclick="switchStatTab('scores',this)">Баллы (тек.)</button>
+        <button class="stats-tab" data-stab="weekhist" onclick="switchStatTab('weekhist',this)">История недель</button>
+        <button class="stats-tab" data-stab="log" onclick="switchStatTab('log',this)">История</button>
+      </div>
+
+      <div id="statPanel-meetings">
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px;margin-bottom:18px" id="statMeetStats"></div>
+        <div class="card">
+          <div class="card-hd"><span class="card-title">Явка по сотрудникам за месяц</span></div>
+          <div class="card-body"><div class="bar-chart" id="statMeetBar"></div></div>
+        </div>
+      </div>
+
+      <div id="statPanel-reprimands" style="display:none">
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px;margin-bottom:18px" id="statRepStats"></div>
+        <div class="card">
+          <div class="card-hd"><span class="card-title">Выговоры по сотрудникам (накопленно)</span></div>
+          <div class="card-body"><div class="bar-chart" id="statRepBar"></div></div>
+        </div>
+      </div>
+
+      <div id="statPanel-scores" style="display:none">
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px;margin-bottom:18px" id="statScoreStats"></div>
+        <div class="card">
+          <div class="card-hd"><span class="card-title">Баллы по сотрудникам за месяц</span></div>
+          <div class="card-body"><div class="bar-chart" id="statScoreBar"></div></div>
+        </div>
+      </div>
+
+      <div id="statPanel-weekhist" style="display:none">
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px;flex-wrap:wrap">
+          <span style="font-family:var(--mono);font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--t3)">Архив недель</span>
+          <select id="weekHistSelect" onchange="renderWeekHistory()" style="width:auto;max-width:280px;padding:5px 10px;font-size:12px"></select>
+        </div>
+        <div id="weekHistPanel"></div>
+      </div>
+
+      <div id="statPanel-log" style="display:none">
+        <div class="card">
+          <div class="card-hd">
+            <span class="card-title">История событий</span>
+            <button class="btn btn-ghost btn-sm" onclick="clearMonthLog()">Очистить месяц</button>
+          </div>
+          <div id="statLogList" style="max-height:420px;overflow-y:auto"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ ADMIN ══ -->
+    <div id="tab-admin" class="tab-content hidden">
+      <div class="section-hd">
+        <div><div class="page-title">Настройки</div><div class="page-sub">Состав, синхронизация и справочники</div></div>
+      </div>
+
+      <div class="admin-grid">
+
+        <div class="card">
+          <div class="card-hd"><span class="card-title">Добавить сотрудника</span></div>
+          <div class="card-body">
+            <div class="form-row">
+              <div class="form-group"><label>Имя</label><input type="text" id="addFirst" placeholder="Имя"></div>
+              <div class="form-group"><label>Фамилия</label><input type="text" id="addLast" placeholder="Фамилия"></div>
+            </div>
+            <div class="form-row">
+              <div class="form-group"><label>Статик (ID)</label><input type="text" id="addGameId" placeholder="123456"></div>
+              <div class="form-group"><label>Должность</label><select id="addRank"></select></div>
+            </div>
+            <div class="form-row">
+              <div class="form-group"><label>Телефон</label><input type="text" id="addPhone" placeholder="+7 999 999-99-99"></div>
+              <div class="form-group"><label>Номер банк. счёта</label><input type="text" id="addBank" placeholder="0000 0000 0000 0000"></div>
+            </div>
+            <div class="form-group"><label>OOC статус</label><input type="text" id="addOoc" value="-"></div>
+            <button class="btn btn-primary" onclick="addMember()">+ Добавить</button>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-hd"><span class="card-title">Состав (редактирование)</span></div>
+          <div class="card-body" id="adminMembersList" style="max-height:360px;overflow-y:auto"></div>
+        </div>
+
+        <div class="card">
+          <div class="card-hd"><span class="card-title">Должности</span></div>
+          <div class="card-body">
+            <div id="ranksList" style="display:flex;flex-direction:column;gap:7px;margin-bottom:14px"></div>
+            <div style="display:flex;gap:7px">
+              <input type="text" id="newRankInput" placeholder="Новая должность">
+              <button class="btn btn-primary btn-sm" onclick="addRank()">+</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-hd"><span class="card-title">Виды активности</span></div>
+          <div class="card-body">
+            <div id="activitiesList" style="display:flex;flex-direction:column;gap:7px;margin-bottom:12px"></div>
+            <button class="btn btn-ghost btn-sm" onclick="openAddActivity()">+ Активность</button>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-hd"><span class="card-title">Вопросы обзвона</span></div>
+          <div class="card-body">
+            <div id="questionsList" style="display:flex;flex-direction:column;gap:7px;margin-bottom:12px;max-height:260px;overflow-y:auto"></div>
+            <button class="btn btn-ghost btn-sm" onclick="openAddQuestion()">+ Вопрос</button>
+          </div>
+        </div>
+
+        <div class="card" id="adminDataCard">
+          <div class="card-hd"><span class="card-title">Данные</span></div>
+          <div class="card-body" style="display:flex;flex-direction:column;gap:9px">
+            <button class="btn btn-ghost" onclick="exportData()">↑ Экспорт JSON</button>
+            <button class="btn btn-ghost" onclick="document.getElementById('importFile').click()">↓ Импорт JSON</button>
+            <div class="divider"></div>
+            <button class="btn btn-danger" id="clearDataBtn" onclick="clearAllData()">↺ Сбросить к начальным</button>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- ══ USERS ══ -->
+    <div id="tab-users" class="tab-content hidden">
+      <div class="section-hd">
+        <div>
+          <div class="page-title">Пользователи</div>
+          <div class="page-sub">Управление ролями и доступом</div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-hd"><span class="card-title">Все пользователи</span></div>
+        <div class="tbl-wrap">
+          <table>
+            <thead><tr><th>Логин</th><th>Имя</th><th>Статик</th><th>Роль</th><th>Последний вход</th><th></th></tr></thead>
+            <tbody id="usersTableBody"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /page -->
+</main>
+
+<!-- ── MODALS ── -->
+
+<!-- Edit Member -->
+<div class="modal-overlay" id="modalMember">
+  <div class="modal">
+    <div class="modal-hd">
+      <span class="modal-title">Редактировать сотрудника</span>
+      <button class="modal-close" onclick="closeModal('modalMember')">×</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-row">
+        <div class="form-group"><label>Имя</label><input type="text" id="editFirst"></div>
+        <div class="form-group"><label>Фамилия</label><input type="text" id="editLast"></div>
+      </div>
+      <div class="form-row">
+        <div class="form-group"><label>Статик</label><input type="text" id="editGameId"></div>
+        <div class="form-group"><label>Должность</label><select id="editRank"></select></div>
+      </div>
+      <div class="form-row">
+        <div class="form-group"><label>Телефон</label><input type="text" id="editPhone" placeholder="+7 999 ..."></div>
+        <div class="form-group"><label>Номер банк. счёта</label><input type="text" id="editBank" placeholder="0000 0000 ..."></div>
+      </div>
+      <div class="form-group"><label>OOC</label><input type="text" id="editOoc"></div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn btn-ghost" onclick="closeModal('modalMember')">Отмена</button>
+      <button class="btn btn-primary" onclick="saveMemberEdit()">Сохранить</button>
+    </div>
+  </div>
+</div>
+
+<!-- Add Activity -->
+<div class="modal-overlay" id="modalActivity">
+  <div class="modal" style="max-width:420px">
+    <div class="modal-hd">
+      <span class="modal-title" id="modalActivityTitle">Добавить активность</span>
+      <button class="modal-close" onclick="closeModal('modalActivity')">×</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-row">
+        <div class="form-group"><label>Код (2 буквы)</label><input type="text" id="actCode" maxlength="2" placeholder="LC"></div>
+        <div class="form-group"><label>Баллов</label><input type="number" id="actPoints" min="1"></div>
+      </div>
+      <div class="form-group"><label>Название</label><input type="text" id="actName"></div>
+      <div class="form-row">
+        <div class="form-group"><label>High Staff</label><select id="actHighStaff"><option value="false">Нет</option><option value="true">Да</option></select></div>
+        <div class="form-group"><label>Примечание</label><input type="text" id="actNote"></div>
+      </div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn btn-ghost" onclick="closeModal('modalActivity')">Отмена</button>
+      <button class="btn btn-primary" id="modalActivitySaveBtn" onclick="saveActivity()">Добавить</button>
+    </div>
+  </div>
+</div>
+
+<!-- Add Question -->
+<div class="modal-overlay" id="modalQuestion">
+  <div class="modal" style="max-width:480px">
+    <div class="modal-hd">
+      <span class="modal-title" id="modalQuestionTitle">Добавить вопрос</span>
+      <button class="modal-close" onclick="closeModal('modalQuestion')">×</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-group"><label>Вопрос</label><textarea id="qQuestion" rows="3"></textarea></div>
+      <div class="form-group"><label>Ответ</label><textarea id="qAnswer" rows="2"></textarea></div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn btn-ghost" onclick="closeModal('modalQuestion')">Отмена</button>
+      <button class="btn btn-primary" id="modalQuestionSaveBtn" onclick="saveQuestion()">Добавить</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast-wrap" id="toasts"></div>
+
+<!-- ═══════════════════════════════ EMBEDDED DATA ═══════════════════════════════ -->
+<script type="application/json" id="embedded-state">
+{
+  "members": [
+    {"id":"m1","firstName":"Richi","lastName":"Londo","gameId":"232430","rank":"Curator of Department","ooc":"-","phone":"","bank":""},
+    {"id":"m2","firstName":"Mir","lastName":"Li","gameId":"45430","rank":"Head of Department","ooc":"-","phone":"","bank":""},
+    {"id":"m3","firstName":"Francesco","lastName":"DeLondo","gameId":"99108","rank":"Head of Department","ooc":"-","phone":"","bank":""},
+    {"id":"m4","firstName":"Logan","lastName":"Brooks","gameId":"159733","rank":"Head of Department","ooc":"-","phone":"","bank":""},
+    {"id":"m5","firstName":"Kamilla","lastName":"Initial","gameId":"159945","rank":"Deputy Head of Department","ooc":"-","phone":"","bank":""},
+    {"id":"m6","firstName":"Edwin","lastName":"Milton","gameId":"218240","rank":"Deputy Head of Department","ooc":"OOC Отпуск 16.06.26-30.06.26","phone":"","bank":""},
+    {"id":"m7","firstName":"Zakura","lastName":"Londo","gameId":"273383","rank":"Instructor of Department","ooc":"-","phone":"","bank":""},
+    {"id":"m8","firstName":"Princess","lastName":"Londo","gameId":"256278","rank":"Instructor of Department","ooc":"-","phone":"","bank":""},
+    {"id":"m9","firstName":"Molly","lastName":"Londo","gameId":"58309","rank":"Instructor of Department","ooc":"-","phone":"","bank":""},
+    {"id":"m10","firstName":"Miran","lastName":"Zekari","gameId":"34987","rank":"Instructor of Department","ooc":"-","phone":"","bank":""},
+    {"id":"m11","firstName":"Archangel","lastName":"Londo","gameId":"239308","rank":"Instructor of Department","ooc":"-","phone":"","bank":""},
+    {"id":"m12","firstName":"Satoru","lastName":"Initial","gameId":"201700","rank":"Instructor of Department","ooc":"-","phone":"","bank":""},
+    {"id":"m13","firstName":"Naylor","lastName":"Stella","gameId":"96776","rank":"Instructor of Department","ooc":"OOC Отпуск","phone":"","bank":""},
+    {"id":"m14","firstName":"Roma","lastName":"Londovich","gameId":"258012","rank":"Instructor of Department","ooc":"-","phone":"","bank":""},
+    {"id":"m15","firstName":"Daryana","lastName":"Londo","gameId":"30514","rank":"Instructor of Department","ooc":"-","phone":"","bank":""},
+    {"id":"m16","firstName":"Neko","lastName":"Toujou","gameId":"24300","rank":"Instructor of Department","ooc":"-","phone":"","bank":""},
+    {"id":"m17","firstName":"Mack","lastName":"Nightez","gameId":"289844","rank":"Instructor of Department","ooc":"-","phone":"","bank":""},
+    {"id":"m18","firstName":"Vanco","lastName":"Londo","gameId":"288208","rank":"Instructor of Department","ooc":"-","phone":"","bank":""},
+    {"id":"m19","firstName":"Anthony","lastName":"Wilson","gameId":"292488","rank":"Instructor of Department","ooc":"-","phone":"","bank":""},
+    {"id":"m20","firstName":"Aomine","lastName":"Londo","gameId":"116222","rank":"Instructor of Department","ooc":"-","phone":"","bank":""},
+    {"id":"m21","firstName":"Tom","lastName":"Zerg","gameId":"226491","rank":"Instructor of Department","ooc":"-","phone":"","bank":""},
+    {"id":"m22","firstName":"Lana","lastName":"Westcoast","gameId":"267626","rank":"Instructor of Department","ooc":"-","phone":"","bank":""}
+  ],
+  "ranks": ["Curator of Department","Head of Department","Deputy Head of Department","Instructor of Department","Staff of Department"],
+  "activities": [
+    {"id":"a1","code":"LC","name":"Кол-во лицензий","points":15,"highStaff":false,"note":"Скриншот выдачи лицензии"},
+    {"id":"a2","code":"EM","name":"Трудоустройство","points":30,"highStaff":false,"note":"Скриншот трудоустройства"},
+    {"id":"a3","code":"EX","name":"Проведено экзаменов","points":20,"highStaff":false,"note":"Скриншот экзамена"},
+    {"id":"a4","code":"RP","name":"Проверка отчётность PA","points":10,"highStaff":false,"note":""},
+    {"id":"a5","code":"GN","name":"Отправлено гос. волн (набор)","points":45,"highStaff":false,"note":"Одобренный отчёт, 3 скриншота"},
+    {"id":"a6","code":"GL","name":"Отправлено гос. волн (лицензии)","points":10,"highStaff":false,"note":"Одобренный отчёт, 1 скриншот лицензии"},
+    {"id":"a7","code":"UP","name":"Проверено запросов на повышение","points":5,"highStaff":false,"note":""},
+    {"id":"a8","code":"AC","name":"Перевод человека из академии","points":10,"highStaff":false,"note":""},
+    {"id":"a9","code":"AG","name":"Отправлено агитаций","points":5,"highStaff":false,"note":""},
+    {"id":"a10","code":"CL","name":"Обзвон в отдел","points":40,"highStaff":true,"note":""},
+    {"id":"a11","code":"DS","name":"Проверено рапортов на увал","points":5,"highStaff":true,"note":""}
+  ],
+  "weeklyScores": {},
+  "weeklyHistory": [],
+  "meeting": {"date":"","attendance":{}},
+  "call": {"date":"","candidates":[],"scores":{}},
+  "reprimands": {},
+  "questions": [
+    {"id":"q1","q":"Кто является старшим составом?","a":"От Dep.H и выше"},
+    {"id":"q2","q":"Иерархия хай рангов?","a":"Deputy Head → Head → Curator → Assistant → Advisor → Deputy Chief → Chief"},
+    {"id":"q3","q":"Какой отдел отвечает за внутренний контроль?","a":"IAD"},
+    {"id":"q4","q":"Кто выдаёт спецуху?","a":"Storekeeper"},
+    {"id":"q5","q":"Что нужно сделать после получения спецухи?","a":"Составить отчёт. Рабочее время 14:00–22:00"},
+    {"id":"q6","q":"Правила IC и OOC отпуска?","a":"IC: перерыв не более 5 ч. OOC: не более 7 дней"},
+    {"id":"q7","q":"Кто может стоять в холле?","a":"IAD и PAI"},
+    {"id":"q8","q":"Как принимать человека во фракцию?","a":"Проверить заявку, провести собеседование, оформить кадровый аудит"},
+    {"id":"q9","q":"Что самое важное при проверке отчёта?","a":"Имя/фамилия/статик вручную совпадают, не повышался сегодня, есть бодик, нет варнов"},
+    {"id":"q10","q":"Что делаем после проверки отчёта?","a":"СОЗДАТЬ ВЕТКУ. ДА — отправить в канал запроса. НЕТ — объяснить причину"},
+    {"id":"q11","q":"Почему нельзя проверять отчёты не по порядку?","a":"Есть вероятность, что те, кто выше, останутся непроверенными"},
+    {"id":"q12","q":"Правила агитаций?","a":"С 10:00 до 22:00 МСК. Пауза между агитациями отделов — 60 минут"},
+    {"id":"q13","q":"Правила выдачи лицензий?","a":"Проверить документы, выдать лицензию, зафиксировать в журнале"},
+    {"id":"q14","q":"Как повышать человека по восстановлению или переводу?","a":"Проверить одобренный запрос и ранг, в кадровом указать ссылку"},
+    {"id":"q15","q":"Что делать, если написал кадровый неправильно?","a":"Удалить или поставить реакцию крестика"}
+  ],
+  "monthlyLog": []
+}
+</script>
+
+<!-- ═══════════════════════════════ JAVASCRIPT ═══════════════════════════════ -->
+<script src="api-client.js"></script>
+<script>
+'use strict';
+
+// ── AUTH ─────────────────────────────────────────────────────────────────────
+let CURRENT_USER = null;
+const APP_ROLE_LABELS = PAI_API.ROLE_LABELS;
+
+async function doLogout() {
+  await PAI_API.apiFetch('/api/auth/logout', { method: 'POST' });
+  window.location.href = '/login';
+}
+
+function applyPermissions() {
+  const isAdmin = PAI_API.isAdmin(CURRENT_USER.role);
+  const isSenior = PAI_API.isSenior(CURRENT_USER.role);
+  document.getElementById('navUsers').style.display = isSenior ? '' : 'none';
+  document.getElementById('topReportLink').style.display = PAI_API.isEmployee(CURRENT_USER.role) ? '' : 'none';
+  document.getElementById('topProfileLink').textContent = PAI_API.formatUserName(CURRENT_USER);
+  document.getElementById('sbUserInfo').innerHTML = `${ea(PAI_API.formatUserName(CURRENT_USER))}<br>${APP_ROLE_LABELS[CURRENT_USER.role] || CURRENT_USER.role}`;
+  if (!isAdmin) {
+    document.getElementById('tab-admin')?.querySelectorAll('.card').forEach((card, i) => {
+      if (i < 3) card.style.display = 'none';
+    });
+    document.getElementById('clearDataBtn')?.remove();
+  }
+}
+
+// ── RANK HIERARCHY ───────────────────────────────────────────────────────────
+const RANK_ORDER = [
+  'Curator of Department',       // 0
+  'Head of Department',          // 1
+  'Deputy Head of Department',   // 2
+  'Instructor of Department',    // 3
+  'Staff of Department'          // 4
+];
+
+function rankIdx(rank) {
+  const r = (rank || '').trim();
+  for (let i = 0; i < RANK_ORDER.length; i++) {
+    if (r.toLowerCase().includes(RANK_ORDER[i].toLowerCase().split(' ')[0].toLowerCase())) {
+      // match by first keyword
+    }
+  }
+  const idx = RANK_ORDER.findIndex(ro => r === ro);
+  if (idx !== -1) return idx;
+  if (r.includes('Curator'))    return 0;
+  if (r.includes('Head of'))    return 1;
+  if (r.includes('Deputy'))     return 2;
+  if (r.includes('Instructor')) return 3;
+  return 4;
+}
+
+function rankNameClass(rank) { return 'rn-' + Math.min(rankIdx(rank), 4); }
+function rankBadgeClass(rank){ return 'rb-' + Math.min(rankIdx(rank), 4); }
+
+// ── STATE ────────────────────────────────────────────────────────────────────
+let S = null;
+let currentTab = 'dashboard';
+let memberFilter = '';
+let memberSort  = 'rank-asc';
+let editMemberId = null;
+let editActivityId = null;
+let editQuestionId = null;
+let isSaving = false, pendingSave = false;
+let saveTimer = null;
+let currentStatMonth = null;
+let currentStatTab = 'meetings';
+let USERS_LIST = [];
+
+// ── UTILS ────────────────────────────────────────────────────────────────────
+function uid() { return 'i' + Date.now() + Math.random().toString(36).slice(2, 6); }
+function ea(s) { return (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/"/g,'&quot;'); }
+function now_iso() { return new Date().toISOString().split('T')[0]; }
+
+function isEmptyOoc(s) { const v = (s||'').trim(); return !v || v === '-' || v === '—' || v === '–'; }
+
+function memberName(m) {
+  if (m.firstName || m.lastName) return `${m.firstName||''} ${m.lastName||''}`.trim();
+  return m.name || '';
+}
+
+function normalizeMember(m) {
+  if (!m.firstName && m.name) {
+    const p = m.name.trim().split(/\s+/);
+    m.firstName = p[0]||''; m.lastName = p.slice(1).join(' ')||'';
+  }
+  m.name = memberName(m);
+  if (!('phone' in m)) m.phone = '';
+  if (!('bank'  in m)) m.bank  = '';
+  return m;
+}
+
+function getEmbedded() {
+  try { return JSON.parse(document.getElementById('embedded-state').textContent); } catch { return null; }
+}
+
+function getMemberTotal(mid) {
+  const sc = S.weeklyScores[mid] || {};
+  return Object.entries(sc).reduce((sum, [aid, cnt]) => {
+    const a = S.activities.find(x => x.id === aid);
+    return sum + (a ? a.points * (parseInt(cnt)||0) : 0);
+  }, 0);
+}
+
+// ── MONTHLY STATS HELPERS ────────────────────────────────────────────────────
+function thisYearMonth() {
+  const d = new Date();
+  return { year: d.getFullYear(), month: d.getMonth() + 1 };
+}
+
+function ymKey(y, m) { return `${y}-${String(m).padStart(2,'0')}`; }
+
+function monthLabel(ym) {
+  const MONTHS = ['Январь','Февраль','Март','Апрель','Май','Июнь','Июль','Август','Сентябрь','Октябрь','Ноябрь','Декабрь'];
+  return MONTHS[ym.month - 1] + ' ' + ym.year;
+}
+
+function changeMonth(delta) {
+  let { year, month } = currentStatMonth;
+  month += delta;
+  if (month > 12) { month = 1; year++; }
+  if (month < 1)  { month = 12; year--; }
+  currentStatMonth = { year, month };
+  renderStatistics();
+}
+
+// ── MEETING SNAPSHOT → monthly log ──────────────────────────────────────────
+// ── TOAST ─────────────────────────────────────────────────────────────────────
+function toast(msg) {
+  const el = document.createElement('div');
+  el.className = 'toast-item';
+  el.textContent = msg;
+  document.getElementById('toasts').appendChild(el);
+  setTimeout(() => el.remove(), 3000);
+}
+
+// ── DB SYNC ──────────────────────────────────────────────────────────────────
+function setSyncUI(cls, text) {
+  document.getElementById('syncDot').className = 'sync-dot ' + (cls||'');
+  document.getElementById('syncText').textContent = text;
+}
+
+async function pullRemote() {
+  setSyncUI('loading', 'Загрузка...');
+  try {
+    S = await PAI_API.apiFetch('/api/state');
+    ensureAll();
+    renderTab(currentTab);
+    setSyncUI('ok', 'БД · ' + new Date().toLocaleTimeString('ru',{hour:'2-digit',minute:'2-digit'}));
+  } catch(e) {
+    if (!S?.members?.length) S = defaultState();
+    ensureAll();
+    renderTab(currentTab);
+    setSyncUI('err', e.message || 'Ошибка загрузки');
+  }
+}
+
+function scheduleSave() {
+  clearTimeout(saveTimer);
+  saveTimer = setTimeout(pushRemote, 900);
+}
+
+async function pushRemote() {
+  if (isSaving) { pendingSave = true; return; }
+  isSaving = true;
+  setSyncUI('loading', 'Сохранение...');
+  try {
+    await PAI_API.apiFetch('/api/state', { method: 'POST', body: JSON.stringify(S) });
+    setSyncUI('ok', 'Сохранено ' + new Date().toLocaleTimeString('ru',{hour:'2-digit',minute:'2-digit'}));
+  } catch(e) {
+    setSyncUI('err', 'Ошибка'); toast('Сохранение: ' + e.message);
+  } finally {
+    isSaving = false;
+    if (pendingSave) { pendingSave = false; scheduleSave(); }
+  }
+}
+
+// ── STATE MIGRATION ──────────────────────────────────────────────────────────
+function migrateState(raw) {
+  const base = getEmbedded() || {};
+  const s = {
+    ...base, ...raw,
+    members:     (raw.members?.length     ? raw.members     : base.members    || []).map(normalizeMember),
+    activities:  raw.activities?.length   ? raw.activities   : base.activities || [],
+    questions:   raw.questions?.length    ? raw.questions    : base.questions  || [],
+    ranks:       raw.ranks?.length        ? raw.ranks        : base.ranks      || [],
+    weeklyScores: raw.weeklyScores || base.weeklyScores || {},
+    weeklyHistory: raw.weeklyHistory || base.weeklyHistory || [],
+    meeting:     raw.meeting     || base.meeting     || { date:'', attendance:{} },
+    call:        raw.call        || base.call        || { date:'', candidates:[], scores:{} },
+    meetings:    raw.meetings    || base.meetings    || [],
+    reprimands:  raw.reprimands  || base.reprimands  || {},
+    monthlyLog:  raw.monthlyLog  || base.monthlyLog  || []
+  };
+  if (!s.call.candidates) s.call.candidates = [];
+  s.call.candidates = s.call.candidates.filter(c => c && (c.name||c.gameId));
+  if (!s.meeting.attendance) s.meeting.attendance = {};
+  return s;
+}
+
+function defaultState() { return migrateState(JSON.parse(JSON.stringify(getEmbedded()||{}))); }
+
+function ensureAll() {
+  if (!S) S = defaultState();
+  if (!S.meeting) S.meeting = { date: '', attendance: {} };
+  if (!S.meeting.attendance) S.meeting.attendance = {};
+  if (!S.reprimands) S.reprimands = {};
+  if (!S.monthlyLog) S.monthlyLog = [];
+  if (!S.call) S.call = { date: '', candidates: [], scores: {} };
+  if (!S.call.candidates) S.call.candidates = [];
+  if (!S.call.scores) S.call.scores = {};
+  if (!S.meetings) S.meetings = [];
+  if (!S.members) S.members = [];
+  if (!S.activities) S.activities = [];
+  if (!S.ranks) S.ranks = [];
+  if (!S.questions) S.questions = [];
+
+  // meeting attendance for every member
+  S.members.forEach(m => {
+    if (!S.meeting.attendance[m.id]) S.meeting.attendance[m.id] = { status:'none', note:'' };
+    const a = S.meeting.attendance[m.id];
+    if (a.present !== undefined || a.warned !== undefined) {
+      a.status = a.present ? 'present' : a.warned ? 'warned' : 'absent';
+      delete a.present; delete a.warned;
+    }
+    if (!a.status) a.status = 'none';
+  });
+  // reprimands
+  S.members.forEach(m => {
+    if (!S.reprimands[m.id]) S.reprimands[m.id] = { verbal:0, strict:0 };
+    S.reprimands[m.id].verbal = Math.min(2, Math.max(0, S.reprimands[m.id].verbal||0));
+    S.reprimands[m.id].strict = Math.min(2, Math.max(0, S.reprimands[m.id].strict||0));
+  });
+  // ensure phone/bank fields
+  S.members.forEach(m => { if(!('phone' in m)) m.phone=''; if(!('bank' in m)) m.bank=''; });
+}
+
+// ── NAV ──────────────────────────────────────────────────────────────────────
+const TAB_TITLES = {
+  dashboard: 'Дашборд', members: 'Состав', scores: 'Еженедельные баллы',
+  meetings: 'Собрания', calls: 'Обзвон', reprimands: 'Выговоры',
+  statistics: 'Статистика', admin: 'Настройки', reports: 'Заявки на еженедельку',
+  users: 'Пользователи'
+};
+
+function showTab(tab, el) {
+  currentTab = tab;
+  document.querySelectorAll('.tab-content').forEach(t => t.classList.add('hidden'));
+  document.getElementById('tab-'+tab)?.classList.remove('hidden');
+  document.querySelectorAll('.sb-item').forEach(n => n.classList.remove('active'));
+  (el || document.querySelector(`[data-tab="${tab}"]`))?.classList.add('active');
+  document.getElementById('topbarTitle').textContent = TAB_TITLES[tab] || tab;
+  renderTab(tab);
+}
+
+function renderTab(tab) {
+  if (tab === 'dashboard')  renderDashboard();
+  else if (tab === 'members')    renderMembers();
+  else if (tab === 'scores')     renderScores();
+  else if (tab === 'meetings')   renderMeetings();
+  else if (tab === 'calls')      renderCalls();
+  else if (tab === 'reprimands') renderReprimands();
+  else if (tab === 'statistics') renderStatistics();
+  else if (tab === 'admin')      renderAdmin();
+  else if (tab === 'reports')    renderReports();
+  else if (tab === 'users')      renderUsers();
+}
+
+function closeModal(id) { document.getElementById(id)?.classList.remove('open'); }
+function openModal(id)  { document.getElementById(id)?.classList.add('open'); }
+document.querySelectorAll('.modal-overlay').forEach(o => {
+  o.addEventListener('click', e => { if (e.target === o) o.classList.remove('open'); });
+});
+
+// ── DASHBOARD ────────────────────────────────────────────────────────────────
+function renderDashboard() {
+  const total  = S.members.length;
+  const onOoc  = S.members.filter(m => !isEmptyOoc(m.ooc)).length;
+  const totalPts = S.members.reduce((s, m) => s + getMemberTotal(m.id), 0);
+  const att    = S.meeting.attendance || {};
+  const present = Object.values(att).filter(a => a.status === 'present').length;
+  const warned  = Object.values(att).filter(a => a.status === 'warned').length;
+  const absent  = Object.values(att).filter(a => a.status === 'absent').length;
+  const reps = S.reprimands || {};
+  let totV = 0, totS = 0;
+  S.members.forEach(m => { const r = reps[m.id]||{}; totV += r.verbal||0; totS += r.strict||0; });
+
+  document.getElementById('dashStats').innerHTML = `
+    <div class="sc"><div class="sc-label">Сотрудников</div><div class="sc-val">${total}</div><div class="sc-sub">${total - onOoc} активных</div></div>
+    <div class="sc"><div class="sc-label">OOC</div><div class="sc-val">${onOoc}</div><div class="sc-sub">в отпуске</div></div>
+    <div class="sc"><div class="sc-label">Баллов за неделю</div><div class="sc-val">${totalPts}</div><div class="sc-sub">всего начислено</div></div>
+    <div class="sc"><div class="sc-label">Присутствовало</div><div class="sc-val">${present}</div><div class="sc-sub">предупр. ${warned} · отс. ${absent}</div></div>
+    <div class="sc" style="border-left:2px solid var(--verbal)"><div class="sc-label">Устных выгов.</div><div class="sc-val" style="color:var(--verbal)">${totV}</div><div class="sc-sub">из ${total*2} макс.</div></div>
+    <div class="sc" style="border-left:2px solid var(--strict)"><div class="sc-label">Строгих выгов.</div><div class="sc-val" style="color:var(--strict)">${totS}</div><div class="sc-sub">из ${total*2} макс.</div></div>
+  `;
+
+  // Top scores table
+  const sorted = [...S.members].map(m => ({...m, total: getMemberTotal(m.id)})).sort((a,b) => b.total - a.total).slice(0, 8);
+  document.querySelector('#topScoresTable tbody').innerHTML = sorted.map((m,i) => `
+    <tr>
+      <td class="mono" style="color:var(--t3)">${i+1}</td>
+      <td><span class="${rankNameClass(m.rank)}">${ea(memberName(m))}</span></td>
+      <td><span class="rank-badge ${rankBadgeClass(m.rank)}">${ea(m.rank)}</span></td>
+      <td class="mono" style="color:${m.total > 0 ? 'var(--t1)':'var(--t3)'}">${m.total}</td>
+    </tr>
+  `).join('');
+
+  // OOC table
+  const oocM = S.members.filter(m => !isEmptyOoc(m.ooc));
+  document.querySelector('#oocTable tbody').innerHTML = oocM.length
+    ? oocM.map(m => `<tr><td><span class="${rankNameClass(m.rank)}">${ea(memberName(m))}</span></td><td><span class="badge bg-amber">${ea(m.ooc)}</span></td></tr>`).join('')
+    : `<tr><td colspan="2" class="empty">Все активны</td></tr>`;
+
+  // Activity points — redesigned section
+  const totalScored = totalPts;
+  document.getElementById('actTotalLabel').textContent = `Итого выдано: ${totalScored} баллов`;
+
+  // By activity type — with both points and count
+  const byType = S.activities.map(a => {
+    const cnt  = S.members.reduce((s, m) => s + ((S.weeklyScores[m.id]||{})[a.id]||0), 0);
+    const pts  = cnt * a.points;
+    return { label: a.name, code: a.code, pts, cnt };
+  }).filter(x => x.pts > 0).sort((a, b) => b.pts - a.pts);
+
+  const maxType = Math.max(1, ...byType.map(x => x.pts));
+  document.getElementById('actByType').innerHTML = byType.length
+    ? byType.map((x, i) => `
+        <div class="act-row">
+          <div class="act-row-label" title="${ea(x.label)}"><span class="act-code">${ea(x.code)}</span> ${ea(x.label)}</div>
+          <div class="act-bar-track"><div class="act-bar-fill${i===0?' top':''}" style="width:${(x.pts/maxType)*100}%"></div></div>
+          <div class="act-row-val">${x.pts}</div>
+        </div>`)
+      .join('')
+    : '<div style="color:var(--t3);font-size:12px">Нет данных</div>';
+
+  // By activity type — count
+  const byCount = [...byType].sort((a, b) => b.cnt - a.cnt);
+  const maxCount = Math.max(1, ...byCount.map(x => x.cnt));
+  document.getElementById('actByCount').innerHTML = byCount.length
+    ? byCount.map((x, i) => `
+        <div class="act-row">
+          <div class="act-row-label" title="${ea(x.label)}"><span class="act-code">${ea(x.code)}</span> ${ea(x.label)}</div>
+          <div class="act-bar-track"><div class="act-bar-fill${i===0?' top':''}" style="width:${(x.cnt/maxCount)*100}%"></div></div>
+          <div class="act-row-val">${x.cnt}</div>
+        </div>`)
+      .join('')
+    : '<div style="color:var(--t3);font-size:12px">Нет данных</div>';
+
+  // By person top-8
+  const byPerson = [...S.members].map(m => ({ name: memberName(m), total: getMemberTotal(m.id) }))
+    .sort((a, b) => b.total - a.total).slice(0, 8).filter(x => x.total > 0);
+  const maxPerson = Math.max(1, ...byPerson.map(x => x.total));
+  document.getElementById('actByPerson').innerHTML = byPerson.length
+    ? byPerson.map((x, i) => `
+        <div class="act-row">
+          <div class="act-row-label">${ea(x.name)}</div>
+          <div class="act-bar-track"><div class="act-bar-fill${i===0?' top':''}" style="width:${(x.total/maxPerson)*100}%"></div></div>
+          <div class="act-row-val">${x.total}</div>
+        </div>`)
+      .join('')
+    : '<div style="color:var(--t3);font-size:12px">Нет данных</div>';
+}
+
+// ── MEMBERS ──────────────────────────────────────────────────────────────────
+function setSort(mode, el) {
+  memberSort = mode;
+  document.querySelectorAll('.sort-btn').forEach(b => b.classList.remove('active'));
+  el?.classList.add('active');
+  renderMembers();
+}
+
+function sortedMembers(list) {
+  if (memberSort === 'rank-asc')  return [...list].sort((a,b) => rankIdx(a.rank) - rankIdx(b.rank));
+  if (memberSort === 'rank-desc') return [...list].sort((a,b) => rankIdx(b.rank) - rankIdx(a.rank));
+  if (memberSort === 'alpha')     return [...list].sort((a,b) => memberName(a).localeCompare(memberName(b), 'ru'));
+  return list;
+}
+
+function filterMembers(val) { memberFilter = val; renderMembers(); }
+
+function renderMembers() {
+  let list = S.members.filter(m => {
+    const q = memberFilter.toLowerCase();
+    return memberName(m).toLowerCase().includes(q) || (m.gameId||'').includes(q) || (m.rank||'').toLowerCase().includes(q);
+  });
+  list = sortedMembers(list);
+  document.getElementById('memberCount').textContent = `${S.members.length} сотрудников`;
+  document.querySelector('#membersTable tbody').innerHTML = list.map((m, i) => `
+    <tr>
+      <td class="mono" style="color:var(--t3)">${i+1}</td>
+      <td><span class="${rankNameClass(m.rank)}">${ea(memberName(m))}</span></td>
+      <td><span class="rank-badge ${rankBadgeClass(m.rank)}">${ea(m.rank)}</span></td>
+      <td class="mono">#${ea(m.gameId)}</td>
+      <td class="mono" style="font-size:11px">${m.phone ? ea(m.phone) : '<span style="color:var(--t3)">—</span>'}</td>
+      <td>${!isEmptyOoc(m.ooc) ? `<span class="badge bg-amber">${ea(m.ooc)}</span>` : `<span style="color:var(--t3)">—</span>`}</td>
+    </tr>
+  `).join('');
+}
+
+// ── SCORES ───────────────────────────────────────────────────────────────────
+const MIN_SCORE = 500;
+let weekViewOffset = 0; // 0 = current, -1 = previous archived, etc.
+
+function getViewedWeek() {
+  if (weekViewOffset === 0) return null; // live
+  const hist = S.weeklyHistory || [];
+  const idx = hist.length + weekViewOffset; // offset is negative
+  return hist[idx] || null;
+}
+
+function changeWeekView(delta) {
+  const hist = S.weeklyHistory || [];
+  weekViewOffset = Math.min(0, Math.max(-(hist.length), weekViewOffset + delta));
+  renderScores();
+}
+
+function weekLabel(entry) {
+  if (!entry) return 'Текущая неделя';
+  return `Неделя ${entry.weekNum || ''} · ${entry.dateFrom || ''} — ${entry.dateTo || entry.date || ''}`;
+}
+
+function getWeekNumber(d) {
+  const date = new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()));
+  const dayNum = date.getUTCDay() || 7;
+  date.setUTCDate(date.getUTCDate() + 4 - dayNum);
+  const yearStart = new Date(Date.UTC(date.getUTCFullYear(), 0, 1));
+  return Math.ceil((((date - yearStart) / 86400000) + 1) / 7);
+}
+
+function getMemberTotalFromScores(mid, scores) {
+  const sc = scores[mid] || {};
+  return Object.entries(sc).reduce((sum, [aid, cnt]) => {
+    const a = S.activities.find(x => x.id === aid);
+    return sum + (a ? a.points * (parseInt(cnt)||0) : 0);
+  }, 0);
+}
+
+function renderScores() {
+  if (!S.weeklyHistory) S.weeklyHistory = [];
+  const hist = S.weeklyHistory;
+  const viewEntry = getViewedWeek();
+  const isHistory = weekViewOffset < 0;
+  const scores = isHistory ? (viewEntry?.scores || {}) : S.weeklyScores;
+
+  // Week navigation label
+  document.getElementById('weekViewLabel').textContent = isHistory
+    ? weekLabel(viewEntry)
+    : 'Текущая неделя';
+  document.getElementById('weekPrevBtn').disabled = weekViewOffset <= -hist.length;
+  document.getElementById('weekPrevBtn').style.opacity = weekViewOffset <= -hist.length ? '.3' : '';
+  document.getElementById('weekNextBtn').disabled = weekViewOffset >= 0;
+  document.getElementById('weekNextBtn').style.opacity = weekViewOffset >= 0 ? '.3' : '';
+
+  // Archive banner
+  const banner = document.getElementById('weekArchiveBanner');
+  if (isHistory && viewEntry) {
+    banner.style.display = '';
+    const archivedDate = viewEntry.archivedAt ? ` · закрыта ${viewEntry.archivedAt}` : '';
+    banner.innerHTML = `<div style="background:var(--amber-bg);border:1px solid var(--amber-line);border-radius:var(--rad);padding:10px 16px;font-family:var(--mono);font-size:11px;color:var(--t2)">📁 Архивная неделя${archivedDate} — только просмотр</div>`;
+  } else {
+    banner.style.display = 'none';
+  }
+
+  // Legend
+  document.getElementById('legendBadges').innerHTML = S.activities.map(a => `
+    <span class="badge bg-gray">
+      <span class="act-code">${ea(a.code)}</span> ${ea(a.name)} · <strong style="color:var(--t1)">${a.points} б.</strong>
+      ${a.highStaff ? ' · <span style="color:var(--red)">★ HS</span>' : ''}
+    </span>
+  `).join('');
+
+  const grid = sortedMembers(S.members);
+  document.getElementById('scoresGrid').innerHTML = grid.map(m => {
+    const hs = rankIdx(m.rank) <= 2;
+    const acts = S.activities.filter(a => !a.highStaff || hs);
+    const sc = scores[m.id] || {};
+    const total = getMemberTotalFromScores(m.id, scores);
+    const meetsMin = total >= MIN_SCORE;
+    const borderColor = !isHistory ? (total > 0 ? (meetsMin ? 'var(--green-line)' : 'var(--amber-line)') : 'var(--line)') : 'var(--line)';
+    return `
+      <div class="score-card" style="border-color:${borderColor}">
+        <div class="score-card-name ${rankNameClass(m.rank)}">${ea(memberName(m))}</div>
+        <div class="score-card-rank">${ea(m.rank)} · #${ea(m.gameId)}</div>
+        ${acts.map(a => `
+          <div class="score-row">
+            <div class="score-label"><span class="act-code">${ea(a.code)}</span><span>${ea(a.name)}</span></div>
+            ${isHistory
+              ? `<span class="mono" style="font-size:12px;color:var(--t2);min-width:52px;text-align:center">${sc[a.id]||0}</span>`
+              : `<input type="number" class="score-input" min="0" value="${sc[a.id]||0}" onchange="updateScore('${m.id}','${a.id}',this.value)">`
+            }
+          </div>
+        `).join('')}
+        <div class="score-total">
+          <span class="score-total-label">Итого</span>
+          <div style="display:flex;align-items:baseline;gap:8px">
+            ${!isHistory && total > 0 && !meetsMin ? `<span style="font-family:var(--mono);font-size:10px;color:var(--t2)">< ${MIN_SCORE}</span>` : ''}
+            ${!isHistory && meetsMin ? `<span style="font-family:var(--mono);font-size:10px;color:var(--t1)">✓</span>` : ''}
+            <span class="score-total-val" id="tot_${m.id}" style="color:${total>0?(meetsMin?'var(--t1)':'var(--t2)'):'var(--t2)'}">${total}</span>
+          </div>
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+
+function updateScore(mid, aid, val) {
+  if (!S.weeklyScores[mid]) S.weeklyScores[mid] = {};
+  S.weeklyScores[mid][aid] = parseInt(val)||0;
+  const el = document.getElementById('tot_'+mid);
+  if (el) {
+    const t = getMemberTotal(mid);
+    const meetsMin = t >= MIN_SCORE;
+    el.textContent = t;
+    el.style.color = t > 0 ? (meetsMin ? 'var(--green)' : 'var(--amber)') : 'var(--t2)';
+  }
+  scheduleSave();
+}
+
+function archiveWeek() {
+  const totalAll = S.members.reduce((s, m) => s + getMemberTotal(m.id), 0);
+  if (totalAll === 0) { toast('Нет баллов для архивирования'); return; }
+  if (!confirm('Закрыть текущую неделю и сохранить в архив? Баллы будут сброшены.')) return;
+  if (!S.weeklyHistory) S.weeklyHistory = [];
+  const now = new Date();
+  // Find monday of current week
+  const mon = new Date(now);
+  mon.setDate(now.getDate() - ((now.getDay() + 6) % 7));
+  const sun = new Date(mon);
+  sun.setDate(mon.getDate() + 6);
+  const fmt = d => d.toLocaleDateString('ru', { day:'2-digit', month:'2-digit', year:'numeric' });
+  S.weeklyHistory.push({
+    id: uid(),
+    date: now_iso(),
+    archivedAt: now.toLocaleDateString('ru', {day:'2-digit',month:'2-digit',year:'numeric'}),
+    dateFrom: fmt(mon),
+    dateTo: fmt(sun),
+    weekNum: getWeekNumber(now),
+    scores: JSON.parse(JSON.stringify(S.weeklyScores))
+  });
+  // Also log to monthlyLog
+  if (!S.monthlyLog) S.monthlyLog = [];
+  S.monthlyLog.push({
+    id: uid(), type: 'scores-reset', date: now_iso(),
+    data: { scores: JSON.parse(JSON.stringify(S.weeklyScores)) }
+  });
+  S.weeklyScores = {};
+  weekViewOffset = 0;
+  scheduleSave(); renderScores(); toast('Неделя закрыта и сохранена в архив');
+}
+
+function resetWeeklyScores() {
+  if (!confirm('Сбросить все баллы за неделю без сохранения в архив?')) return;
+  if (!S.monthlyLog) S.monthlyLog = [];
+  S.monthlyLog.push({
+    id: uid(), type: 'scores-reset', date: now_iso(),
+    data: { scores: JSON.parse(JSON.stringify(S.weeklyScores)) }
+  });
+  S.weeklyScores = {};
+  weekViewOffset = 0;
+  scheduleSave(); renderScores(); toast('Баллы сброшены');
+}
+
+// ── MEETINGS (new system) ────────────────────────────────────────────────────
+// ── MEETINGS ─────────────────────────────────────────────────────────────────
+let meetingWeekOffset = 0;
+let activeMeetingId   = null;
+let mAttDraft         = {};
+let editingMeetingId  = null; // for edit mode in create modal
+let repType           = 'verbal';
+let repSelected       = {};   // mid → true/false
+
+/* ── helpers ── */
+function getMondayOf(d) {
+  const r = new Date(d); const day = r.getDay() || 7;
+  r.setDate(r.getDate() - day + 1); r.setHours(12,0,0,0); return r;
+}
+function addDays(d, n) { const r = new Date(d); r.setDate(r.getDate()+n); return r; }
+function fmtDate(d) { return new Date(d).toLocaleDateString('ru',{day:'2-digit',month:'2-digit',year:'numeric'}); }
+function meetingWeekRange(offset) {
+  const mon = getMondayOf(new Date());
+  mon.setDate(mon.getDate() + offset * 7);
+  const sun = addDays(mon, 6); return { mon, sun };
+}
+function isoDate(d) { return PAI_API.isoDateLocal(d); }
+function ensureMeetings() { if (!S.meetings) S.meetings = []; }
+
+const MTG_TYPE_LABEL = { weekly:'Еженедельное', emergency:'Экстренное', briefing:'Брифинг', other:'Другое' };
+
+function changeMeetingWeek(delta) { meetingWeekOffset += delta; renderMeetings(); }
+
+/* ── RENDER TILES ── */
+function renderMeetings() {
+  ensureMeetings();
+  const { mon, sun } = meetingWeekRange(meetingWeekOffset);
+  const monIso = isoDate(mon); const sunIso = isoDate(sun);
+
+  document.getElementById('mwLabel').textContent = `${fmtDate(mon)} — ${fmtDate(sun)}`;
+
+  const weekMtgs = S.meetings
+    .filter(m => m.date >= monIso && m.date <= sunIso)
+    .sort((a,b) => (a.date+a.time).localeCompare(b.date+b.time));
+
+  // Week summary badges
+  let wPresent=0, wWarned=0, wAbsent=0;
+  weekMtgs.forEach(mtg => {
+    const att = mtg.attendance || {};
+    S.members.forEach(m => {
+      const s = (att[m.id]||{}).status;
+      if (s==='present') wPresent++;
+      else if (s==='warned') wWarned++;
+      else if (s==='absent') wAbsent++;
+    });
+  });
+  const wSum = document.getElementById('mwWeekSummary');
+  if (weekMtgs.length) {
+    wSum.innerHTML = `
+      <span class="badge bg-gray" style="color:var(--t1)">◷ ${weekMtgs.length} собр.</span>
+      ${wPresent ? `<span class="badge bg-gray" style="color:var(--t2)">✓ ${wPresent}</span>` : ''}
+      ${wWarned  ? `<span class="badge bg-amber">⚠ ${wWarned}</span>` : ''}
+      ${wAbsent  ? `<span class="badge bg-red">✕ ${wAbsent}</span>` : ''}
+    `;
+  } else { wSum.innerHTML = ''; }
+
+  const grid  = document.getElementById('meetingTilesGrid');
+  const empty = document.getElementById('meetingEmptyState');
+
+  if (!weekMtgs.length) { grid.innerHTML=''; empty.style.display=''; return; }
+  empty.style.display = 'none';
+
+  grid.innerHTML = weekMtgs.map(mtg => {
+    const att     = mtg.attendance || {};
+    const total   = S.members.length;
+    const present = S.members.filter(m => (att[m.id]||{}).status==='present').length;
+    const warned  = S.members.filter(m => (att[m.id]||{}).status==='warned').length;
+    const absent  = S.members.filter(m => (att[m.id]||{}).status==='absent').length;
+    const marked  = present + warned + absent;
+    const fillPct = total ? (marked/total*100) : 0;
+    const isToday = mtg.date === isoDate(new Date());
+    const isPast  = mtg.date < isoDate(new Date());
+    const typeLabel = MTG_TYPE_LABEL[mtg.type] || 'Другое';
+
+    // Absent names preview
+    const absentNames = S.members
+      .filter(m => (att[m.id]||{}).status==='absent')
+      .slice(0,3).map(m => memberName(m)).join(', ');
+    const absentMore = absent > 3 ? ` +${absent-3}` : '';
+
+    return `
+      <div class="mtg-tile" onclick="openMeetingAttendance('${mtg.id}')">
+        <div class="mtg-tile-status-bar">
+          <div class="mtg-tile-status-fill" style="width:${fillPct}%"></div>
+        </div>
+        <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:8px;margin-top:8px">
+          <div class="mtg-tile-title">${ea(mtg.title||'Собрание')}</div>
+          <span class="badge bg-gray" style="font-size:9.5px;flex-shrink:0">${typeLabel}</span>
+        </div>
+        <div class="mtg-tile-meta">
+          ${isToday?'<span style="color:var(--t1);font-weight:500">Сегодня</span> · ':''}${fmtDate(mtg.date)}${mtg.time?' · '+mtg.time:''}
+        </div>
+        ${mtg.note ? `<div style="font-size:11.5px;color:var(--t3);margin-bottom:10px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${ea(mtg.note)}</div>` : ''}
+        <div class="mtg-tile-stats">
+          ${marked===0 ? `<div class="mtg-stat"><span class="mtg-stat-dot"></span>Не отмечено</div>` : ''}
+          ${present ? `<div class="mtg-stat present"><span class="mtg-stat-dot"></span>${present} присут.</div>` : ''}
+          ${warned  ? `<div class="mtg-stat warned"><span class="mtg-stat-dot"></span>${warned} предупр.</div>` : ''}
+          ${absent  ? `<div class="mtg-stat absent"><span class="mtg-stat-dot"></span>${absent} отсутств.</div>` : ''}
+          ${marked < total && marked > 0 ? `<div class="mtg-stat"><span class="mtg-stat-dot"></span>${total-marked} не отм.</div>` : ''}
+        </div>
+        ${absent ? `<div style="font-size:10.5px;color:var(--t3);margin-top:8px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">Отсутств.: ${ea(absentNames)}${absentMore}</div>` : ''}
+        ${absent && !mtg.reprimandsIssued ? `<div style="display:flex;align-items:center;gap:5px;margin-top:10px;font-family:var(--mono);font-size:9.5px;color:var(--red)"><span>●</span> Выговоры не выданы</div>` : ''}
+        ${mtg.reprimandsIssued ? `<div style="display:flex;align-items:center;gap:5px;margin-top:10px;font-family:var(--mono);font-size:9.5px;color:var(--t3)"><span>✓</span> Выговоры выданы</div>` : ''}
+      </div>`;
+  }).join('');
+}
+
+/* ── CREATE / EDIT MEETING ── */
+function openCreateMeeting() {
+  editingMeetingId = null;
+  document.getElementById('modalCreateMeetingTitle').textContent = 'Новое собрание';
+  document.getElementById('mtgSaveBtn').textContent = 'Создать';
+  document.getElementById('mtgTitle').value = '';
+  document.getElementById('mtgDate').value  = isoDate(new Date());
+  document.getElementById('mtgTime').value  = '20:00';
+  document.getElementById('mtgType').value  = 'weekly';
+  document.getElementById('mtgNote').value  = '';
+  openModal('modalCreateMeeting');
+}
+
+function openEditMeeting() {
+  const mtg = S.meetings.find(m => m.id === activeMeetingId);
+  if (!mtg) return;
+  closeModal('modalMeetingAttendance');
+  editingMeetingId = mtg.id;
+  document.getElementById('modalCreateMeetingTitle').textContent = 'Редактировать собрание';
+  document.getElementById('mtgSaveBtn').textContent = 'Сохранить';
+  document.getElementById('mtgTitle').value = mtg.title || '';
+  document.getElementById('mtgDate').value  = mtg.date  || isoDate(new Date());
+  document.getElementById('mtgTime').value  = mtg.time  || '20:00';
+  document.getElementById('mtgType').value  = mtg.type  || 'weekly';
+  document.getElementById('mtgNote').value  = mtg.note  || '';
+  openModal('modalCreateMeeting');
+}
+
+function createMeeting() {
+  const title = document.getElementById('mtgTitle').value.trim() || 'Собрание';
+  const date  = document.getElementById('mtgDate').value;
+  const time  = document.getElementById('mtgTime').value;
+  const type  = document.getElementById('mtgType').value || 'weekly';
+  const note  = document.getElementById('mtgNote').value.trim();
+  if (!date) { toast('Укажите дату'); return; }
+  ensureMeetings();
+
+  if (editingMeetingId) {
+    // Edit mode
+    const mtg = S.meetings.find(m => m.id === editingMeetingId);
+    if (mtg) { mtg.title=title; mtg.date=date; mtg.time=time; mtg.type=type; mtg.note=note; }
+    closeModal('modalCreateMeeting');
+    scheduleSave(); renderMeetings(); toast('Собрание обновлено');
+    return;
+  }
+
+  // Create mode
+  const attendance = {};
+  S.members.forEach(m => { attendance[m.id] = { status:'none', note:'' }; });
+  S.meetings.push({ id:uid(), title, date, time, type, note, attendance, createdAt:now_iso() });
+  closeModal('modalCreateMeeting');
+
+  const mtgDate = new Date(date + 'T12:00:00');
+  const currentMon = getMondayOf(new Date());
+  const mtgMon = getMondayOf(mtgDate);
+  meetingWeekOffset = Math.round((mtgMon - currentMon) / (7 * 24 * 60 * 60 * 1000));
+
+  scheduleSave(); renderMeetings(); toast('Собрание создано');
+}
+
+/* ── ATTENDANCE MODAL ── */
+function openMeetingAttendance(id) {
+  ensureMeetings();
+  const mtg = S.meetings.find(m => m.id === id);
+  if (!mtg) return;
+  activeMeetingId = id;
+
+  mAttDraft = {};
+  S.members.forEach(m => {
+    const a = (mtg.attendance||{})[m.id] || { status:'none', note:'' };
+    mAttDraft[m.id] = { status: a.status||'none', note: a.note||'' };
+  });
+
+  document.getElementById('mAttTitle').textContent    = mtg.title || 'Собрание';
+  document.getElementById('mAttTypeBadge').textContent = MTG_TYPE_LABEL[mtg.type] || '';
+  document.getElementById('mAttMeta').textContent     =
+    fmtDate(mtg.date) + (mtg.time?' · '+mtg.time:'') + (mtg.note?' · '+mtg.note:'');
+
+  renderAttendanceModal();
+  openModal('modalMeetingAttendance');
+}
+
+function renderAttendanceModal() {
+  const list    = sortedMembers(S.members);
+  const present = list.filter(m => mAttDraft[m.id]?.status==='present').length;
+  const warned  = list.filter(m => mAttDraft[m.id]?.status==='warned').length;
+  const absent  = list.filter(m => mAttDraft[m.id]?.status==='absent').length;
+  const none    = list.length - present - warned - absent;
+
+  document.getElementById('mAttSummary').innerHTML = `
+    <span class="badge bg-gray" style="color:var(--t1)">✓ ${present} присут.</span>
+    ${warned ? `<span class="badge bg-amber">⚠ ${warned} предупр.</span>` : ''}
+    ${absent ? `<span class="badge bg-red">✕ ${absent} отсутств.</span>` : ''}
+    ${none   ? `<span class="badge bg-gray">${none} не отм.</span>` : ''}
+  `;
+
+  const repBtn = document.getElementById('mAttReprimandBtn');
+  repBtn.style.display = absent ? '' : 'none';
+
+  // Group: sort so absent/warned go to top
+  const sorted = [...list].sort((a,b) => {
+    const order = { absent:0, warned:1, none:2, present:3 };
+    return (order[mAttDraft[a.id]?.status||'none']||2) - (order[mAttDraft[b.id]?.status||'none']||2);
+  });
+
+  document.getElementById('mAttList').innerHTML = sorted.map(m => {
+    const d  = mAttDraft[m.id] || { status:'none', note:'' };
+    const sc = d.status;
+    const rowBg = sc==='absent' ? 'rgba(240,200,200,0.03)' : sc==='warned' ? 'rgba(240,224,176,0.03)' : '';
+    return `
+      <div class="mAtt-row" style="background:${rowBg}">
+        <div class="mAtt-name">
+          <div class="mAtt-name-text ${rankNameClass(m.rank)}">${ea(memberName(m))}</div>
+          <div class="mAtt-rank-text">${ea(m.rank)} · #${ea(m.gameId)}</div>
+        </div>
+        <div class="mAtt-controls">
+          <button class="mAtt-btn ${sc==='present'?'active-present':''}" onclick="setAttStatus('${m.id}','present')">Присут.</button>
+          <button class="mAtt-btn ${sc==='warned'?'active-warned':''}"   onclick="setAttStatus('${m.id}','warned')">Предупр.</button>
+          <button class="mAtt-btn ${sc==='absent'?'active-absent':''}"   onclick="setAttStatus('${m.id}','absent')">Отсутств.</button>
+        </div>
+        <input class="mAtt-note" type="text" placeholder="Примечание"
+          value="${ea(d.note)}" oninput="setAttNote('${m.id}',this.value)">
+      </div>`;
+  }).join('');
+}
+
+function setAttStatus(mid, status) {
+  if (!mAttDraft[mid]) mAttDraft[mid] = { status:'none', note:'' };
+  mAttDraft[mid].status = mAttDraft[mid].status === status ? 'none' : status;
+  renderAttendanceModal();
+}
+function setAttNote(mid, note) {
+  if (!mAttDraft[mid]) mAttDraft[mid] = { status:'none', note:'' };
+  mAttDraft[mid].note = note;
+}
+function mAttMarkAll(status) {
+  S.members.forEach(m => { mAttDraft[m.id] = { ...(mAttDraft[m.id]||{}), status }; });
+  renderAttendanceModal();
+}
+function mAttReset() {
+  S.members.forEach(m => { mAttDraft[m.id] = { status:'none', note:'' }; });
+  renderAttendanceModal();
+}
+
+function saveMeetingAttendance() {
+  ensureMeetings();
+  const mtg = S.meetings.find(m => m.id === activeMeetingId);
+  if (!mtg) return;
+  mtg.attendance = JSON.parse(JSON.stringify(mAttDraft));
+
+  // Log
+  if (!S.monthlyLog) S.monthlyLog = [];
+  const att = mtg.attendance;
+  const pC = S.members.filter(m=>(att[m.id]||{}).status==='present').length;
+  const wC = S.members.filter(m=>(att[m.id]||{}).status==='warned').length;
+  const aC = S.members.filter(m=>(att[m.id]||{}).status==='absent').length;
+  const existing = S.monthlyLog.find(l => l.type==='meeting' && l.meetingId===mtg.id);
+  const entry = {
+    id: existing?.id||uid(), meetingId:mtg.id, type:'meeting', date:mtg.date,
+    data: { title:mtg.title, present:pC, warned:wC, absent:aC, total:S.members.length,
+      detail: S.members.map(m=>({ id:m.id, name:memberName(m), status:(att[m.id]||{}).status||'none', note:(att[m.id]||{}).note||'' })) }
+  };
+  if (existing) Object.assign(existing, entry); else S.monthlyLog.push(entry);
+
+  closeModal('modalMeetingAttendance');
+  scheduleSave(); renderMeetings(); toast('Явка сохранена');
+}
+
+/* ── REPRIMAND PANEL ── */
+function openReprimandPanel() {
+  const absentIds = S.members.filter(m => mAttDraft[m.id]?.status==='absent').map(m=>m.id);
+  const warnedIds = S.members.filter(m => mAttDraft[m.id]?.status==='warned').map(m=>m.id);
+
+  // Default: absent selected, warned not selected
+  repSelected = {};
+  absentIds.forEach(id => { repSelected[id] = true; });
+  warnedIds.forEach(id => { repSelected[id] = false; });
+
+  repType = 'verbal';
+  renderReprimandPanel();
+  openModal('modalReprimandPanel');
+}
+
+function setRepType(t) {
+  repType = t;
+  document.getElementById('repTypeVerbal').className  = 'mAtt-btn' + (t==='verbal' ? ' active-present' : '');
+  document.getElementById('repTypeStrict').className  = 'mAtt-btn' + (t==='strict' ? ' active-absent' : '');
+}
+
+function renderReprimandPanel() {
+  const targets = S.members.filter(m =>
+    mAttDraft[m.id]?.status==='absent' || mAttDraft[m.id]?.status==='warned'
+  );
+  const sorted = [...targets].sort((a,b) => {
+    const order = { absent:0, warned:1 };
+    return (order[mAttDraft[a.id]?.status]||1) - (order[mAttDraft[b.id]?.status]||1);
+  });
+
+  document.getElementById('repMemberList').innerHTML = sorted.length ? sorted.map(m => {
+    const sc      = mAttDraft[m.id]?.status;
+    const checked = repSelected[m.id] !== false; // default true for absent
+    const repInfo = S.reprimands?.[m.id] || { verbal:0, strict:0 };
+    const note    = mAttDraft[m.id]?.note || '';
+    return `
+      <div style="display:flex;align-items:center;gap:12px;padding:11px 18px;border-bottom:1px solid var(--line);cursor:pointer;transition:background .12s"
+           onclick="toggleRepSelected('${m.id}')" id="repRow_${m.id}">
+        <div style="width:18px;height:18px;border-radius:4px;border:1.5px solid;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:10px;transition:all .12s;
+          ${checked ? 'background:rgba(255,255,255,.1);border-color:rgba(255,255,255,.35);color:var(--t1)' : 'border-color:var(--t3);color:transparent'}">
+          ${checked?'✓':''}
+        </div>
+        <div style="flex:1;min-width:0">
+          <div style="font-size:13px;font-weight:500;${rankNameClass(m.rank)?'':''}class="${rankNameClass(m.rank)}">${ea(memberName(m))}</div>
+          <div style="font-family:var(--mono);font-size:10px;color:var(--t3);margin-top:1px">${ea(m.rank)}</div>
+          ${note ? `<div style="font-size:11px;color:var(--t2);margin-top:2px;font-style:italic">"${ea(note)}"</div>` : ''}
+        </div>
+        <div style="display:flex;flex-direction:column;align-items:flex-end;gap:3px;flex-shrink:0">
+          <span class="badge ${sc==='absent'?'bg-red':'bg-amber'}">${sc==='absent'?'Отсутств.':'Предупр.'}</span>
+          <span style="font-family:var(--mono);font-size:9.5px;color:var(--t3)">У:${repInfo.verbal}/2 · С:${repInfo.strict}/2</span>
+        </div>
+      </div>`;
+  }).join('') : `<div class="empty">Нет отсутствующих</div>`;
+}
+
+function toggleRepSelected(mid) {
+  repSelected[mid] = !repSelected[mid];
+  renderReprimandPanel();
+}
+
+function confirmIssueReprimands() {
+  const targets = S.members.filter(m => repSelected[m.id] === true);
+  if (!targets.length) { toast('Никто не выбран'); return; }
+
+  if (!S.reprimands) S.reprimands = {};
+  if (!S.monthlyLog) S.monthlyLog = [];
+  const given = []; const skipped = [];
+
+  targets.forEach(m => {
+    if (!S.reprimands[m.id]) S.reprimands[m.id] = { verbal:0, strict:0 };
+    const cur = S.reprimands[m.id][repType] || 0;
+    if (cur < 2) {
+      S.reprimands[m.id][repType] = cur + 1;
+      given.push(memberName(m));
+      S.monthlyLog.push({ id:uid(), type:'reprimand', date:now_iso(),
+        data:{ mid:m.id, memberName:memberName(m), repType, val:S.reprimands[m.id][repType], reason:'Отсутствие на собрании' }
+      });
+    } else { skipped.push(memberName(m)); }
+  });
+
+  // Mark meeting as reprimands issued
+  const mtg = S.meetings.find(m => m.id === activeMeetingId);
+  if (mtg) mtg.reprimandsIssued = true;
+
+  closeModal('modalReprimandPanel');
+  saveMeetingAttendance();
+
+  if (given.length) toast(`Выговор (${repType==='verbal'?'устный':'строгий'}) выдан: ${given.join(', ')}`);
+  if (skipped.length) toast(`Пропущены (макс.): ${skipped.join(', ')}`);
+  scheduleSave(); renderMeetings();
+}
+
+function deleteMeetingConfirm() {
+  if (!confirm('Удалить это собрание?')) return;
+  ensureMeetings();
+  S.meetings = S.meetings.filter(m => m.id !== activeMeetingId);
+  closeModal('modalMeetingAttendance');
+  scheduleSave(); renderMeetings(); toast('Собрание удалено');
+}
+
+// Legacy stub — no-op (old meeting.attendance is replaced by meetings array)
+function saveMeetingSnapshot() { toast('Используйте вкладку Собрания'); }
+
+// ── CALLS ────────────────────────────────────────────────────────────────────
+function addCandidate() {
+  if (!S.call.candidates) S.call.candidates = [];
+  S.call.candidates.push({ name:'', gameId:'' });
+  renderCalls(); scheduleSave();
+}
+function removeCandidate(i) {
+  S.call.candidates.splice(i, 1);
+  const ns = {};
+  Object.entries(S.call.scores||{}).forEach(([qi, qs]) => {
+    ns[qi] = {};
+    Object.entries(qs).forEach(([ci, v]) => { const idx=parseInt(ci); if(idx<i) ns[qi][ci]=v; else if(idx>i) ns[qi][idx-1]=v; });
+  });
+  S.call.scores = ns;
+  renderCalls(); scheduleSave();
+}
+function setCandidate(i, field, val) { S.call.candidates[i][field] = val; scheduleSave(); }
+function setCallDate(v) { S.call.date = v; scheduleSave(); }
+
+function getCallScore(qi, ci) { return parseFloat(((S.call.scores||{})[qi]||{})[ci]??0)||0; }
+function setCallScore(qi, ci, val) {
+  if (!S.call.scores[qi]) S.call.scores[qi] = {};
+  S.call.scores[qi][ci] = parseFloat(val)||0;
+  renderCalls(); scheduleSave();
+}
+
+function rsCls(v) { if(v>=1) return 'rs-1'; if(v>=0.7) return 'rs-07'; if(v>=0.5) return 'rs-05'; return 'rs-0'; }
+
+function calcResult(ci) {
+  const max = S.questions.length;
+  let total = 0;
+  S.questions.forEach((_,qi) => { total += getCallScore(qi, ci); });
+  const pct = max > 0 ? Math.round((total/max)*100) : 0;
+  return { total, pct, pass: pct >= 70 };
+}
+
+function renderCalls() {
+  if (!S.call.date) S.call.date = now_iso();
+  document.getElementById('callDate').value = S.call.date;
+
+  // Candidates
+  const list = document.getElementById('candidatesList');
+  list.innerHTML = (S.call.candidates||[]).map((c, i) => `
+    <div class="candidate-row">
+      <span class="mono" style="color:var(--t3);min-width:18px">${i+1}</span>
+      <input type="text" value="${ea(c.name)}" placeholder="Имя кандидата" style="flex:1" oninput="setCandidate(${i},'name',this.value)">
+      <input type="text" value="${ea(c.gameId)}" placeholder="Статик" style="width:110px" oninput="setCandidate(${i},'gameId',this.value)">
+      <button class="del-btn" onclick="removeCandidate(${i})">×</button>
+    </div>
+  `).join('') || '<div style="color:var(--t3);font-size:12px;padding:4px 0">Нажмите «+ Кандидат»</div>';
+
+  const active = (S.call.candidates||[]).map((c,i) => ({...c, idx:i})).filter(c => c.name?.trim());
+
+  // Table header
+  document.getElementById('callHead').innerHTML =
+    '<th style="width:32px">#</th><th>Вопрос</th><th>Ответ</th>' +
+    active.map(c => `<th style="text-align:center;min-width:68px">${ea((c.name||'').split(' ')[0])}</th>`).join('');
+
+  // Table body
+  document.getElementById('callBody').innerHTML = S.questions.map((q, qi) => `
+    <tr>
+      <td class="mono" style="color:var(--t3)">${qi+1}</td>
+      <td style="font-size:12px;max-width:220px">${ea(q.q)}</td>
+      <td style="font-size:11px;color:var(--t3);max-width:140px" title="${ea(q.a)}">${(q.a||'').slice(0,35)}${(q.a||'').length>35?'…':''}</td>
+      ${active.map(c => {
+        const sc = getCallScore(qi, c.idx);
+        return `<td style="text-align:center"><select class="rating-select ${rsCls(sc)}" onchange="setCallScore(${qi},${c.idx},this.value)">${[0,0.5,0.7,1].map(v=>`<option value="${v}" ${sc==v?'selected':''}>${v===1?'1.0':v}</option>`).join('')}</select></td>`;
+      }).join('')}
+    </tr>
+  `).join('');
+
+  // Results
+  document.getElementById('callResults').innerHTML = (S.call.candidates||[]).map((c, i) => {
+    if (!c.name?.trim()) return '';
+    const r = calcResult(i);
+    return `
+      <div class="call-card ${r.pass?'pass':'fail'}">
+        <div style="font-size:13px;font-weight:500">${ea(c.name)}</div>
+        <div style="font-size:11px;color:var(--t3);margin:3px 0">#${ea(c.gameId||'—')}</div>
+        <div style="font-family:var(--mono);font-size:24px;font-weight:300;margin:6px 0">${r.pct}%</div>
+        <span class="badge ${r.pass?'bg-green':'bg-red'}">${r.pass?'ПРИНЯТ':'ОТКАЗ'}</span>
+        <div style="font-family:var(--mono);font-size:10px;color:var(--t3);margin-top:5px">${r.total.toFixed(1)} / ${S.questions.length} вопр.</div>
+      </div>
+    `;
+  }).join('');
+}
+
+// ── REPRIMANDS ───────────────────────────────────────────────────────────────
+function setReprimand(mid, type, val) {
+  if (!S.reprimands[mid]) S.reprimands[mid] = { verbal:0, strict:0 };
+  S.reprimands[mid][type] = Math.min(2, Math.max(0, val));
+  // log it
+  if (!S.monthlyLog) S.monthlyLog = [];
+  S.monthlyLog.push({ id:uid(), type:'reprimand', date:now_iso(), data:{ mid, memberName: memberName(S.members.find(m=>m.id===mid)||{}), repType:type, val } });
+  renderReprimands(); renderDashboard(); scheduleSave();
+}
+
+function renderReprimands() {
+  const search = (document.getElementById('repSearch')?.value||'').toLowerCase();
+  const filter = document.getElementById('repFilter')?.value||'all';
+  const reps = S.reprimands || {};
+
+  let members = sortedMembers(S.members).filter(m => {
+    const nm = memberName(m).toLowerCase();
+    if (!nm.includes(search) && !(m.gameId||'').includes(search)) return false;
+    const r = reps[m.id]||{};
+    if (filter === 'has-verbal')  return (r.verbal||0) > 0;
+    if (filter === 'has-strict')  return (r.strict||0) > 0;
+    if (filter === 'max-verbal')  return (r.verbal||0) >= 2;
+    if (filter === 'max-strict')  return (r.strict||0) >= 2;
+    return true;
+  });
+
+  let totV=0, totS=0, maxV=0, maxS=0;
+  S.members.forEach(m => { const r=reps[m.id]||{}; totV+=r.verbal||0; totS+=r.strict||0; if((r.verbal||0)>=2)maxV++; if((r.strict||0)>=2)maxS++; });
+  document.getElementById('repSummary').innerHTML = `
+    <span class="badge bg-verbal">Устных: ${totV} / ${S.members.length*2}</span>
+    <span class="badge bg-strict">Строгих: ${totS} / ${S.members.length*2}</span>
+    ${maxV > 0 ? `<span class="badge bg-amber">Макс. устных: ${maxV} чел.</span>` : ''}
+    ${maxS > 0 ? `<span class="badge bg-red">Макс. строгих: ${maxS} чел.</span>` : ''}
+  `;
+
+  document.getElementById('repGrid').innerHTML = members.map(m => {
+    const r = reps[m.id] || { verbal:0, strict:0 };
+    const vDots = [0,1].map(i => {
+      const f = i < r.verbal;
+      return `<div class="rep-dot ${f?'rd-vf':'rd-ve'}" onclick="setReprimand('${m.id}','verbal',${f?r.verbal-1:r.verbal+1})" title="${f?'Снять':'Выдать'} устный выговор">${f?'!':''}</div>`;
+    }).join('');
+    const sDots = [0,1].map(i => {
+      const f = i < r.strict;
+      return `<div class="rep-dot ${f?'rd-sf':'rd-se'}" onclick="setReprimand('${m.id}','strict',${f?r.strict-1:r.strict+1})" title="${f?'Снять':'Выдать'} строгий выговор">${f?'!!':''}</div>`;
+    }).join('');
+    return `
+      <div class="rep-card">
+        <div class="rep-card-hd">
+          <div>
+            <div class="${rankNameClass(m.rank)}" style="font-size:13px">${ea(memberName(m))}</div>
+            <div style="font-family:var(--mono);font-size:10px;color:var(--t3)">${ea(m.rank)} · #${ea(m.gameId)}</div>
+          </div>
+          <div style="display:flex;gap:5px;flex-wrap:wrap">
+            ${r.verbal>0?`<span class="badge bg-verbal">УВ: ${r.verbal}</span>`:''}
+            ${r.strict>0?`<span class="badge bg-strict">СВ: ${r.strict}</span>`:''}
+            ${r.verbal>=2?`<span class="badge bg-amber">Макс.</span>`:''}
+            ${r.strict>=2?`<span class="badge bg-red">Макс.</span>`:''}
+          </div>
+        </div>
+        <div class="rep-card-body">
+          <div class="rep-row">
+            <span class="rep-row-label" style="color:var(--verbal)">Устный</span>
+            <div class="rep-dots">${vDots}</div>
+          </div>
+          <div class="rep-row">
+            <span class="rep-row-label" style="color:var(--strict)">Строгий</span>
+            <div class="rep-dots">${sDots}</div>
+          </div>
+        </div>
+      </div>
+    `;
+  }).join('') || '<div class="empty">Нет сотрудников по фильтру</div>';
+}
+
+// ── STATISTICS ───────────────────────────────────────────────────────────────
+function switchStatTab(tab, el) {
+  currentStatTab = tab;
+  document.querySelectorAll('.stats-tab').forEach(b => b.classList.remove('active'));
+  el?.classList.add('active');
+  ['meetings','reprimands','scores','weekhist','log'].forEach(t => {
+    document.getElementById('statPanel-'+t).style.display = (t === tab) ? '' : 'none';
+  });
+  renderStatContent();
+}
+
+function renderStatistics() {
+  if (!currentStatMonth) currentStatMonth = thisYearMonth();
+  document.getElementById('monthLabel').textContent = monthLabel(currentStatMonth);
+  renderStatContent();
+}
+
+function getMonthLogs(type) {
+  const ym = ymKey(currentStatMonth.year, currentStatMonth.month);
+  return (S.monthlyLog||[]).filter(e => e.date?.startsWith(ym) && (type ? e.type === type : true));
+}
+
+function renderStatContent() {
+  if (currentStatTab === 'meetings')    renderStatMeetings();
+  else if (currentStatTab === 'reprimands') renderStatReprimands();
+  else if (currentStatTab === 'scores')     renderStatScores();
+  else if (currentStatTab === 'weekhist')   renderWeekHistoryList();
+  else if (currentStatTab === 'log')        renderStatLog();
+}
+
+function renderWeekHistoryList() {
+  const hist = (S.weeklyHistory || []).slice().reverse(); // newest first
+  const sel = document.getElementById('weekHistSelect');
+  if (!hist.length) {
+    sel.innerHTML = '<option>Нет архивных недель</option>';
+    document.getElementById('weekHistPanel').innerHTML = '<div class="empty">Архив пуст. Закрывайте недели кнопкой «💾 Закрыть неделю» в разделе Еженедельные баллы.</div>';
+    return;
+  }
+  const curVal = sel.value;
+  sel.innerHTML = hist.map((w, i) => `<option value="${i}">${weekLabel(w)}</option>`).join('');
+  if (curVal && hist.findIndex((_,i)=>String(i)===curVal) !== -1) sel.value = curVal;
+  renderWeekHistory();
+}
+
+function renderWeekHistory() {
+  const hist = (S.weeklyHistory || []).slice().reverse();
+  const idx = parseInt(document.getElementById('weekHistSelect')?.value || '0') || 0;
+  const entry = hist[idx];
+  if (!entry) { document.getElementById('weekHistPanel').innerHTML = '<div class="empty">Выберите неделю</div>'; return; }
+
+  const scores = entry.scores || {};
+  const members = sortedMembers(S.members);
+  const totals = members.map(m => ({ m, total: getMemberTotalFromScores(m.id, scores) }))
+    .sort((a, b) => b.total - a.total);
+  const maxVal = Math.max(1, ...totals.map(x => x.total));
+  const totalPts = totals.reduce((s, x) => s + x.total, 0);
+  const active = totals.filter(x => x.total > 0).length;
+  const meetsMin = totals.filter(x => x.total >= MIN_SCORE).length;
+  const avgPts = members.length > 0 ? Math.round(totalPts / members.length) : 0;
+
+  document.getElementById('weekHistPanel').innerHTML = `
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px;margin-bottom:18px">
+      <div class="sc"><div class="sc-label">Итого баллов</div><div class="sc-val" style="color:var(--t1)">${totalPts}</div></div>
+      <div class="sc"><div class="sc-label">Среднее</div><div class="sc-val">${avgPts}</div><div class="sc-sub">на сотрудника</div></div>
+      <div class="sc"><div class="sc-label">Выполнили норму</div><div class="sc-val" style="color:var(--t1)">${meetsMin}</div><div class="sc-sub">из ${members.length} · ≥${MIN_SCORE} б.</div></div>
+      <div class="sc"><div class="sc-label">Не выполнили</div><div class="sc-val" style="color:var(--red)">${active - meetsMin}</div><div class="sc-sub">набрали < ${MIN_SCORE} б.</div></div>
+    </div>
+    <div class="card">
+      <div class="card-hd"><span class="card-title">Баллы по сотрудникам · ${weekLabel(entry)}</span></div>
+      <div class="card-body">
+        <div class="bar-chart">
+          ${totals.map(({m, total}) => {
+            const meetsMinRow = total >= MIN_SCORE;
+            const color = total === 0 ? 'rgba(255,255,255,.08)' : meetsMinRow ? 'var(--t1)' : 'var(--t2)';
+            return `
+              <div class="bc-row">
+                <div class="bc-label" title="${ea(memberName(m))}"><span class="${rankNameClass(m.rank)}">${ea(memberName(m))}</span></div>
+                <div class="bc-track"><div class="bc-fill" style="width:${(total/maxVal)*100}%;background:${color}"></div></div>
+                <div class="bc-val" style="color:${total>0?(meetsMinRow?'var(--t1)':'var(--t2)'):'var(--t3)'}">${total}${total>0&&!meetsMinRow?'<span style="color:var(--t3);font-size:9px"> &lt;500</span>':''}</div>
+              </div>
+            `;
+          }).join('')}
+        </div>
+      </div>
+    </div>
+    <div class="card" style="margin-top:14px">
+      <div class="card-hd"><span class="card-title">Детальные баллы по активностям</span></div>
+      <div class="tbl-wrap">
+        <table>
+          <thead><tr><th>Сотрудник</th><th>Должность</th>${S.activities.map(a=>`<th style="text-align:center" title="${ea(a.name)}">${ea(a.code)}</th>`).join('')}<th>Итого</th></tr></thead>
+          <tbody>
+            ${totals.map(({m, total}) => {
+              const sc = scores[m.id] || {};
+              const hs = rankIdx(m.rank) <= 2;
+              return `<tr>
+                <td><span class="${rankNameClass(m.rank)}">${ea(memberName(m))}</span></td>
+                <td><span class="rank-badge ${rankBadgeClass(m.rank)}">${ea(m.rank)}</span></td>
+                ${S.activities.map(a => {
+                  const cnt = (!a.highStaff || hs) ? (sc[a.id]||0) : '—';
+                  return `<td class="mono" style="text-align:center;color:${cnt&&cnt!=='—'&&cnt>0?'var(--t1)':'var(--t3)'}">${cnt||0}</td>`;
+                }).join('')}
+                <td class="mono" style="color:${total>0?(total>=MIN_SCORE?'var(--t1)':'var(--t2)'):'var(--t3)'};font-weight:500">${total}</td>
+              </tr>`;
+            }).join('')}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  `;
+}
+
+function renderStatMeetings() {
+  const logs = getMonthLogs('meeting');
+  const totalMeetings = logs.length;
+
+  // per-member attendance count
+  const memberPresent = {}; const memberWarned = {}; const memberAbsent = {};
+  S.members.forEach(m => { memberPresent[m.id]=0; memberWarned[m.id]=0; memberAbsent[m.id]=0; });
+  logs.forEach(log => {
+    (log.data?.detail||[]).forEach(d => {
+      if (d.status === 'present') memberPresent[d.id] = (memberPresent[d.id]||0) + 1;
+      else if (d.status === 'warned') memberWarned[d.id] = (memberWarned[d.id]||0) + 1;
+      else if (d.status === 'absent') memberAbsent[d.id] = (memberAbsent[d.id]||0) + 1;
+    });
+  });
+
+  const totalPresent = Object.values(memberPresent).reduce((s,v) => s+v, 0);
+  const totalAbsent  = Object.values(memberAbsent).reduce((s,v) => s+v, 0);
+  const totalWarned  = Object.values(memberWarned).reduce((s,v) => s+v, 0);
+
+  document.getElementById('statMeetStats').innerHTML = `
+    <div class="sc"><div class="sc-label">Собраний за месяц</div><div class="sc-val">${totalMeetings}</div></div>
+    <div class="sc"><div class="sc-label">Всего явок</div><div class="sc-val" style="color:var(--t1)">${totalPresent}</div></div>
+    <div class="sc"><div class="sc-label">Предупреждений</div><div class="sc-val" style="color:var(--t2)">${totalWarned}</div></div>
+    <div class="sc"><div class="sc-label">Отсутствий</div><div class="sc-val" style="color:var(--red)">${totalAbsent}</div></div>
+  `;
+
+  const members = sortedMembers(S.members);
+  const maxVal = Math.max(1, ...members.map(m => memberPresent[m.id]||0));
+  document.getElementById('statMeetBar').innerHTML = totalMeetings === 0
+    ? '<div class="empty">Нет данных за этот месяц. Сохраняйте собрания кнопкой «Сохранить в историю».</div>'
+    : members.map(m => {
+        const p = memberPresent[m.id]||0;
+        const w = memberWarned[m.id]||0;
+        const a = memberAbsent[m.id]||0;
+        return `
+          <div class="bc-row">
+            <div class="bc-label" title="${ea(memberName(m))}">${ea(memberName(m))}</div>
+            <div class="bc-track"><div class="bc-fill" style="width:${(p/maxVal)*100}%;background:rgba(255,255,255,0.25)"></div></div>
+            <div class="bc-val"><span style="color:var(--t1)">${p}</span><span style="color:var(--t3)"> / ${p+w+a}</span></div>
+          </div>
+        `;
+      }).join('');
+}
+
+function renderStatReprimands() {
+  const reps = S.reprimands || {};
+  let totV=0, totS=0, maxV=0, maxS=0;
+  S.members.forEach(m => {
+    const r = reps[m.id]||{};
+    totV += r.verbal||0; totS += r.strict||0;
+    if ((r.verbal||0) >= 2) maxV++;
+    if ((r.strict||0) >= 2) maxS++;
+  });
+
+  document.getElementById('statRepStats').innerHTML = `
+    <div class="sc" style="border-left:2px solid var(--verbal)"><div class="sc-label">Устных выговоров</div><div class="sc-val" style="color:var(--verbal)">${totV}</div><div class="sc-sub">из ${S.members.length*2} макс.</div></div>
+    <div class="sc" style="border-left:2px solid var(--strict)"><div class="sc-label">Строгих выговоров</div><div class="sc-val" style="color:var(--strict)">${totS}</div><div class="sc-sub">из ${S.members.length*2} макс.</div></div>
+    <div class="sc"><div class="sc-label">Макс. устных</div><div class="sc-val">${maxV}</div><div class="sc-sub">сотрудников</div></div>
+    <div class="sc"><div class="sc-label">Макс. строгих</div><div class="sc-val">${maxS}</div><div class="sc-sub">сотрудников</div></div>
+  `;
+
+  const members = sortedMembers(S.members).filter(m => {
+    const r = reps[m.id]||{};
+    return (r.verbal||0) > 0 || (r.strict||0) > 0;
+  });
+  const maxVal = Math.max(1, ...members.map(m => ((reps[m.id]||{}).verbal||0) + ((reps[m.id]||{}).strict||0)));
+
+  document.getElementById('statRepBar').innerHTML = members.length === 0
+    ? '<div class="empty">Выговоров нет</div>'
+    : members.map(m => {
+        const r = reps[m.id]||{};
+        const total = (r.verbal||0) + (r.strict||0);
+        return `
+          <div class="bc-row">
+            <div class="bc-label">${ea(memberName(m))}</div>
+            <div class="bc-track" style="position:relative;overflow:visible">
+              <div style="display:flex;height:7px;border-radius:3px;overflow:hidden;width:100%">
+                <div style="width:${((r.verbal||0)/Math.max(1,total))*100}%;background:var(--verbal);transition:width .4s"></div>
+                <div style="width:${((r.strict||0)/Math.max(1,total))*100}%;background:var(--strict);transition:width .4s"></div>
+              </div>
+            </div>
+            <div class="bc-val">
+              <span style="color:var(--verbal)">${r.verbal||0}у</span>
+              <span style="color:var(--t3)"> + </span>
+              <span style="color:var(--strict)">${r.strict||0}с</span>
+            </div>
+          </div>
+        `;
+      }).join('');
+}
+
+function renderStatScores() {
+  // Try to get saved score snapshots from this month
+  const logs = getMonthLogs('scores-reset');
+  const currentTotals = S.members.map(m => ({ m, total: getMemberTotal(m.id) })).filter(x => x.total > 0);
+  const totalPts = currentTotals.reduce((s, x) => s + x.total, 0);
+  const avgPts = S.members.length > 0 ? Math.round(totalPts / S.members.length) : 0;
+  const maxPts = currentTotals.reduce((max, x) => Math.max(max, x.total), 0);
+  const active = currentTotals.length;
+
+  document.getElementById('statScoreStats').innerHTML = `
+    <div class="sc"><div class="sc-label">Итого баллов</div><div class="sc-val" style="color:var(--t1)">${totalPts}</div><div class="sc-sub">текущая неделя</div></div>
+    <div class="sc"><div class="sc-label">Среднее</div><div class="sc-val">${avgPts}</div><div class="sc-sub">на сотрудника</div></div>
+    <div class="sc"><div class="sc-label">Максимум</div><div class="sc-val">${maxPts}</div></div>
+    <div class="sc"><div class="sc-label">Активных</div><div class="sc-val">${active}</div><div class="sc-sub">набрали >0 баллов</div></div>
+  `;
+
+  const members = sortedMembers(S.members);
+  const maxVal = Math.max(1, ...members.map(m => getMemberTotal(m.id)));
+
+  document.getElementById('statScoreBar').innerHTML = members.map(m => {
+    const total = getMemberTotal(m.id);
+    return `
+      <div class="bc-row">
+        <div class="bc-label">${ea(memberName(m))}</div>
+        <div class="bc-track"><div class="bc-fill" style="width:${(total/maxVal)*100}%;background:${total>0?'rgba(255,255,255,.35)':'rgba(255,255,255,.08)'}"></div></div>
+        <div class="bc-val" style="color:${total>0?'var(--t1)':'var(--t3)'}">${total}</div>
+      </div>
+    `;
+  }).join('');
+}
+
+function renderStatLog() {
+  const logs = getMonthLogs(null).slice().reverse();
+  const TYPE_LABEL = { meeting:'Собрание', reprimand:'Выговор', 'scores-reset':'Сброс баллов' };
+  const TYPE_COLOR = { meeting:'rgba(255,255,255,0.4)', reprimand:'var(--red)', 'scores-reset':'rgba(255,255,255,0.2)' };
+
+  document.getElementById('statLogList').innerHTML = logs.length === 0
+    ? '<div class="empty">Нет событий за этот месяц</div>'
+    : logs.map(e => {
+        let text = '';
+        if (e.type === 'meeting') {
+          text = `Собрание: ${e.data?.present||0} присут., ${e.data?.warned||0} предупр., ${e.data?.absent||0} отс.`;
+        } else if (e.type === 'reprimand') {
+          const rType = e.data?.repType === 'verbal' ? 'устный' : 'строгий';
+          const action = (e.data?.val||0) > 0 ? 'Выдан' : 'Снят';
+          text = `${action} ${rType} выговор — ${e.data?.memberName||'?'}`;
+        } else if (e.type === 'scores-reset') {
+          text = 'Сброс еженедельных баллов';
+        } else {
+          text = e.type;
+        }
+        return `
+          <div class="log-entry">
+            <div class="log-dot" style="background:${TYPE_COLOR[e.type]||'var(--t3)'}"></div>
+            <div class="log-content">
+              <div class="log-date">${e.date} · ${TYPE_LABEL[e.type]||e.type}</div>
+              <div class="log-text">${ea(text)}</div>
+            </div>
+          </div>
+        `;
+      }).join('');
+}
+
+function clearMonthLog() {
+  if (!confirm('Очистить историю за этот месяц?')) return;
+  const ym = ymKey(currentStatMonth.year, currentStatMonth.month);
+  S.monthlyLog = (S.monthlyLog||[]).filter(e => !e.date?.startsWith(ym));
+  scheduleSave(); renderStatContent(); toast('История очищена');
+}
+
+// ── ADMIN ────────────────────────────────────────────────────────────────────
+function fillRankSelects() {
+  const opts = S.ranks.map(r => `<option value="${ea(r)}">${ea(r)}</option>`).join('');
+  document.getElementById('addRank').innerHTML = opts;
+  document.getElementById('editRank').innerHTML = opts;
+}
+
+function renderAdmin() {
+  fillRankSelects();
+
+  document.getElementById('adminMembersList').innerHTML = sortedMembers(S.members).map(m => `
+    <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;padding:7px 0;border-bottom:1px solid var(--line)">
+      <div>
+        <div class="${rankNameClass(m.rank)}" style="font-size:13px">${ea(memberName(m))}</div>
+        <div style="font-family:var(--mono);font-size:10px;color:var(--t3)">${ea(m.rank)} · #${ea(m.gameId)}</div>
+      </div>
+      <div style="display:flex;gap:5px">
+        <button class="btn btn-ghost btn-xs" onclick="openEditMember('${m.id}')">Ред.</button>
+        <button class="btn btn-danger btn-xs" onclick="deleteMember('${m.id}')">×</button>
+      </div>
+    </div>
+  `).join('');
+
+  document.getElementById('ranksList').innerHTML = S.ranks.map((r, i) => `
+    <div style="display:flex;justify-content:space-between;align-items:center;background:var(--bg3);padding:7px 11px;border-radius:var(--rad-s);border:1px solid var(--line)">
+      <span class="rank-badge ${rankBadgeClass(r)}">${ea(r)}</span>
+      ${i > 0 ? `<button class="btn btn-danger btn-xs" onclick="deleteRank(${i})">×</button>` : ''}
+    </div>
+  `).join('');
+
+  document.getElementById('activitiesList').innerHTML = S.activities.map(a => `
+    <div style="display:flex;justify-content:space-between;align-items:center;background:var(--bg3);padding:7px 11px;border-radius:var(--rad-s);border:1px solid var(--line)">
+      <span style="font-size:12px"><span class="act-code">${ea(a.code)}</span> ${ea(a.name)} · <span class="mono" style="color:var(--t3)">${a.points} б.</span></span>
+      <div style="display:flex;gap:5px">
+        <button class="btn btn-ghost btn-xs" onclick="openEditActivity('${a.id}')">Ред.</button>
+        <button class="btn btn-danger btn-xs" onclick="deleteActivity('${a.id}')">×</button>
+      </div>
+    </div>
+  `).join('');
+
+  document.getElementById('questionsList').innerHTML = S.questions.map((q, i) => `
+    <div style="display:flex;gap:7px;justify-content:space-between;background:var(--bg3);padding:7px 11px;border-radius:var(--rad-s);border:1px solid var(--line)">
+      <span style="font-size:12px;color:var(--t2);flex:1"><span class="mono" style="color:var(--t3)">${i+1}.</span> ${ea(q.q)}</span>
+      <div style="display:flex;gap:5px">
+        <button class="btn btn-ghost btn-xs" onclick="openEditQuestion('${q.id}')">Ред.</button>
+        <button class="btn btn-danger btn-xs" onclick="deleteQuestion('${q.id}')">×</button>
+      </div>
+    </div>
+  `).join('');
+}
+
+function addMember() {
+  const first = document.getElementById('addFirst').value.trim();
+  const last  = document.getElementById('addLast').value.trim();
+  const gameId = document.getElementById('addGameId').value.trim();
+  const rank  = document.getElementById('addRank').value;
+  const phone = document.getElementById('addPhone').value.trim();
+  const bank  = document.getElementById('addBank').value.trim();
+  const ooc   = document.getElementById('addOoc').value.trim() || '-';
+  if (!first || !last || !gameId) { toast('Заполните имя, фамилию и статик'); return; }
+  const m = normalizeMember({ id: uid(), firstName: first, lastName: last, gameId, rank, ooc, phone, bank });
+  S.members.push(m);
+  ensureAll();
+  ['addFirst','addLast','addGameId','addPhone','addBank'].forEach(id => document.getElementById(id).value = '');
+  document.getElementById('addOoc').value = '-';
+  scheduleSave(); renderAdmin(); toast('Сотрудник добавлен');
+}
+
+function openEditMember(id) {
+  editMemberId = id;
+  const m = S.members.find(x => x.id === id);
+  if (!m) return;
+  document.getElementById('editFirst').value  = m.firstName || '';
+  document.getElementById('editLast').value   = m.lastName  || '';
+  document.getElementById('editGameId').value = m.gameId    || '';
+  document.getElementById('editPhone').value  = m.phone     || '';
+  document.getElementById('editBank').value   = m.bank      || '';
+  document.getElementById('editOoc').value    = m.ooc       || '-';
+  fillRankSelects();
+  document.getElementById('editRank').value   = m.rank;
+  openModal('modalMember');
+}
+
+function saveMemberEdit() {
+  const m = S.members.find(x => x.id === editMemberId);
+  if (!m) return;
+  m.firstName = document.getElementById('editFirst').value.trim();
+  m.lastName  = document.getElementById('editLast').value.trim();
+  m.gameId    = document.getElementById('editGameId').value.trim();
+  m.rank      = document.getElementById('editRank').value;
+  m.phone     = document.getElementById('editPhone').value.trim();
+  m.bank      = document.getElementById('editBank').value.trim();
+  m.ooc       = document.getElementById('editOoc').value.trim() || '-';
+  normalizeMember(m);
+  closeModal('modalMember'); scheduleSave(); renderAdmin(); toast('Сохранено');
+}
+
+function deleteMember(id) {
+  if (!confirm('Удалить сотрудника?')) return;
+  S.members = S.members.filter(m => m.id !== id);
+  delete S.weeklyScores[id];
+  delete S.meeting.attendance[id];
+  delete S.reprimands[id];
+  scheduleSave(); renderAdmin();
+}
+
+function addRank() {
+  const v = document.getElementById('newRankInput').value.trim();
+  if (!v) return;
+  S.ranks.push(v);
+  document.getElementById('newRankInput').value = '';
+  scheduleSave(); renderAdmin();
+}
+function deleteRank(i) { S.ranks.splice(i, 1); scheduleSave(); renderAdmin(); }
+
+function openAddActivity() {
+  editActivityId = null;
+  ['actCode','actName','actPoints','actNote'].forEach(id => document.getElementById(id).value = '');
+  document.getElementById('actHighStaff').value = 'false';
+  document.getElementById('modalActivityTitle').textContent = 'Добавить активность';
+  document.getElementById('modalActivitySaveBtn').textContent = 'Добавить';
+  openModal('modalActivity');
+}
+function openEditActivity(id) {
+  const a = S.activities.find(x => x.id === id);
+  if (!a) return;
+  editActivityId = id;
+  document.getElementById('actCode').value = a.code || '';
+  document.getElementById('actName').value = a.name || '';
+  document.getElementById('actPoints').value = a.points || '';
+  document.getElementById('actHighStaff').value = a.highStaff ? 'true' : 'false';
+  document.getElementById('actNote').value = a.note || '';
+  document.getElementById('modalActivityTitle').textContent = 'Редактировать активность';
+  document.getElementById('modalActivitySaveBtn').textContent = 'Сохранить';
+  openModal('modalActivity');
+}
+function saveActivity() {
+  const code   = document.getElementById('actCode').value.trim().toUpperCase() || '?';
+  const name   = document.getElementById('actName').value.trim();
+  const points = parseInt(document.getElementById('actPoints').value) || 0;
+  if (!name || !points) { toast('Название и баллы обязательны'); return; }
+  const data = { code, name, points, highStaff: document.getElementById('actHighStaff').value === 'true', note: document.getElementById('actNote').value.trim() };
+  if (editActivityId) {
+    const a = S.activities.find(x => x.id === editActivityId);
+    if (a) Object.assign(a, data);
+  } else {
+    S.activities.push({ id: uid(), ...data });
+  }
+  editActivityId = null;
+  closeModal('modalActivity'); scheduleSave(); renderAdmin();
+  if (currentTab === 'scores') renderScores();
+}
+function deleteActivity(id) { if (!confirm('Удалить?')) return; S.activities = S.activities.filter(a => a.id !== id); scheduleSave(); renderAdmin(); }
+
+function openAddQuestion() {
+  editQuestionId = null;
+  document.getElementById('qQuestion').value = '';
+  document.getElementById('qAnswer').value = '';
+  document.getElementById('modalQuestionTitle').textContent = 'Добавить вопрос';
+  document.getElementById('modalQuestionSaveBtn').textContent = 'Добавить';
+  openModal('modalQuestion');
+}
+function openEditQuestion(id) {
+  const item = S.questions.find(x => x.id === id);
+  if (!item) return;
+  editQuestionId = id;
+  document.getElementById('qQuestion').value = item.q || '';
+  document.getElementById('qAnswer').value = item.a || '';
+  document.getElementById('modalQuestionTitle').textContent = 'Редактировать вопрос';
+  document.getElementById('modalQuestionSaveBtn').textContent = 'Сохранить';
+  openModal('modalQuestion');
+}
+function saveQuestion() {
+  const q = document.getElementById('qQuestion').value.trim();
+  const a = document.getElementById('qAnswer').value.trim();
+  if (!q) return;
+  if (editQuestionId) {
+    const item = S.questions.find(x => x.id === editQuestionId);
+    if (item) { item.q = q; item.a = a; }
+  } else {
+    S.questions.push({ id: uid(), q, a });
+  }
+  editQuestionId = null;
+  closeModal('modalQuestion'); scheduleSave(); renderAdmin();
+  if (currentTab === 'calls') renderCalls();
+}
+function deleteQuestion(id) { if (!confirm('Удалить?')) return; S.questions = S.questions.filter(q => q.id !== id); scheduleSave(); renderAdmin(); }
+
+// ── IMPORT / EXPORT ──────────────────────────────────────────────────────────
+function exportData() {
+  const blob = new Blob(['\uFEFF' + JSON.stringify(S, null, 2)], { type: 'application/json;charset=utf-8' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = `pai_${now_iso()}.json`;
+  a.click(); toast('Экспортировано');
+}
+function importData(input) {
+  const f = input.files[0]; if (!f) return;
+  const r = new FileReader();
+  r.onload = e => {
+    try {
+      if (confirm('Заменить все данные импортом?')) {
+        S = migrateState(JSON.parse(e.target.result));
+        ensureAll(); scheduleSave(); renderTab(currentTab); toast('Импорт выполнен');
+      }
+    } catch { toast('Ошибка JSON'); }
+  };
+  r.readAsText(f, 'UTF-8');
+  input.value = '';
+}
+function clearAllData() {
+  if (!confirm('Сбросить все данные?')) return;
+  S = defaultState(); ensureAll(); scheduleSave(); renderTab(currentTab); toast('Данные сброшены');
+}
+
+// ── REPORTS MODERATION ──────────────────────────────────────────────────────
+let REPORTS = null;
+let activeReportId = null;
+
+async function loadReports() {
+  try {
+    REPORTS = await PAI_API.apiFetch('/api/reports');
+    if (!Array.isArray(REPORTS)) REPORTS = [];
+  } catch(e) {
+    console.warn('loadReports:', e);
+    REPORTS = REPORTS || [];
+  }
+  if (currentTab === 'reports') renderReports();
+  updatePendingBadge();
+}
+
+async function saveReports() {
+  if (!REPORTS) return;
+  await PAI_API.apiFetch('/api/reports', { method: 'POST', body: JSON.stringify(REPORTS) });
+}
+
+function updatePendingBadge() {
+  const badge = document.getElementById('pendingBadge');
+  if (!badge) return;
+  const pending = (REPORTS||[]).filter(r => r.status === 'pending').length;
+  if (pending > 0) { badge.style.display = ''; badge.textContent = pending; }
+  else { badge.style.display = 'none'; }
+}
+
+function getWeekKey() {
+  return PAI_API.getWeekKey();
+}
+
+function renderReports() {
+  if (!REPORTS) { loadReports(); return; }
+
+  // Build week filter options
+  const sel = document.getElementById('reportWeekFilter');
+  const curWeekFilter = sel.value;
+  const weeks = [...new Set(REPORTS.map(r => r.weekKey).filter(Boolean))].sort().reverse();
+  const thisWeek = getWeekKey();
+  sel.innerHTML = '<option value="all">Все недели</option>' +
+    weeks.map(w => `<option value="${ea(w)}"${w===thisWeek&&curWeekFilter==='all'?'':''} ${curWeekFilter===w?'selected':''}>${ea(w)}</option>`).join('');
+  // auto-select current week if first load
+  if (curWeekFilter === 'all' && weeks.includes(thisWeek)) {
+    // leave as 'all' but default view shows current week first
+  }
+
+  const statusFilter = document.getElementById('reportStatusFilter').value;
+  const weekFilter   = document.getElementById('reportWeekFilter').value;
+
+  let list = [...REPORTS];
+  if (weekFilter !== 'all') list = list.filter(r => r.weekKey === weekFilter);
+  if (statusFilter !== 'all') list = list.filter(r => r.status === statusFilter);
+  list.sort((a,b) => (b.submittedAt||'').localeCompare(a.submittedAt||''));
+
+  // Summary
+  const allWeek = weekFilter !== 'all' ? REPORTS.filter(r => r.weekKey === weekFilter) : REPORTS;
+  const pendingN  = allWeek.filter(r => r.status === 'pending').length;
+  const approvedN = allWeek.filter(r => r.status === 'approved').length;
+  const rejectedN = allWeek.filter(r => r.status === 'rejected').length;
+  document.getElementById('reportsSummary').innerHTML = `
+    <div class="sc"><div class="sc-label">Ожидают</div><div class="sc-val" style="color:var(--amber)">${pendingN}</div></div>
+    <div class="sc"><div class="sc-label">Одобрено</div><div class="sc-val" style="color:var(--green)">${approvedN}</div></div>
+    <div class="sc"><div class="sc-label">Отклонено</div><div class="sc-val" style="color:var(--red)">${rejectedN}</div></div>
+    <div class="sc"><div class="sc-label">Всего</div><div class="sc-val">${allWeek.length}</div></div>
+  `;
+
+  const container = document.getElementById('reportsList');
+  if (!list.length) {
+    container.innerHTML = '<div class="empty" style="padding:40px;text-align:center;color:var(--t3)">Заявок нет</div>';
+    return;
+  }
+
+  container.innerHTML = list.map(r => {
+    const statusColor = r.status==='approved' ? 'var(--green)' : r.status==='rejected' ? 'var(--red)' : 'var(--amber)';
+    const statusLabel = r.status==='approved' ? 'Одобрено' : r.status==='rejected' ? 'Отклонено' : 'На проверке';
+    const filled = (r.aspects||[]).filter(a => a.count > 0);
+    const submDate = r.submittedAt ? new Date(r.submittedAt).toLocaleString('ru',{day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit'}) : '—';
+
+    // Find matching member
+    const member = S.members.find(m =>
+      m.gameId === r.gameId ||
+      (m.firstName?.toLowerCase() === r.firstName?.toLowerCase() && m.lastName?.toLowerCase() === r.lastName?.toLowerCase())
+    );
+
+    return `
+      <div class="card" style="margin-bottom:10px;border-left:3px solid ${statusColor}20;cursor:pointer" onclick="openReportModal('${r.id}')">
+        <div class="card-body" style="padding:14px 18px">
+          <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:12px;flex-wrap:wrap">
+            <div style="flex:1;min-width:0">
+              <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px;flex-wrap:wrap">
+                <span style="font-size:14px;font-weight:500;color:var(--t1)">${ea(r.name||'—')}</span>
+                <span class="badge bg-gray">#${ea(r.gameId||'—')}</span>
+                ${member ? `<span class="rank-badge ${rankBadgeClass(member.rank)}">${ea(member.rank)}</span>` : '<span style="font-family:var(--mono);font-size:10px;color:var(--t3)">не в составе</span>'}
+              </div>
+              <div style="font-family:var(--mono);font-size:10px;color:var(--t3);margin-bottom:8px">${ea(r.weekLabel||r.weekKey||'—')} · Подано: ${submDate}</div>
+              <div style="display:flex;gap:6px;flex-wrap:wrap">
+                ${filled.map(a => `
+                  <span class="badge bg-gray">
+                    <span class="act-code">${ea(a.code)}</span>
+                    ${ea(a.name)} · ${a.count}×
+                  </span>`).join('')}
+                ${!filled.length ? '<span style="color:var(--t3);font-size:12px">Нет ссылок</span>' : ''}
+              </div>
+            </div>
+            <div style="display:flex;flex-direction:column;align-items:flex-end;gap:6px;flex-shrink:0">
+              <span class="badge" style="background:transparent;color:${statusColor};border-color:${statusColor}40">${statusLabel}</span>
+              <span style="font-family:var(--mono);font-size:18px;font-weight:300;color:var(--t1)">${r.totalPts||0} б.</span>
+              <span style="font-family:var(--mono);font-size:10px;color:var(--t3)">${(r.aspects||[]).reduce((s,a)=>s+(a.links?.length||0),0)} ссылок</span>
+            </div>
+          </div>
+          ${r.modNote ? `<div style="margin-top:10px;padding:8px 12px;background:var(--bg3);border-radius:var(--rad-s);font-size:12px;color:var(--t2);border:1px solid var(--line)">💬 ${ea(r.modNote)}</div>` : ''}
+        </div>
+      </div>`;
+  }).join('');
+
+  updatePendingBadge();
+}
+
+function openReportModal(id) {
+  const r = (REPORTS||[]).find(x => x.id === id);
+  if (!r) return;
+  activeReportId = id;
+
+  document.getElementById('modalReportTitle').textContent = `${r.name||'—'} · #${r.gameId||'—'}`;
+
+  const member = S.members.find(m =>
+    m.gameId === r.gameId ||
+    (m.firstName?.toLowerCase() === r.firstName?.toLowerCase() && m.lastName?.toLowerCase() === r.lastName?.toLowerCase())
+  );
+
+  const submDate = r.submittedAt ? new Date(r.submittedAt).toLocaleString('ru',{day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit'}) : '—';
+  const reviewDate = r.reviewedAt ? new Date(r.reviewedAt).toLocaleString('ru',{day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit'}) : '—';
+  const statusColor = r.status==='approved' ? 'var(--green)' : r.status==='rejected' ? 'var(--red)' : 'var(--amber)';
+  const statusLabel = r.status==='approved' ? 'Одобрено' : r.status==='rejected' ? 'Отклонено' : 'На проверке';
+
+  document.getElementById('modalReportBody').innerHTML = `
+    <div style="display:flex;align-items:center;gap:8px;margin-bottom:14px;flex-wrap:wrap">
+      ${member ? `<span class="${rankNameClass(member.rank)}">${ea(member.rank)}</span>` : ''}
+      <span class="badge bg-gray">#${ea(r.gameId||'—')}</span>
+      <span class="badge" style="background:transparent;color:${statusColor};border-color:${statusColor}40">${statusLabel}</span>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:16px;font-family:var(--mono);font-size:10.5px;color:var(--t3)">
+      <div>Неделя: <span style="color:var(--t2)">${ea(r.weekLabel||r.weekKey||'—')}</span></div>
+      <div>Подано: <span style="color:var(--t2)">${submDate}</span></div>
+      ${r.reviewedAt ? `<div>Проверено: <span style="color:var(--t2)">${reviewDate}</span></div>` : ''}
+    </div>
+
+    ${(r.aspects||[]).map(a => {
+      const linksHtml = (a.links||[]).length
+        ? (a.links||[]).map((lnk, idx) => `
+            <div style="display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:1px solid var(--line)">
+              <span style="font-family:var(--mono);font-size:10px;color:var(--t3);min-width:20px;text-align:right">${idx+1}</span>
+              <a href="${ea(lnk)}" target="_blank" style="flex:1;color:var(--blue);font-family:var(--mono);font-size:11px;word-break:break-all;text-decoration:none;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${ea(lnk)}">${ea(lnk)}</a>
+            </div>`).join('')
+        : '<div style="color:var(--t3);font-size:12px;padding:6px 0">Нет ссылок</div>';
+      return `
+        <div style="margin-bottom:14px">
+          <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:6px;padding-bottom:6px;border-bottom:1px solid var(--line)">
+            <div style="display:flex;align-items:center;gap:6px">
+              <span class="act-code">${ea(a.code)}</span>
+              <span style="font-size:13px;font-weight:500">${ea(a.name)}</span>
+            </div>
+            <div style="display:flex;align-items:center;gap:8px">
+              <span style="font-family:var(--mono);font-size:11px;color:var(--t3)">${a.count} × ${a.points} б.</span>
+              ${r.status === 'approved' || r.status === 'pending' ? `
+              <input type="number" min="0" style="width:52px;font-family:var(--mono);font-size:12px;text-align:center;padding:3px 6px" 
+                id="modCount_${a.actId}" value="${r.status==='approved' ? (getApprovedCount(r,a.actId)||a.count) : a.count}" 
+                title="Скорректировать кол-во">` : `<span style="font-family:var(--mono);font-size:11px;color:var(--t2)">${a.count}</span>`}
+            </div>
+          </div>
+          <div style="padding:0 4px">${linksHtml}</div>
+        </div>`;
+    }).join('')}
+
+    <div style="padding:12px 0;border-top:1px solid var(--line);display:flex;justify-content:space-between;align-items:baseline">
+      <span style="font-family:var(--mono);font-size:10px;color:var(--t3);letter-spacing:.08em;text-transform:uppercase">Итого</span>
+      <span style="font-family:var(--mono);font-size:24px;font-weight:300;color:var(--t1)">${r.totalPts||0} б.</span>
+    </div>
+
+    <div style="margin-top:12px">
+      <label style="font-family:var(--mono);font-size:9.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--t3)">Комментарий модератора</label>
+      <textarea id="modNoteInput" rows="2" style="resize:vertical;margin-top:6px" placeholder="Причина отказа, примечание...">${ea(r.modNote||'')}</textarea>
+    </div>
+  `;
+
+  const isPending  = r.status === 'pending';
+  const isApproved = r.status === 'approved';
+  const isRejected = r.status === 'rejected';
+
+  document.getElementById('modalReportFoot').innerHTML = `
+    <button class="btn btn-ghost btn-sm" onclick="closeModal('modalReport')">Закрыть</button>
+    ${isPending || isApproved ? `<button class="btn btn-danger btn-sm" onclick="reviewReport('rejected')">✕ Отклонить</button>` : ''}
+    ${isPending ? `<button class="btn btn-primary btn-sm" onclick="reviewReport('approved')">✓ Одобрить</button>` : ''}
+    ${isApproved ? `<button class="btn btn-primary btn-sm" onclick="reviewReport('approved')">↻ Пересчитать</button>` : ''}
+    ${isRejected ? `<button class="btn btn-primary btn-sm" onclick="reviewReport('approved')">✓ Одобрить</button>` : ''}
+  `;
+
+  openModal('modalReport');
+}
+
+function getApprovedCount(r, actId) {
+  // Returns approved count if set (for recalculation)
+  const a = (r.aspects||[]).find(x => x.actId === actId);
+  return a?.approvedCount ?? a?.count ?? 0;
+}
+
+async function reviewReport(newStatus) {
+  const r = (REPORTS||[]).find(x => x.id === activeReportId);
+  if (!r) return;
+
+  const modNote = document.getElementById('modNoteInput').value.trim();
+
+  if (newStatus === 'approved') {
+    // Collect moderator-adjusted counts
+    let newTotal = 0;
+    const newAspects = (r.aspects||[]).map(a => {
+      const inputEl = document.getElementById('modCount_' + a.actId);
+      const approvedCount = inputEl ? (parseInt(inputEl.value)||0) : a.count;
+      const pts = approvedCount * a.points;
+      newTotal += pts;
+      return { ...a, approvedCount, count: approvedCount, totalPts: pts };
+    });
+
+    r.aspects  = newAspects;
+    r.totalPts = newTotal;
+    r.status   = 'approved';
+    r.modNote  = modNote;
+    r.reviewedAt = new Date().toISOString();
+
+    // Apply to weeklyScores
+    const member = S.members.find(m =>
+      m.gameId === r.gameId ||
+      (m.firstName?.toLowerCase() === r.firstName?.toLowerCase() && m.lastName?.toLowerCase() === r.lastName?.toLowerCase())
+    );
+    if (member) {
+      if (!S.weeklyScores[member.id]) S.weeklyScores[member.id] = {};
+      newAspects.forEach(a => {
+        S.weeklyScores[member.id][a.actId] = (parseInt(S.weeklyScores[member.id][a.actId])||0) + a.approvedCount;
+      });
+      scheduleSave();
+      toast(`✓ Баллы засчитаны для ${memberName(member)}`);
+    } else {
+      toast('⚠ Сотрудник не найден в составе — баллы не засчитаны');
+    }
+  } else {
+    r.status   = 'rejected';
+    r.modNote  = modNote;
+    r.reviewedAt = new Date().toISOString();
+  }
+
+  try {
+    await saveReports();
+    closeModal('modalReport');
+    renderReports();
+    toast(newStatus === 'approved' ? 'Заявка одобрена' : 'Заявка отклонена');
+  } catch(e) {
+    toast('Ошибка сохранения: ' + e.message);
+  }
+}
+
+// ── USERS ────────────────────────────────────────────────────────────────────
+async function renderUsers() {
+  try {
+    const data = await PAI_API.apiFetch('/api/users');
+    USERS_LIST = data.users || [];
+    const isAdmin = PAI_API.isAdmin(CURRENT_USER.role);
+    const assignableRoles = isAdmin
+      ? ['verification', 'pai_employee', 'pai_senior', 'admin']
+      : ['verification', 'pai_employee', 'pai_senior'];
+
+    document.getElementById('usersTableBody').innerHTML = USERS_LIST.map(u => {
+      const lastIn = u.lastSignInAt ? new Date(u.lastSignInAt).toLocaleString('ru',{day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit'}) : '—';
+      const name = [u.firstName, u.lastName].filter(Boolean).join(' ') || '—';
+      const canEdit = u.id !== CURRENT_USER.id && (isAdmin || u.role !== 'admin');
+      const opts = assignableRoles.map(r =>
+        `<option value="${r}"${r===u.role?' selected':''}>${APP_ROLE_LABELS[r]||r}</option>`
+      ).join('');
+      return `<tr>
+        <td style="font-family:var(--mono);font-size:11px">${ea(u.username)}</td>
+        <td>${ea(name)}</td>
+        <td style="font-family:var(--mono);font-size:11px">${ea(u.gameId||'—')}</td>
+        <td>${canEdit ? `<select onchange="changeUserRole(${u.id},this.value)" style="font-size:12px;padding:4px 8px;background:var(--bg3);border:1px solid var(--line);border-radius:4px;color:var(--t1)">${opts}</select>` : `<span class="badge bg-gray">${APP_ROLE_LABELS[u.role]||u.role}</span>`}</td>
+        <td style="font-family:var(--mono);font-size:10px;color:var(--t3)">${lastIn}</td>
+        <td>${isAdmin && u.id !== CURRENT_USER.id ? `<button class="btn btn-ghost btn-sm" onclick="toggleUserActive(${u.id},${!u.isActive})">${u.isActive?'Блок':'Актив.'}</button>` : ''}</td>
+      </tr>`;
+    }).join('');
+  } catch(e) {
+    toast('Ошибка загрузки пользователей: ' + e.message);
+  }
+}
+
+async function changeUserRole(userId, role) {
+  try {
+    await PAI_API.apiFetch(`/api/users/${userId}/role`, { method: 'PUT', body: JSON.stringify({ role }) });
+    toast('Роль обновлена');
+    renderUsers();
+  } catch(e) { toast(e.message); renderUsers(); }
+}
+
+async function toggleUserActive(userId, isActive) {
+  try {
+    await PAI_API.apiFetch(`/api/users/${userId}/active`, { method: 'PUT', body: JSON.stringify({ isActive }) });
+    toast(isActive ? 'Пользователь активирован' : 'Пользователь заблокирован');
+    renderUsers();
+  } catch(e) { toast(e.message); }
+}
+
+// ── INIT ─────────────────────────────────────────────────────────────────────
+async function init() {
+  CURRENT_USER = await PAI_API.requireAuth('/login');
+  if (!CURRENT_USER) return;
+
+  if (!PAI_API.isSenior(CURRENT_USER.role)) {
+    if (CURRENT_USER.role === 'pai_employee') window.location.href = '/report';
+    else window.location.href = '/profile';
+    return;
+  }
+
+  applyPermissions();
+  setSyncUI('loading', 'Загрузка...');
+  S = defaultState();
+  ensureAll();
+  currentStatMonth = thisYearMonth();
+  renderDashboard();
+
+  try {
+    await pullRemote();
+    await loadReports();
+  } catch {
+    setSyncUI('ok', 'Встроенные данные · ' + S.members.length + ' чел.');
+  }
+}
+
+init();
+</script>
+</body>
+</html>

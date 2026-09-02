@@ -1,0 +1,1934 @@
+{
+  "members": [
+    {
+      "id": "m1",
+      "firstName": "Richi",
+      "lastName": "Londo",
+      "name": "Richi Londo",
+      "gameId": "232430",
+      "rank": "Curator of Department",
+      "ooc": "ООС Отпуск (22.06.26-25.06.26)",
+      "phone": "",
+      "bank": ""
+    },
+    {
+      "id": "m4",
+      "firstName": "Logan",
+      "lastName": "Brooks",
+      "name": "Logan Brooks",
+      "gameId": "159733",
+      "rank": "Curator of Department",
+      "ooc": "-",
+      "phone": "",
+      "bank": ""
+    },
+    {
+      "id": "m15",
+      "firstName": "Daryana",
+      "lastName": "Londo",
+      "name": "Daryana Londo",
+      "gameId": "30514",
+      "rank": "Head of Department",
+      "ooc": "-",
+      "phone": "",
+      "bank": ""
+    },
+    {
+      "id": "m19",
+      "firstName": "Anthony",
+      "lastName": "Wilson",
+      "name": "Anthony Wilson",
+      "gameId": "292488",
+      "rank": "Instructor of Department",
+      "ooc": "-",
+      "phone": "",
+      "bank": ""
+    },
+    {
+      "id": "i17808319413133ci4",
+      "firstName": "Kyka",
+      "lastName": "Londo",
+      "gameId": "186776",
+      "rank": "Head of Department",
+      "ooc": "-",
+      "phone": "",
+      "bank": "",
+      "name": "Kyka Londo"
+    },
+    {
+      "id": "i1780833670884jza4",
+      "firstName": "Ryker",
+      "lastName": "Moonlight",
+      "gameId": "305966",
+      "rank": "Instructor of Department",
+      "ooc": "-",
+      "phone": "",
+      "bank": "",
+      "name": "Ryker Moonlight"
+    },
+    {
+      "id": "i1781452361976vitd",
+      "firstName": "Cornelio",
+      "lastName": "Londo",
+      "gameId": "101475",
+      "rank": "Deputy Head of Department",
+      "ooc": "-",
+      "phone": "",
+      "bank": "",
+      "name": "Cornelio Londo"
+    },
+    {
+      "id": "i1781452383425yq1w",
+      "firstName": "Chaobi",
+      "lastName": "Yuwi",
+      "gameId": "156750",
+      "rank": "Deputy Head of Department",
+      "ooc": "-",
+      "phone": "",
+      "bank": "",
+      "name": "Chaobi Yuwi"
+    },
+    {
+      "id": "i1781452448187t94n",
+      "firstName": "Sato",
+      "lastName": "Horikawa",
+      "gameId": "158390",
+      "rank": "Deputy Head of Department",
+      "ooc": "-",
+      "phone": "",
+      "bank": "",
+      "name": "Sato Horikawa"
+    },
+    {
+      "id": "i1781452469848uojk",
+      "firstName": "Abdullah",
+      "lastName": "Londo",
+      "gameId": "207759",
+      "rank": "Instructor of Department",
+      "ooc": "-",
+      "phone": "",
+      "bank": "",
+      "name": "Abdullah Londo"
+    },
+    {
+      "id": "i1782058246001zypf",
+      "firstName": "Cheef",
+      "lastName": "ForSainttez",
+      "gameId": "267268",
+      "rank": "Deputy Head of Department",
+      "ooc": "-",
+      "phone": "",
+      "bank": "",
+      "name": "Cheef ForSainttez"
+    },
+    {
+      "id": "i1782662593743xinc",
+      "firstName": "John",
+      "lastName": "Whou",
+      "gameId": "227136",
+      "rank": "Instructor of Department",
+      "ooc": "-",
+      "phone": "",
+      "bank": "",
+      "name": "John Whou"
+    },
+    {
+      "id": "i1782662618505udak",
+      "firstName": "Violetta",
+      "lastName": "Hive",
+      "gameId": "280427",
+      "rank": "Instructor of Department",
+      "ooc": "-",
+      "phone": "",
+      "bank": "",
+      "name": "Violetta Hive"
+    },
+    {
+      "id": "i1782662634913t0fm",
+      "firstName": "Likki",
+      "lastName": "Cartel",
+      "gameId": "71985",
+      "rank": "Instructor of Department",
+      "ooc": "-",
+      "phone": "",
+      "bank": "",
+      "name": "Likki Cartel"
+    },
+    {
+      "id": "i1782662666929rv1h",
+      "firstName": "Hayden",
+      "lastName": "Londo",
+      "gameId": "304891",
+      "rank": "Instructor of Department",
+      "ooc": "-",
+      "phone": "",
+      "bank": "",
+      "name": "Hayden Londo"
+    },
+    {
+      "id": "i1782662691351xpca",
+      "firstName": "Jordan",
+      "lastName": "Londo",
+      "gameId": "317616",
+      "rank": "Instructor of Department",
+      "ooc": "-",
+      "phone": "",
+      "bank": "",
+      "name": "Jordan Londo"
+    },
+    {
+      "id": "i1782662924519f0zw",
+      "firstName": "Kento",
+      "lastName": "Londo",
+      "gameId": "118230",
+      "rank": "Instructor of Department",
+      "ooc": "-",
+      "phone": "",
+      "bank": "",
+      "name": "Kento Londo"
+    }
+  ],
+  "ranks": [
+    "Curator of Department",
+    "Head of Department",
+    "Deputy Head of Department",
+    "Instructor of Department"
+  ],
+  "activities": [
+    {
+      "id": "a1",
+      "code": "LC",
+      "name": "Выдача лицензии",
+      "points": 15,
+      "highStaff": false,
+      "note": "Заполнить количество выданных лицензий"
+    },
+    {
+      "id": "a2",
+      "code": "EM",
+      "name": "Трудоустройство (кадр. аудит)",
+      "points": 30,
+      "highStaff": false,
+      "note": "Оформление нового сотрудника"
+    },
+    {
+      "id": "a3",
+      "code": "EX",
+      "name": "Практический экзамен",
+      "points": 20,
+      "highStaff": false,
+      "note": "Проведение практического экзамена"
+    },
+    {
+      "id": "a4",
+      "code": "RP",
+      "name": "Проверка отчётность-pa",
+      "points": 10,
+      "highStaff": false,
+      "note": "Проверка отчётности в канале"
+    },
+    {
+      "id": "a5",
+      "code": "GV",
+      "name": "Отчётность по гос. волнам",
+      "points": 30,
+      "highStaff": false,
+      "note": "3 скриншота = 1 запись"
+    },
+    {
+      "id": "a6",
+      "code": "CK",
+      "name": "Проверка трудоустройство",
+      "points": 10,
+      "highStaff": false,
+      "note": "Проверка документов трудоустройства"
+    },
+    {
+      "id": "a7",
+      "code": "UP",
+      "name": "Запрос-на-повышение",
+      "points": 5,
+      "highStaff": false,
+      "note": "Рассмотрение запроса на повышение"
+    },
+    {
+      "id": "a8",
+      "code": "AC",
+      "name": "Перевод из академии",
+      "points": 10,
+      "highStaff": false,
+      "note": "Перевод курсанта в полноценный состав"
+    },
+    {
+      "id": "a9",
+      "code": "AG",
+      "name": "Агитация в канал",
+      "points": 5,
+      "highStaff": true,
+      "note": "Только для High Staff (Head+)"
+    },
+    {
+      "id": "a10",
+      "code": "CL",
+      "name": "Обзвон в отдел PAI",
+      "points": 30,
+      "highStaff": true,
+      "note": "Только для High Staff (Head+)"
+    },
+    {
+      "id": "a11",
+      "code": "DS",
+      "name": "Рапорт-на-увольнение",
+      "points": 5,
+      "highStaff": true,
+      "note": "Только для High Staff (Head+)"
+    }
+  ],
+  "weeklyScores": {
+    "m19": {
+      "a1": 47,
+      "a2": 15,
+      "a3": 0,
+      "a4": 40,
+      "a5": 3,
+      "a6": 0,
+      "a7": 0,
+      "a8": 0,
+      "a9": 0,
+      "a10": 1,
+      "a11": 1
+    },
+    "m1": {
+      "a1": 0
+    },
+    "m4": {
+      "a1": 33,
+      "a2": 65
+    },
+    "i1781452448187t94n": {
+      "a1": 18,
+      "a10": 1,
+      "a7": 17,
+      "a5": 2,
+      "a3": 1,
+      "a4": 31,
+      "a2": 9,
+      "a8": 6
+    },
+    "i1781452361976vitd": {
+      "a8": 12,
+      "a2": 24,
+      "a4": 28,
+      "a3": 5,
+      "a5": 2
+    },
+    "i1781452383425yq1w": {
+      "a4": 78,
+      "a8": 6,
+      "a2": 35,
+      "a5": 12,
+      "a1": 80,
+      "a3": 5
+    }
+  },
+  "weeklyHistory": [
+    {
+      "id": "i1780820050136dm69",
+      "date": "2026-06-07",
+      "archivedAt": "07.06.2026",
+      "dateFrom": "01.06.2026",
+      "dateTo": "07.06.2026",
+      "weekNum": 23,
+      "scores": {
+        "m1": {
+          "a1": 24,
+          "a2": 16,
+          "a3": 7,
+          "a4": 14,
+          "a7": 13,
+          "a10": 2,
+          "a8": 7
+        },
+        "m2": {
+          "a9": 0
+        },
+        "m6": {
+          "a1": 46,
+          "a2": 35,
+          "a4": 19
+        },
+        "m10": {
+          "a1": 17,
+          "a2": 3,
+          "a3": 5,
+          "a4": 11,
+          "a6": 14,
+          "a7": 14
+        },
+        "m15": {
+          "a1": 29,
+          "a4": 1,
+          "a2": 30,
+          "a3": 19
+        },
+        "m16": {
+          "a2": 9,
+          "a1": 16,
+          "a3": 5,
+          "a4": 6
+        },
+        "m17": {
+          "a2": 9,
+          "a3": 27,
+          "a6": 0,
+          "a7": 1
+        },
+        "m19": {
+          "a1": 9,
+          "a2": 6,
+          "a3": 5,
+          "a4": 51
+        },
+        "m20": {
+          "a1": 3,
+          "a2": 2,
+          "a3": 6,
+          "a4": 4
+        },
+        "m22": {
+          "a2": 3,
+          "a4": 3,
+          "a7": 2
+        }
+      }
+    },
+    {
+      "id": "i1780869559188lsvl",
+      "date": "2026-06-07",
+      "archivedAt": "08.06.2026",
+      "dateFrom": "08.06.2026",
+      "dateTo": "14.06.2026",
+      "weekNum": 24,
+      "scores": {
+        "m1": {
+          "a1": 0,
+          "a2": 0
+        },
+        "m16": {
+          "a1": 45,
+          "a2": 30,
+          "a7": 10,
+          "a8": 4,
+          "a3": 6
+        },
+        "m20": {
+          "a2": 10,
+          "a5": 3,
+          "a4": 33,
+          "a1": 16
+        },
+        "id_1780246795993_72yjh7t9f7d": {
+          "a2": 10,
+          "a4": 10,
+          "a3": 6,
+          "a1": 5
+        },
+        "m15": {
+          "a4": 22,
+          "a3": 10,
+          "a2": 27,
+          "a1": 12,
+          "a5": 2
+        },
+        "id_1780246783483_wj5t4ndl8j": {
+          "a4": 39,
+          "a3": 44,
+          "a2": 1
+        },
+        "i17808319413133ci4": {
+          "a4": 32,
+          "a3": 10,
+          "a7": 13
+        },
+        "m19": {
+          "a4": 50,
+          "a3": 6,
+          "a1": 91,
+          "a5": 1,
+          "a2": 37,
+          "a8": 24
+        },
+        "i1780832354801ym38": {
+          "a1": 37,
+          "a2": 5,
+          "a3": 6
+        },
+        "id_1780246701085_rt4ppx33i1": {
+          "a3": 18,
+          "a4": 17
+        },
+        "m2": {
+          "a2": 8,
+          "a11": 8,
+          "a3": 12,
+          "a1": 33
+        },
+        "m4": {
+          "a2": 29,
+          "a4": 61,
+          "a5": 10,
+          "a8": 18,
+          "a1": 33
+        }
+      }
+    }
+  ],
+  "meeting": {
+    "date": "2026-05-29",
+    "attendance": {
+      "m1": {
+        "status": "none",
+        "note": ""
+      },
+      "m4": {
+        "status": "none",
+        "note": ""
+      },
+      "m15": {
+        "status": "none",
+        "note": ""
+      },
+      "m19": {
+        "status": "none",
+        "note": ""
+      },
+      "i17808319413133ci4": {
+        "status": "none",
+        "note": ""
+      },
+      "i1780833670884jza4": {
+        "status": "none",
+        "note": ""
+      },
+      "i1781452361976vitd": {
+        "status": "none",
+        "note": ""
+      },
+      "i1781452383425yq1w": {
+        "status": "none",
+        "note": ""
+      },
+      "i1781452448187t94n": {
+        "status": "none",
+        "note": ""
+      },
+      "i1781452469848uojk": {
+        "status": "none",
+        "note": ""
+      },
+      "i1782058246001zypf": {
+        "status": "none",
+        "note": ""
+      },
+      "i1782662593743xinc": {
+        "status": "none",
+        "note": ""
+      },
+      "i1782662618505udak": {
+        "status": "none",
+        "note": ""
+      },
+      "i1782662634913t0fm": {
+        "status": "none",
+        "note": ""
+      },
+      "i1782662666929rv1h": {
+        "status": "none",
+        "note": ""
+      },
+      "i1782662691351xpca": {
+        "status": "none",
+        "note": ""
+      },
+      "i1782662924519f0zw": {
+        "status": "none",
+        "note": ""
+      }
+    }
+  },
+  "call": {
+    "date": "2026-05-29",
+    "candidates": [],
+    "scores": {
+      "0": {},
+      "1": {},
+      "2": {},
+      "3": {},
+      "4": {},
+      "5": {},
+      "6": {},
+      "7": {},
+      "8": {},
+      "9": {},
+      "10": {},
+      "11": {},
+      "12": {},
+      "13": {},
+      "14": {},
+      "15": {},
+      "16": {},
+      "17": {},
+      "18": {},
+      "19": {},
+      "20": {},
+      "21": {}
+    }
+  },
+  "reprimands": {
+    "m1": {
+      "verbal": 0,
+      "strict": 0
+    },
+    "m4": {
+      "verbal": 0,
+      "strict": 0
+    },
+    "m8": {
+      "verbal": 0,
+      "strict": 0
+    },
+    "m11": {
+      "verbal": 0,
+      "strict": 0
+    },
+    "m13": {
+      "verbal": 0,
+      "strict": 0
+    },
+    "m14": {
+      "verbal": 0,
+      "strict": 0
+    },
+    "m15": {
+      "verbal": 0,
+      "strict": 0
+    },
+    "m18": {
+      "verbal": 0,
+      "strict": 0
+    },
+    "m19": {
+      "verbal": 0,
+      "strict": 0
+    },
+    "m21": {
+      "verbal": 0,
+      "strict": 0
+    },
+    "i17808319413133ci4": {
+      "verbal": 0,
+      "strict": 0
+    },
+    "i1780833670884jza4": {
+      "verbal": 0,
+      "strict": 0
+    },
+    "i1781452361976vitd": {
+      "verbal": 0,
+      "strict": 0
+    },
+    "i1781452383425yq1w": {
+      "verbal": 0,
+      "strict": 0
+    },
+    "i1781452448187t94n": {
+      "verbal": 0,
+      "strict": 0
+    },
+    "i1781452469848uojk": {
+      "verbal": 0,
+      "strict": 0
+    },
+    "i1782058246001zypf": {
+      "verbal": 0,
+      "strict": 0
+    },
+    "i1782662593743xinc": {
+      "verbal": 0,
+      "strict": 0
+    },
+    "i1782662618505udak": {
+      "verbal": 0,
+      "strict": 0
+    },
+    "i1782662634913t0fm": {
+      "verbal": 0,
+      "strict": 0
+    },
+    "i1782662666929rv1h": {
+      "verbal": 0,
+      "strict": 0
+    },
+    "i1782662691351xpca": {
+      "verbal": 0,
+      "strict": 0
+    },
+    "i1782662924519f0zw": {
+      "verbal": 0,
+      "strict": 0
+    }
+  },
+  "questions": [
+    {
+      "id": "q1",
+      "q": "Кто является старшим составом?",
+      "a": "От Dep.H и выше"
+    },
+    {
+      "id": "q2",
+      "q": "Иерархия хай рангов?",
+      "a": "Deputy Head → Head → Curator → Assistant → Advisor → Deputy Chief → Chief"
+    },
+    {
+      "id": "q3",
+      "q": "Какой отдел отвечает за внутренний контроль и надзор за сотрудниками?",
+      "a": "IAD"
+    },
+    {
+      "id": "q4",
+      "q": "Кто выдаёт спецуху?",
+      "a": "Storekeeper"
+    },
+    {
+      "id": "q5",
+      "q": "Что нужно сделать после получения спецухи?",
+      "a": "Составить отчёт о получении. Рабочее время 14:00–22:00"
+    },
+    {
+      "id": "q6",
+      "q": "Правила IC и OOC отпуска?",
+      "a": "IC: перерыв не более 5 ч, 1 раз в день, не освобождает от строёв. OOC: не более 7 дней, нельзя заходить в игру"
+    },
+    {
+      "id": "q7",
+      "q": "Кто может стоять в холле?",
+      "a": "IAD и PAI"
+    },
+    {
+      "id": "q8",
+      "q": "Как принимать человека во фракцию?",
+      "a": "Проверить заявку, провести собеседование, оформить кадровый аудит"
+    },
+    {
+      "id": "q9",
+      "q": "Что самое важное при проверке отчёта?",
+      "a": "1. Имя/фамилия/статик вручную и совпадают. 2. Не повышался сегодня. 3. Есть бодик. 4. Нет варнов"
+    },
+    {
+      "id": "q10",
+      "q": "Что делаем после проверки отчёта?",
+      "a": "СОЗДАТЬ ВЕТКУ. Если ДА — отправить в канал запроса на повышение. Если НЕТ — объяснить причину отказа"
+    },
+    {
+      "id": "q11",
+      "q": "Почему нельзя проверять отчёты не по порядку?",
+      "a": "Есть вероятность, что те, кто выше, останутся непроверенными"
+    },
+    {
+      "id": "q12",
+      "q": "Правила агитаций?",
+      "a": "Агитация подаётся с 10:00 до 22:00 МСК. Пауза между агитациями отделов — 1 час (60 минут)"
+    },
+    {
+      "id": "q13",
+      "q": "Правила выдачи лицензий?",
+      "a": "Проверить документы, выдать лицензию, зафиксировать в журнале"
+    },
+    {
+      "id": "q14",
+      "q": "Как повышать человека по восстановлению или переводу?",
+      "a": "Проверить одобренный запрос, одобренный ранг (реакцией), в кадровом указать ссылку на одобренный запрос"
+    },
+    {
+      "id": "q15",
+      "q": "Что делать, если написал кадровый неправильно?",
+      "a": "Удалить или поставить реакцию крестика"
+    },
+    {
+      "id": "q16",
+      "q": "Разрешено ли младшему составу (PA Cadet, Officer) проводить задержание?",
+      "a": "Нет. Исключение: обездвижить и надеть наручники для передачи агентам"
+    },
+    {
+      "id": "q17",
+      "q": "Может ли отдел PAI выдавать наказания (ВУ) отделу PA?",
+      "a": "Да, может"
+    },
+    {
+      "id": "q18",
+      "q": "Обязан ли сотрудник вызвать прока по запросу адвоката?",
+      "a": "Да, если аргументированно и с перечислением статей"
+    },
+    {
+      "id": "q19",
+      "q": "Почему обязательно проверять человека с розыском по базе данных?",
+      "a": "Проверить — функциональный розыск или нет"
+    },
+    {
+      "id": "q20",
+      "q": "Можно ли дать больше 5 лет срока?",
+      "a": "Только по решению суда с постановлением"
+    },
+    {
+      "id": "q21",
+      "q": "Послать на хуй — какая статья?",
+      "a": "15.8 Провокация"
+    },
+    {
+      "id": "q22",
+      "q": "Отличие 12.8 от 12.8.1?",
+      "a": "Гос. и негос. оружие"
+    }
+  ],
+  "monthlyLog": [
+    {
+      "id": "i1780776501143xm2k",
+      "type": "reprimand",
+      "date": "2026-06-06",
+      "data": {
+        "mid": "m1",
+        "memberName": "Richi Londo",
+        "repType": "verbal",
+        "val": 1
+      }
+    },
+    {
+      "id": "i1780776501761mg0t",
+      "type": "reprimand",
+      "date": "2026-06-06",
+      "data": {
+        "mid": "m1",
+        "memberName": "Richi Londo",
+        "repType": "strict",
+        "val": 1
+      }
+    },
+    {
+      "id": "i1780776502253158s",
+      "type": "reprimand",
+      "date": "2026-06-06",
+      "data": {
+        "mid": "m1",
+        "memberName": "Richi Londo",
+        "repType": "verbal",
+        "val": 0
+      }
+    },
+    {
+      "id": "i1780776502642dqnf",
+      "type": "reprimand",
+      "date": "2026-06-06",
+      "data": {
+        "mid": "m1",
+        "memberName": "Richi Londo",
+        "repType": "strict",
+        "val": 0
+      }
+    },
+    {
+      "id": "i1780820050136w2p3",
+      "type": "scores-reset",
+      "date": "2026-06-07",
+      "data": {
+        "scores": {
+          "m1": {
+            "a1": 24,
+            "a2": 16,
+            "a3": 7,
+            "a4": 14,
+            "a7": 13,
+            "a10": 2,
+            "a8": 7
+          },
+          "m2": {
+            "a9": 0
+          },
+          "m6": {
+            "a1": 46,
+            "a2": 35,
+            "a4": 19
+          },
+          "m10": {
+            "a1": 17,
+            "a2": 3,
+            "a3": 5,
+            "a4": 11,
+            "a6": 14,
+            "a7": 14
+          },
+          "m15": {
+            "a1": 29,
+            "a4": 1,
+            "a2": 30,
+            "a3": 19
+          },
+          "m16": {
+            "a2": 9,
+            "a1": 16,
+            "a3": 5,
+            "a4": 6
+          },
+          "m17": {
+            "a2": 9,
+            "a3": 27,
+            "a6": 0,
+            "a7": 1
+          },
+          "m19": {
+            "a1": 9,
+            "a2": 6,
+            "a3": 5,
+            "a4": 51
+          },
+          "m20": {
+            "a1": 3,
+            "a2": 2,
+            "a3": 6,
+            "a4": 4
+          },
+          "m22": {
+            "a2": 3,
+            "a4": 3,
+            "a7": 2
+          }
+        }
+      }
+    },
+    {
+      "id": "i1780869559189a4m8",
+      "type": "scores-reset",
+      "date": "2026-06-07",
+      "data": {
+        "scores": {
+          "m1": {
+            "a1": 0,
+            "a2": 0
+          },
+          "m16": {
+            "a1": 45,
+            "a2": 30,
+            "a7": 10,
+            "a8": 4,
+            "a3": 6
+          },
+          "m20": {
+            "a2": 10,
+            "a5": 3,
+            "a4": 33,
+            "a1": 16
+          },
+          "id_1780246795993_72yjh7t9f7d": {
+            "a2": 10,
+            "a4": 10,
+            "a3": 6,
+            "a1": 5
+          },
+          "m15": {
+            "a4": 22,
+            "a3": 10,
+            "a2": 27,
+            "a1": 12,
+            "a5": 2
+          },
+          "id_1780246783483_wj5t4ndl8j": {
+            "a4": 39,
+            "a3": 44,
+            "a2": 1
+          },
+          "i17808319413133ci4": {
+            "a4": 32,
+            "a3": 10,
+            "a7": 13
+          },
+          "m19": {
+            "a4": 50,
+            "a3": 6,
+            "a1": 91,
+            "a5": 1,
+            "a2": 37,
+            "a8": 24
+          },
+          "i1780832354801ym38": {
+            "a1": 37,
+            "a2": 5,
+            "a3": 6
+          },
+          "id_1780246701085_rt4ppx33i1": {
+            "a3": 18,
+            "a4": 17
+          },
+          "m2": {
+            "a2": 8,
+            "a11": 8,
+            "a3": 12,
+            "a1": 33
+          },
+          "m4": {
+            "a2": 29,
+            "a4": 61,
+            "a5": 10,
+            "a8": 18,
+            "a1": 33
+          }
+        }
+      }
+    },
+    {
+      "id": "i1780902765717b7bl",
+      "meetingId": "i1780902754162rk4m",
+      "type": "meeting",
+      "date": "2026-06-08",
+      "data": {
+        "title": "Собрание отдела",
+        "present": 12,
+        "warned": 3,
+        "absent": 3,
+        "total": 18,
+        "detail": [
+          {
+            "id": "m1",
+            "name": "Richi Londo",
+            "status": "present",
+            "note": ""
+          },
+          {
+            "id": "m2",
+            "name": "Mir Li",
+            "status": "present",
+            "note": ""
+          },
+          {
+            "id": "m3",
+            "name": "Francesco IceTwice",
+            "status": "present",
+            "note": ""
+          },
+          {
+            "id": "m4",
+            "name": "Logan Brooks",
+            "status": "present",
+            "note": ""
+          },
+          {
+            "id": "m10",
+            "name": "Miran Zekari",
+            "status": "present",
+            "note": ""
+          },
+          {
+            "id": "m15",
+            "name": "Daryana Londo",
+            "status": "present",
+            "note": ""
+          },
+          {
+            "id": "m16",
+            "name": "Neko Toujou",
+            "status": "present",
+            "note": ""
+          },
+          {
+            "id": "m19",
+            "name": "Anthony Wilson",
+            "status": "present",
+            "note": ""
+          },
+          {
+            "id": "m20",
+            "name": "Aomine Londo",
+            "status": "present",
+            "note": ""
+          },
+          {
+            "id": "id_1780246654453_gkl6e4m2ewo",
+            "name": "Shaggy Furia",
+            "status": "present",
+            "note": ""
+          },
+          {
+            "id": "id_1780246701085_rt4ppx33i1",
+            "name": "Kalyaka Mart",
+            "status": "present",
+            "note": ""
+          },
+          {
+            "id": "id_1780246783483_wj5t4ndl8j",
+            "name": "Vex Londo",
+            "status": "warned",
+            "note": ""
+          },
+          {
+            "id": "id_1780246795993_72yjh7t9f7d",
+            "name": "Egor Blazer",
+            "status": "warned",
+            "note": ""
+          },
+          {
+            "id": "i17808319413133ci4",
+            "name": "Kyka Londo",
+            "status": "present",
+            "note": ""
+          },
+          {
+            "id": "i1780832354801ym38",
+            "name": "Doshy Unfairz",
+            "status": "warned",
+            "note": ""
+          },
+          {
+            "id": "i1780833670884jza4",
+            "name": "Ryker Moonlight",
+            "status": "absent",
+            "note": ""
+          },
+          {
+            "id": "i1780833688077woux",
+            "name": "Wiski IceTwice",
+            "status": "absent",
+            "note": ""
+          },
+          {
+            "id": "i17808337037678l8f",
+            "name": "Vanco Londo",
+            "status": "absent",
+            "note": ""
+          }
+        ]
+      }
+    },
+    {
+      "id": "i1780902771205rpso",
+      "type": "reprimand",
+      "date": "2026-06-08",
+      "data": {
+        "mid": "i1780833670884jza4",
+        "memberName": "Ryker Moonlight",
+        "repType": "verbal",
+        "val": 1,
+        "reason": "Отсутствие на собрании"
+      }
+    },
+    {
+      "id": "i178090277120512jt",
+      "type": "reprimand",
+      "date": "2026-06-08",
+      "data": {
+        "mid": "i1780833688077woux",
+        "memberName": "Wiski IceTwice",
+        "repType": "verbal",
+        "val": 1,
+        "reason": "Отсутствие на собрании"
+      }
+    },
+    {
+      "id": "i1780902771205j70k",
+      "type": "reprimand",
+      "date": "2026-06-08",
+      "data": {
+        "mid": "i17808337037678l8f",
+        "memberName": "Vanco Londo",
+        "repType": "verbal",
+        "val": 1,
+        "reason": "Отсутствие на собрании"
+      }
+    },
+    {
+      "id": "i17809027789193l7q",
+      "type": "reprimand",
+      "date": "2026-06-08",
+      "data": {
+        "mid": "i1780833670884jza4",
+        "memberName": "Ryker Moonlight",
+        "repType": "verbal",
+        "val": 0
+      }
+    },
+    {
+      "id": "i17809027797809s41",
+      "type": "reprimand",
+      "date": "2026-06-08",
+      "data": {
+        "mid": "i1780833688077woux",
+        "memberName": "Wiski IceTwice",
+        "repType": "verbal",
+        "val": 0
+      }
+    },
+    {
+      "id": "i1780902780571fzj1",
+      "type": "reprimand",
+      "date": "2026-06-08",
+      "data": {
+        "mid": "i17808337037678l8f",
+        "memberName": "Vanco Londo",
+        "repType": "verbal",
+        "val": 0
+      }
+    },
+    {
+      "id": "i1780902780850eusw",
+      "type": "reprimand",
+      "date": "2026-06-08",
+      "data": {
+        "mid": "i17808337037678l8f",
+        "memberName": "Vanco Londo",
+        "repType": "verbal",
+        "val": 1
+      }
+    },
+    {
+      "id": "i1780902781360wufp",
+      "type": "reprimand",
+      "date": "2026-06-08",
+      "data": {
+        "mid": "i17808337037678l8f",
+        "memberName": "Vanco Londo",
+        "repType": "verbal",
+        "val": 0
+      }
+    },
+    {
+      "id": "i1780902781752366v",
+      "type": "reprimand",
+      "date": "2026-06-08",
+      "data": {
+        "mid": "i17808337037678l8f",
+        "memberName": "Vanco Londo",
+        "repType": "strict",
+        "val": 1
+      }
+    },
+    {
+      "id": "i17809027822355tx3",
+      "type": "reprimand",
+      "date": "2026-06-08",
+      "data": {
+        "mid": "i17808337037678l8f",
+        "memberName": "Vanco Londo",
+        "repType": "strict",
+        "val": 0
+      }
+    },
+    {
+      "id": "i1781689565443vc8a",
+      "type": "reprimand",
+      "date": "2026-06-17",
+      "data": {
+        "mid": "m1",
+        "memberName": "Richi Londo",
+        "repType": "verbal",
+        "val": 1
+      }
+    },
+    {
+      "id": "i1781689567710zomf",
+      "type": "reprimand",
+      "date": "2026-06-17",
+      "data": {
+        "mid": "m1",
+        "memberName": "Richi Londo",
+        "repType": "verbal",
+        "val": 0
+      }
+    },
+    {
+      "id": "i178168974243290h9",
+      "meetingId": "i1781689724611cjua",
+      "type": "meeting",
+      "date": "2026-06-17",
+      "data": {
+        "title": "123",
+        "present": 0,
+        "warned": 0,
+        "absent": 0,
+        "total": 20,
+        "detail": [
+          {
+            "id": "m1",
+            "name": "Richi Londo",
+            "status": "none",
+            "note": ""
+          },
+          {
+            "id": "m2",
+            "name": "Mir Li",
+            "status": "none",
+            "note": ""
+          },
+          {
+            "id": "m4",
+            "name": "Logan Brooks",
+            "status": "none",
+            "note": ""
+          },
+          {
+            "id": "m10",
+            "name": "Miran Londo",
+            "status": "none",
+            "note": ""
+          },
+          {
+            "id": "m15",
+            "name": "Daryana Londo",
+            "status": "none",
+            "note": ""
+          },
+          {
+            "id": "m19",
+            "name": "Anthony Wilson",
+            "status": "none",
+            "note": ""
+          },
+          {
+            "id": "m20",
+            "name": "Aomine Londo",
+            "status": "none",
+            "note": ""
+          },
+          {
+            "id": "id_1780246701085_rt4ppx33i1",
+            "name": "Kalyaka Mart",
+            "status": "none",
+            "note": ""
+          },
+          {
+            "id": "id_1780246783483_wj5t4ndl8j",
+            "name": "Vex Londo",
+            "status": "none",
+            "note": ""
+          },
+          {
+            "id": "i17808319413133ci4",
+            "name": "Kyka Londo",
+            "status": "none",
+            "note": ""
+          },
+          {
+            "id": "i1780833670884jza4",
+            "name": "Ryker Moonlight",
+            "status": "none",
+            "note": ""
+          },
+          {
+            "id": "i1781452270089wt0y",
+            "name": "Ruan Yuwi",
+            "status": "none",
+            "note": ""
+          },
+          {
+            "id": "i1781452361976vitd",
+            "name": "Cornelio Londo",
+            "status": "none",
+            "note": ""
+          },
+          {
+            "id": "i1781452383425yq1w",
+            "name": "Chaobi Yuwi",
+            "status": "none",
+            "note": ""
+          },
+          {
+            "id": "i1781452418839dj58",
+            "name": "Qwelst Phoenix",
+            "status": "none",
+            "note": ""
+          },
+          {
+            "id": "i1781452448187t94n",
+            "name": "Sato Horikawa",
+            "status": "none",
+            "note": ""
+          },
+          {
+            "id": "i1781452469848uojk",
+            "name": "Abdullah Londo",
+            "status": "none",
+            "note": ""
+          },
+          {
+            "id": "i1781452485118xbs7",
+            "name": "John Whou",
+            "status": "none",
+            "note": ""
+          },
+          {
+            "id": "i1781452502651sag1",
+            "name": "Jannik Londo",
+            "status": "none",
+            "note": ""
+          },
+          {
+            "id": "i1781452513490qgz4",
+            "name": "Alexandr Mirror",
+            "status": "none",
+            "note": ""
+          }
+        ]
+      }
+    },
+    {
+      "id": "i17820583436085yv9",
+      "meetingId": "i1782058178259p0hr",
+      "type": "meeting",
+      "date": "2026-06-21",
+      "data": {
+        "title": "Еженеделька состава",
+        "present": 6,
+        "warned": 7,
+        "absent": 11,
+        "total": 24,
+        "detail": [
+          {
+            "id": "m1",
+            "name": "Richi Londo",
+            "status": "present",
+            "note": ""
+          },
+          {
+            "id": "m2",
+            "name": "Mir Li",
+            "status": "absent",
+            "note": "Рыбка поговорит"
+          },
+          {
+            "id": "m4",
+            "name": "Logan Brooks",
+            "status": "present",
+            "note": ""
+          },
+          {
+            "id": "m10",
+            "name": "Miran Londo",
+            "status": "warned",
+            "note": "Отпуск"
+          },
+          {
+            "id": "m15",
+            "name": "Daryana Londo",
+            "status": "absent",
+            "note": "Илюша напишет"
+          },
+          {
+            "id": "m19",
+            "name": "Anthony Wilson",
+            "status": "absent",
+            "note": "Помилован"
+          },
+          {
+            "id": "id_1780246783483_wj5t4ndl8j",
+            "name": "Vex Londo",
+            "status": "warned",
+            "note": ""
+          },
+          {
+            "id": "i17808319413133ci4",
+            "name": "Kyka Londo",
+            "status": "absent",
+            "note": "Илюша напишет"
+          },
+          {
+            "id": "i1780833670884jza4",
+            "name": "Ryker Moonlight",
+            "status": "absent",
+            "note": "Вопросики"
+          },
+          {
+            "id": "i1781452361976vitd",
+            "name": "Cornelio Londo",
+            "status": "warned",
+            "note": ""
+          },
+          {
+            "id": "i1781452383425yq1w",
+            "name": "Chaobi Yuwi",
+            "status": "present",
+            "note": ""
+          },
+          {
+            "id": "i1781452448187t94n",
+            "name": "Sato Horikawa",
+            "status": "present",
+            "note": ""
+          },
+          {
+            "id": "i1781452469848uojk",
+            "name": "Abdullah Londo",
+            "status": "warned",
+            "note": ""
+          },
+          {
+            "id": "i1781452485118xbs7",
+            "name": "John Whou",
+            "status": "absent",
+            "note": "Вопросики"
+          },
+          {
+            "id": "i1781452502651sag1",
+            "name": "Jannik Londo",
+            "status": "absent",
+            "note": "Уволился"
+          },
+          {
+            "id": "i1781452513490qgz4",
+            "name": "Alexandr Mirror",
+            "status": "warned",
+            "note": "Отпуск"
+          },
+          {
+            "id": "i1781995977319mgic",
+            "name": "Jojo Krager",
+            "status": "warned",
+            "note": ""
+          },
+          {
+            "id": "i1781996307063wsmr",
+            "name": "Raze Zubovich",
+            "status": "warned",
+            "note": ""
+          },
+          {
+            "id": "i1782058023687ba1x",
+            "name": "Abduhalim Faze",
+            "status": "present",
+            "note": ""
+          },
+          {
+            "id": "i1782058046189shs4",
+            "name": "Twix London",
+            "status": "absent",
+            "note": "Не дома"
+          },
+          {
+            "id": "i1782058104607nue4",
+            "name": "Vladislav Bumaga",
+            "status": "absent",
+            "note": "Новый"
+          },
+          {
+            "id": "i1782058153934ll20",
+            "name": "Kate Staffary",
+            "status": "absent",
+            "note": "Какого хуя"
+          },
+          {
+            "id": "i1782058171999elgo",
+            "name": "Denis Armstrong",
+            "status": "absent",
+            "note": "Какого хуя"
+          },
+          {
+            "id": "i1782058246001zypf",
+            "name": "Cheef ForSainttez",
+            "status": "present",
+            "note": ""
+          }
+        ]
+      }
+    },
+    {
+      "id": "i1782662903891j12u",
+      "meetingId": "i17826627186838vf3",
+      "type": "meeting",
+      "date": "2026-06-28",
+      "data": {
+        "title": "Собрание отдела",
+        "present": 6,
+        "warned": 6,
+        "absent": 4,
+        "total": 16,
+        "detail": [
+          {
+            "id": "m1",
+            "name": "Richi Londo",
+            "status": "warned",
+            "note": ""
+          },
+          {
+            "id": "m4",
+            "name": "Logan Brooks",
+            "status": "present",
+            "note": ""
+          },
+          {
+            "id": "m15",
+            "name": "Daryana Londo",
+            "status": "present",
+            "note": ""
+          },
+          {
+            "id": "m19",
+            "name": "Anthony Wilson",
+            "status": "present",
+            "note": ""
+          },
+          {
+            "id": "i17808319413133ci4",
+            "name": "Kyka Londo",
+            "status": "warned",
+            "note": ""
+          },
+          {
+            "id": "i1780833670884jza4",
+            "name": "Ryker Moonlight",
+            "status": "warned",
+            "note": ""
+          },
+          {
+            "id": "i1781452361976vitd",
+            "name": "Cornelio Londo",
+            "status": "absent",
+            "note": ""
+          },
+          {
+            "id": "i1781452383425yq1w",
+            "name": "Chaobi Yuwi",
+            "status": "warned",
+            "note": ""
+          },
+          {
+            "id": "i1781452448187t94n",
+            "name": "Sato Horikawa",
+            "status": "warned",
+            "note": ""
+          },
+          {
+            "id": "i1781452469848uojk",
+            "name": "Abdullah Londo",
+            "status": "absent",
+            "note": ""
+          },
+          {
+            "id": "i1782058246001zypf",
+            "name": "Cheef ForSainttez",
+            "status": "absent",
+            "note": ""
+          },
+          {
+            "id": "i1782662593743xinc",
+            "name": "John Whou",
+            "status": "warned",
+            "note": ""
+          },
+          {
+            "id": "i1782662618505udak",
+            "name": "Violetta Hive",
+            "status": "present",
+            "note": ""
+          },
+          {
+            "id": "i1782662634913t0fm",
+            "name": "Likki Cartel",
+            "status": "absent",
+            "note": ""
+          },
+          {
+            "id": "i1782662666929rv1h",
+            "name": "Hayden Londo",
+            "status": "present",
+            "note": ""
+          },
+          {
+            "id": "i1782662691351xpca",
+            "name": "Jordan Londo",
+            "status": "present",
+            "note": ""
+          }
+        ]
+      }
+    }
+  ],
+  "sync": {
+    "owner": "",
+    "repo": "",
+    "branch": "main",
+    "path": "data/state.json",
+    "token": "",
+    "sha": "",
+    "pollSec": 30
+  },
+  "meetings": [
+    {
+      "id": "i1781689724611cjua",
+      "title": "123",
+      "date": "2026-06-17",
+      "time": "20:00",
+      "type": "weekly",
+      "note": "",
+      "attendance": {
+        "m1": {
+          "status": "none",
+          "note": ""
+        },
+        "m2": {
+          "status": "none",
+          "note": ""
+        },
+        "m4": {
+          "status": "none",
+          "note": ""
+        },
+        "m10": {
+          "status": "none",
+          "note": ""
+        },
+        "m15": {
+          "status": "none",
+          "note": ""
+        },
+        "m19": {
+          "status": "none",
+          "note": ""
+        },
+        "m20": {
+          "status": "none",
+          "note": ""
+        },
+        "id_1780246701085_rt4ppx33i1": {
+          "status": "none",
+          "note": ""
+        },
+        "id_1780246783483_wj5t4ndl8j": {
+          "status": "none",
+          "note": ""
+        },
+        "i17808319413133ci4": {
+          "status": "none",
+          "note": ""
+        },
+        "i1780833670884jza4": {
+          "status": "none",
+          "note": ""
+        },
+        "i1781452270089wt0y": {
+          "status": "none",
+          "note": ""
+        },
+        "i1781452361976vitd": {
+          "status": "none",
+          "note": ""
+        },
+        "i1781452383425yq1w": {
+          "status": "none",
+          "note": ""
+        },
+        "i1781452418839dj58": {
+          "status": "none",
+          "note": ""
+        },
+        "i1781452448187t94n": {
+          "status": "none",
+          "note": ""
+        },
+        "i1781452469848uojk": {
+          "status": "none",
+          "note": ""
+        },
+        "i1781452485118xbs7": {
+          "status": "none",
+          "note": ""
+        },
+        "i1781452502651sag1": {
+          "status": "none",
+          "note": ""
+        },
+        "i1781452513490qgz4": {
+          "status": "none",
+          "note": ""
+        }
+      },
+      "createdAt": "2026-06-17"
+    },
+    {
+      "id": "i1782058178259p0hr",
+      "title": "Еженеделька состава",
+      "date": "2026-06-21",
+      "time": "19:00",
+      "type": "weekly",
+      "note": "",
+      "attendance": {
+        "m1": {
+          "status": "present",
+          "note": ""
+        },
+        "m2": {
+          "status": "absent",
+          "note": "Рыбка поговорит"
+        },
+        "m4": {
+          "status": "present",
+          "note": ""
+        },
+        "m10": {
+          "status": "warned",
+          "note": "Отпуск"
+        },
+        "m15": {
+          "status": "absent",
+          "note": "Илюша напишет"
+        },
+        "m19": {
+          "status": "absent",
+          "note": "Помилован"
+        },
+        "id_1780246783483_wj5t4ndl8j": {
+          "status": "warned",
+          "note": ""
+        },
+        "i17808319413133ci4": {
+          "status": "absent",
+          "note": "Илюша напишет"
+        },
+        "i1780833670884jza4": {
+          "status": "absent",
+          "note": "Вопросики"
+        },
+        "i1781452361976vitd": {
+          "status": "warned",
+          "note": ""
+        },
+        "i1781452383425yq1w": {
+          "status": "present",
+          "note": ""
+        },
+        "i1781452448187t94n": {
+          "status": "present",
+          "note": ""
+        },
+        "i1781452469848uojk": {
+          "status": "warned",
+          "note": ""
+        },
+        "i1781452485118xbs7": {
+          "status": "absent",
+          "note": "Вопросики"
+        },
+        "i1781452502651sag1": {
+          "status": "absent",
+          "note": "Уволился"
+        },
+        "i1781452513490qgz4": {
+          "status": "warned",
+          "note": "Отпуск"
+        },
+        "i1781995977319mgic": {
+          "status": "warned",
+          "note": ""
+        },
+        "i1781996307063wsmr": {
+          "status": "warned",
+          "note": ""
+        },
+        "i1782058023687ba1x": {
+          "status": "present",
+          "note": ""
+        },
+        "i1782058046189shs4": {
+          "status": "absent",
+          "note": "Не дома"
+        },
+        "i1782058104607nue4": {
+          "status": "absent",
+          "note": "Новый"
+        },
+        "i1782058153934ll20": {
+          "status": "absent",
+          "note": "Какого хуя"
+        },
+        "i1782058171999elgo": {
+          "status": "absent",
+          "note": "Какого хуя"
+        },
+        "i1782058246001zypf": {
+          "status": "present",
+          "note": ""
+        }
+      },
+      "createdAt": "2026-06-21"
+    },
+    {
+      "id": "i17826627186838vf3",
+      "title": "Собрание отдела",
+      "date": "2026-06-28",
+      "time": "20:00",
+      "type": "weekly",
+      "note": "",
+      "attendance": {
+        "m1": {
+          "status": "warned",
+          "note": ""
+        },
+        "m4": {
+          "status": "present",
+          "note": ""
+        },
+        "m15": {
+          "status": "present",
+          "note": ""
+        },
+        "m19": {
+          "status": "present",
+          "note": ""
+        },
+        "i17808319413133ci4": {
+          "status": "warned",
+          "note": ""
+        },
+        "i1780833670884jza4": {
+          "status": "warned",
+          "note": ""
+        },
+        "i1781452361976vitd": {
+          "status": "absent",
+          "note": ""
+        },
+        "i1781452383425yq1w": {
+          "status": "warned",
+          "note": ""
+        },
+        "i1781452448187t94n": {
+          "status": "warned",
+          "note": ""
+        },
+        "i1781452469848uojk": {
+          "status": "absent",
+          "note": ""
+        },
+        "i1782058246001zypf": {
+          "status": "absent",
+          "note": ""
+        },
+        "i1782662593743xinc": {
+          "status": "warned",
+          "note": ""
+        },
+        "i1782662618505udak": {
+          "status": "present",
+          "note": ""
+        },
+        "i1782662634913t0fm": {
+          "status": "absent",
+          "note": ""
+        },
+        "i1782662666929rv1h": {
+          "status": "present",
+          "note": ""
+        },
+        "i1782662691351xpca": {
+          "status": "present",
+          "note": ""
+        }
+      },
+      "createdAt": "2026-06-28"
+    }
+  ]
+}
