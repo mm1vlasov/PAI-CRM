@@ -20,6 +20,8 @@ const __dirname = path.dirname(__filename);
 
 const app = express();
 const PORT = process.env.PORT || 3000;
+const HOST = process.env.HOST || '0.0.0.0';
+const PUBLIC_URL = process.env.PUBLIC_URL || 'https://paicrm.bothost.tech';
 
 const pool = new pg.Pool({
   connectionString: process.env.DATABASE_URL,
@@ -466,6 +468,28 @@ app.get('/api/reports', requireSenior(async (req, res) => {
   } finally { client.release(); }
 }));
 
+app.patch('/api/reports/:id/review', requireSenior(async (req, res) => {
+  try {
+    const { status, modNote } = req.body || {};
+    if (!['approved', 'rejected'].includes(status)) {
+      return res.status(400).json({ error: 'Неверный статус заявки' });
+    }
+
+    const result = await pool.query(
+      `UPDATE reports
+       SET status = $1, mod_note = $2, reviewed_at = $3
+       WHERE id = $4
+       RETURNING id, status, mod_note, reviewed_at`,
+      [status, modNote || '', new Date().toISOString(), req.params.id]
+    );
+    if (!result.rows.length) return res.status(404).json({ error: 'Заявка не найдена' });
+    res.json({ report: result.rows[0] });
+  } catch (err) {
+    console.error('Review report error:', err);
+    res.status(500).json({ error: 'Ошибка обновления заявки' });
+  }
+}));
+
 app.get('/api/reports/mine', requireEmployee(async (req, res) => {
   const client = await pool.connect();
   try {
@@ -548,6 +572,6 @@ app.post('/api/reports', requireSenior(async (req, res) => {
   } finally { client.release(); }
 }));
 
-app.listen(PORT, () => {
-  console.log(`PAI CRM running on http://localhost:${PORT}`);
+app.listen(PORT, HOST, () => {
+  console.log(`PAI CRM running on ${PUBLIC_URL}`);
 });

@@ -582,7 +582,7 @@ canvas.monthly-chart { width: 100%; height: 100%; display: block; }
     <span class="sb-section">Аналитика</span>
     <button class="sb-item"        data-tab="statistics"  onclick="showTab('statistics',this)"> <span class="sb-icon">◬</span> Статистика</button>
     <span class="sb-section">Система</span>
-    <button class="sb-item"        data-tab="admin"       onclick="showTab('admin',this)">      <span class="sb-icon">◆</span> Настройки</button>
+    <button class="sb-item"        data-tab="admin"       onclick="showTab('admin',this)" id="navAdmin" style="display:none">      <span class="sb-icon">◆</span> Настройки</button>
     <button class="sb-item"        data-tab="users"       onclick="showTab('users',this)" id="navUsers" style="display:none"> <span class="sb-icon">◇</span> Пользователи</button>
   </nav>
   <div class="sb-footer" id="sbUserInfo">PAI Department<br>MAJESTIC RP · 2026</div>
@@ -600,9 +600,6 @@ canvas.monthly-chart { width: 100%; height: 100%; display: block; }
       <button class="btn btn-ghost btn-sm" onclick="pullRemote()">↻</button>
       <a class="btn btn-ghost btn-sm" href="/report" id="topReportLink" style="display:none">Еженеделька</a>
       <a class="btn btn-ghost btn-sm" href="/profile" id="topProfileLink">Профиль</a>
-      <button class="btn btn-ghost btn-sm" id="exportBtn" onclick="exportData()">↑ Экспорт</button>
-      <button class="btn btn-ghost btn-sm" id="importBtn" onclick="document.getElementById('importFile').click()">↓ Импорт</button>
-      <input type="file" id="importFile" accept=".json" style="display:none" onchange="importData(this)">
       <button class="btn btn-ghost btn-sm" onclick="doLogout()">Выйти</button>
     </div>
   </div>
@@ -1087,6 +1084,7 @@ canvas.monthly-chart { width: 100%; height: 100%; display: block; }
           <div class="card-body" style="display:flex;flex-direction:column;gap:9px">
             <button class="btn btn-ghost" onclick="exportData()">↑ Экспорт JSON</button>
             <button class="btn btn-ghost" onclick="document.getElementById('importFile').click()">↓ Импорт JSON</button>
+            <input type="file" id="importFile" accept=".json" style="display:none" onchange="importData(this)">
             <div class="divider"></div>
             <button class="btn btn-danger" id="clearDataBtn" onclick="clearAllData()">↺ Сбросить к начальным</button>
           </div>
@@ -1276,8 +1274,8 @@ async function doLogout() {
 
 function applyPermissions() {
   const isAdmin = PAI_API.isAdmin(CURRENT_USER.role);
-  const isSenior = PAI_API.isSenior(CURRENT_USER.role);
-  document.getElementById('navUsers').style.display = isSenior ? '' : 'none';
+  document.getElementById('navAdmin').style.display = isAdmin ? '' : 'none';
+  document.getElementById('navUsers').style.display = isAdmin ? '' : 'none';
   document.getElementById('topReportLink').style.display = PAI_API.isEmployee(CURRENT_USER.role) ? '' : 'none';
   document.getElementById('topProfileLink').textContent = PAI_API.formatUserName(CURRENT_USER);
   document.getElementById('sbUserInfo').innerHTML = `${ea(PAI_API.formatUserName(CURRENT_USER))}<br>${APP_ROLE_LABELS[CURRENT_USER.role] || CURRENT_USER.role}`;
@@ -1508,6 +1506,9 @@ const TAB_TITLES = {
 };
 
 function showTab(tab, el) {
+  if ((tab === 'admin' || tab === 'users') && !PAI_API.isAdmin(CURRENT_USER?.role)) {
+    return showTab('dashboard');
+  }
   currentTab = tab;
   document.querySelectorAll('.tab-content').forEach(t => t.classList.add('hidden'));
   document.getElementById('tab-'+tab)?.classList.remove('hidden');
@@ -3108,7 +3109,14 @@ async function reviewReport(newStatus) {
   }
 
   try {
-    await saveReports();
+    if (newStatus === 'rejected') {
+      await PAI_API.apiFetch(`/api/reports/${encodeURIComponent(r.id)}/review`, {
+        method: 'PATCH',
+        body: JSON.stringify({ status: 'rejected', modNote })
+      });
+    } else {
+      await saveReports();
+    }
     closeModal('modalReport');
     renderReports();
     toast(newStatus === 'approved' ? 'Заявка одобрена' : 'Заявка отклонена');
