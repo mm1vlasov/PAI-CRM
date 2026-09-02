@@ -1218,7 +1218,7 @@ canvas.monthly-chart { width: 100%; height: 100%; display: block; }
     {"id":"m21","firstName":"Tom","lastName":"Zerg","gameId":"226491","rank":"Instructor of Department","ooc":"-","phone":"","bank":""},
     {"id":"m22","firstName":"Lana","lastName":"Westcoast","gameId":"267626","rank":"Instructor of Department","ooc":"-","phone":"","bank":""}
   ],
-  "ranks": ["Curator of Department","Head of Department","Deputy Head of Department","Instructor of Department","Staff of Department"],
+  "ranks": ["Advisor Chief","Assistant Chief","Curator of Department","Head of Department","Deputy Head of Department","Instructor of Department"],
   "activities": [
     {"id":"a1","code":"LC","name":"Кол-во лицензий","points":15,"highStaff":false,"note":"Скриншот выдачи лицензии"},
     {"id":"a2","code":"EM","name":"Трудоустройство","points":30,"highStaff":false,"note":"Скриншот трудоустройства"},
@@ -1289,11 +1289,12 @@ function applyPermissions() {
 
 // ── RANK HIERARCHY ───────────────────────────────────────────────────────────
 const RANK_ORDER = [
-  'Curator of Department',       // 0
-  'Head of Department',          // 1
-  'Deputy Head of Department',   // 2
-  'Instructor of Department',    // 3
-  'Staff of Department'          // 4
+  'Advisor Chief',               // 0
+  'Assistant Chief',             // 1
+  'Curator of Department',       // 2
+  'Head of Department',          // 3
+  'Deputy Head of Department',   // 4
+  'Instructor of Department'    // 5
 ];
 
 function rankIdx(rank) {
@@ -1305,11 +1306,13 @@ function rankIdx(rank) {
   }
   const idx = RANK_ORDER.findIndex(ro => r === ro);
   if (idx !== -1) return idx;
-  if (r.includes('Curator'))    return 0;
-  if (r.includes('Head of'))    return 1;
-  if (r.includes('Deputy'))     return 2;
-  if (r.includes('Instructor')) return 3;
-  return 4;
+  if (r.includes('Advisor Chief'))   return 0;
+  if (r.includes('Assistant Chief')) return 1;
+  if (r.includes('Curator'))         return 2;
+  if (r.includes('Deputy'))          return 4;
+  if (r.includes('Head of'))         return 3;
+  if (r.includes('Instructor'))      return 5;
+  return 5;
 }
 
 function rankNameClass(rank) { return 'rn-' + Math.min(rankIdx(rank), 4); }

@@ -19,10 +19,12 @@ DELETE FROM members;
 DELETE FROM ranks;
 DELETE FROM questions;
 
-INSERT INTO ranks (name, order_index) VALUES ('Curator of Department', 0);
-INSERT INTO ranks (name, order_index) VALUES ('Head of Department', 1);
-INSERT INTO ranks (name, order_index) VALUES ('Deputy Head of Department', 2);
-INSERT INTO ranks (name, order_index) VALUES ('Instructor of Department', 3);
+INSERT INTO ranks (name, order_index) VALUES ('Advisor Chief', 0);
+INSERT INTO ranks (name, order_index) VALUES ('Assistant Chief', 1);
+INSERT INTO ranks (name, order_index) VALUES ('Curator of Department', 2);
+INSERT INTO ranks (name, order_index) VALUES ('Head of Department', 3);
+INSERT INTO ranks (name, order_index) VALUES ('Deputy Head of Department', 4);
+INSERT INTO ranks (name, order_index) VALUES ('Instructor of Department', 5);
 INSERT INTO members (id, first_name, last_name, name, game_id, rank, ooc, phone, bank) VALUES ('m1','Richi','Londo','Richi Londo','232430','Curator of Department','ООС Отпуск (22.06.26-25.06.26)','','');
 INSERT INTO members (id, first_name, last_name, name, game_id, rank, ooc, phone, bank) VALUES ('m4','Logan','Brooks','Logan Brooks','159733','Curator of Department','-','','');
 INSERT INTO members (id, first_name, last_name, name, game_id, rank, ooc, phone, bank) VALUES ('m15','Daryana','Londo','Daryana Londo','30514','Head of Department','-','','');
