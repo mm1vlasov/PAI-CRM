@@ -4,3 +4,6 @@ Thumbs.db
 sync.local.json
 .env
 .env.*
+.agents/
+.claude/
+.venv/

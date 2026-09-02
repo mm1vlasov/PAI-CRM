@@ -1,0 +1,267 @@
+{
+  "communities": {
+    "0": [
+      "schema",
+      "schema_activities",
+      "schema_call_candidates",
+      "schema_call_scores",
+      "schema_meeting_attendance",
+      "schema_meetings",
+      "schema_members",
+      "schema_monthly_log",
+      "schema_questions",
+      "schema_ranks",
+      "schema_report_aspect_links",
+      "schema_report_aspects",
+      "schema_reports",
+      "schema_reprimands",
+      "schema_settings",
+      "schema_users",
+      "schema_weekly_history",
+      "schema_weekly_history_scores",
+      "schema_weekly_scores"
+    ],
+    "1": [
+      "dotenv",
+      "express",
+      "package",
+      "package_dependencies",
+      "package_dependencies_dotenv",
+      "package_dependencies_express",
+      "package_dependencies_pg",
+      "package_main",
+      "package_name",
+      "package_scripts",
+      "package_scripts_generate_seed",
+      "package_scripts_seed",
+      "package_scripts_start",
+      "package_type",
+      "package_version",
+      "pg"
+    ],
+    "2": [
+      "app",
+      "app_app",
+      "app_dirname",
+      "app_fetchreports",
+      "app_fetchstate",
+      "app_filename",
+      "app_pool",
+      "app_savestate",
+      "lib_roles",
+      "lib_roles_canassignrole",
+      "lib_roles_isemployee",
+      "lib_roles_issenior",
+      "lib_roles_publicuser",
+      "lib_roles_role_labels",
+      "lib_roles_user_roles"
+    ],
+    "3": [
+      "api_client",
+      "api_client_apifetch",
+      "api_client_formatusername",
+      "api_client_getme",
+      "api_client_getmondayof",
+      "api_client_getweekkey",
+      "api_client_isadmin",
+      "api_client_isemployee",
+      "api_client_isodatelocal",
+      "api_client_issenior",
+      "api_client_isverified",
+      "api_client_requireauth",
+      "api_client_role_labels"
+    ],
+    "4": [
+      "generate_seed",
+      "generate_seed_ddl",
+      "generate_seed_escapeval",
+      "generate_seed_reports",
+      "generate_seed_reportspath",
+      "generate_seed_s",
+      "generate_seed_schemapath",
+      "generate_seed_sql",
+      "generate_seed_statepath",
+      "lib_password",
+      "lib_password_hashpassword",
+      "lib_password_scryptasync",
+      "lib_password_verifypassword"
+    ],
+    "5": [
+      "lib_auth",
+      "lib_auth_authenticaterequest",
+      "lib_auth_clearsessioncookie",
+      "lib_auth_parsecookies",
+      "lib_auth_requireadmin",
+      "lib_auth_requireauth",
+      "lib_auth_requireemployee",
+      "lib_auth_requirerole",
+      "lib_auth_requiresenior",
+      "lib_auth_requireverified",
+      "lib_auth_setsessioncookie",
+      "lib_roles_isadmin",
+      "lib_roles_isverified"
+    ],
+    "6": [
+      "lib_session",
+      "lib_session_b64url",
+      "lib_session_b64urldecode",
+      "lib_session_getsecret",
+      "lib_session_session_cookie",
+      "lib_session_signsessiontoken",
+      "lib_session_verifysessiontoken"
+    ],
+    "7": [
+      "server",
+      "server_app",
+      "server_dirname",
+      "server_filename",
+      "server_pool"
+    ],
+    "8": [
+      "seed_escapeval",
+      "seed_js_seed",
+      "seed_main"
+    ],
+    "9": [
+      "seed_sql_seed"
+    ]
+  },
+  "cohesion": {
+    "0": 0.17543859649122806,
+    "1": 0.125,
+    "2": 0.2,
+    "3": 0.21794871794871795,
+    "4": 0.19230769230769232,
+    "5": 0.2692307692307692,
+    "6": 0.47619047619047616,
+    "7": 0.4,
+    "8": 1.0,
+    "9": 1.0
+  },
+  "gods": [
+    {
+      "id": "lib_auth_requirerole",
+      "label": "requireRole()",
+      "degree": 6
+    },
+    {
+      "id": "lib_roles_isemployee",
+      "label": "isEmployee()",
+      "degree": 5
+    },
+    {
+      "id": "lib_roles_issenior",
+      "label": "isSenior()",
+      "degree": 5
+    },
+    {
+      "id": "lib_auth_authenticaterequest",
+      "label": "authenticateRequest()",
+      "degree": 5
+    },
+    {
+      "id": "lib_session_verifysessiontoken",
+      "label": "verifySessionToken()",
+      "degree": 5
+    },
+    {
+      "id": "schema_members",
+      "label": "members",
+      "degree": 5
+    },
+    {
+      "id": "lib_password_hashpassword",
+      "label": "hashPassword()",
+      "degree": 4
+    },
+    {
+      "id": "lib_auth_requireadmin",
+      "label": "requireAdmin()",
+      "degree": 4
+    },
+    {
+      "id": "lib_auth_requireauth",
+      "label": "requireAuth()",
+      "degree": 4
+    },
+    {
+      "id": "lib_auth_requireemployee",
+      "label": "requireEmployee()",
+      "degree": 4
+    }
+  ],
+  "surprises": [
+    {
+      "source": "requireEmployee()",
+      "target": "isEmployee()",
+      "source_files": [
+        "lib/auth.js",
+        "lib/roles.js"
+      ],
+      "confidence": "INFERRED",
+      "relation": "indirect_call",
+      "why": "inferred connection - not explicitly stated in source; bridges separate communities"
+    },
+    {
+      "source": "requireSenior()",
+      "target": "isSenior()",
+      "source_files": [
+        "lib/auth.js",
+        "lib/roles.js"
+      ],
+      "confidence": "INFERRED",
+      "relation": "indirect_call",
+      "why": "inferred connection - not explicitly stated in source; bridges separate communities"
+    },
+    {
+      "source": "authenticateRequest()",
+      "target": "verifySessionToken()",
+      "source_files": [
+        "lib/auth.js",
+        "lib/session.js"
+      ],
+      "confidence": "EXTRACTED",
+      "relation": "calls",
+      "why": "bridges separate communities"
+    },
+    {
+      "source": "requireAdmin()",
+      "target": "isAdmin()",
+      "source_files": [
+        "lib/auth.js",
+        "lib/roles.js"
+      ],
+      "confidence": "INFERRED",
+      "relation": "indirect_call",
+      "why": "inferred connection - not explicitly stated in source"
+    },
+    {
+      "source": "requireVerified()",
+      "target": "isVerified()",
+      "source_files": [
+        "lib/auth.js",
+        "lib/roles.js"
+      ],
+      "confidence": "INFERRED",
+      "relation": "indirect_call",
+      "why": "inferred connection - not explicitly stated in source"
+    }
+  ],
+  "questions": [
+    {
+      "type": "bridge_node",
+      "question": "Why does `hashPassword()` connect `generate-seed.js` to `app.js`?",
+      "why": "High betweenness centrality (0.032) - this node is a cross-community bridge."
+    },
+    {
+      "type": "isolated_nodes",
+      "question": "What connects `monthly_log`, `settings`, `main` to the rest of the system?",
+      "why": "28 weakly-connected nodes found - possible documentation gaps or missing edges."
+    },
+    {
+      "type": "low_cohesion",
+      "question": "Should `package.json` be split into smaller, more focused modules?",
+      "why": "Cohesion score 0.125 - nodes in this community are weakly interconnected."
+    }
+  ]
+}

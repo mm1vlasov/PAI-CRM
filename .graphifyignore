@@ -1,0 +1,5 @@
+node_modules/
+.agents/
+.claude/
+graphify-out/
+.venv/
